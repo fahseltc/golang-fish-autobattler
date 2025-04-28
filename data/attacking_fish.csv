@@ -1,0 +1,5 @@
+NAME,TYPE,LIFE,DURATION,DAMAGE,DPS(calculated)
+Goldfish,weapon,10,1,1,1
+Shark,weapon,20,1.5,2,1.333333333
+Minnow,weapon,5,0.5,1,2
+Eel,weapon,30,2,3,1.5

@@ -3,6 +3,7 @@ package main
 import (
 	"fishgame/environment"
 	"fishgame/item"
+	"fishgame/loader"
 	"fishgame/player"
 	"fmt"
 	"log/slog"
@@ -14,10 +15,10 @@ import (
 
 type Game struct {
 	Env             *environment.Env
-	Player1         *player.Player
-	Player2         *player.Player
 	TargetFPS       int
 	TargetFrameTime float32
+	Player1         *player.Player
+	Player2         *player.Player
 }
 
 func main() {
@@ -25,14 +26,15 @@ func main() {
 
 	registry := environment.NewRegistry()
 	registry.Add("targetFPS", 2)
-	registry.Add("targetFrameTime", float32(1.0/2))
+	registry.Add("targetFrameTime", float32(1.0/2)) // 1.0 / 2 = 0.5 seconds per frame
 
 	env := environment.NewEnv(logger, registry)
 
-	player1 := GeneratePlayer1(*env)
-	player2 := GeneratePlayer2(*env)
+	itemRegistry := loader.LoadCsv(*env)
+	player1 := GeneratePlayer1(*env, itemRegistry)
+	player2 := GeneratePlayer2(*env, itemRegistry)
 
-	g := &Game{env, player1, player2, registry.Get("targetFPS").(int), registry.Get("targetFrameTime").(float32)}
+	g := &Game{env, registry.Get("targetFPS").(int), registry.Get("targetFrameTime").(float32), player1, player2}
 
 	err := ebiten.RunGame(g)
 	if err != nil {
@@ -74,20 +76,35 @@ func (g *Game) Update(*ebiten.Image) error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-
+	g.Player1.Items.Draw(*g.Env, screen, 1)
+	g.Player2.Items.Draw(*g.Env, screen, 2)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
 }
 
-func GeneratePlayer1(env environment.Env) *player.Player {
+func GeneratePlayer1(env environment.Env, items *item.Registry) *player.Player {
+	item1, err := items.Get("Goldfish")
+	if err {
+		panic(err)
+	}
+	item2, err := items.Get("Eel")
+	if err {
+		panic(err)
+	}
+	item3, err := items.Get("Shark")
+	if err {
+		panic(err)
+	}
 	p := &player.Player{
 		Env:  env,
 		Name: "Player 1",
 		Items: &item.Collection{
 			ActiveItems: []*item.Item{
-				item.NewItem(env, "Goldfish", 10, item.Weapon, 1.0, 1, item.AttackingItem, nil),
+				&item1,
+				&item2,
+				&item3,
 			},
 			InactiveItems: []*item.Item{},
 		},
@@ -97,13 +114,33 @@ func GeneratePlayer1(env environment.Env) *player.Player {
 	return p
 }
 
-func GeneratePlayer2(env environment.Env) *player.Player {
+func GeneratePlayer2(env environment.Env, items *item.Registry) *player.Player {
+	item1, err := items.Get("Shark")
+	if err {
+		panic(err)
+	}
+	item2, err := items.Get("Minnow")
+	if err {
+		panic(err)
+	}
+	item3, err := items.Get("Minnow")
+	if err {
+		panic(err)
+	}
+	item4, err := items.Get("Shark")
+	if err {
+		panic(err)
+	}
+
 	p := &player.Player{
 		Env:  env,
-		Name: "Player 1",
+		Name: "Player 2",
 		Items: &item.Collection{
 			ActiveItems: []*item.Item{
-				item.NewItem(env, "Shark", 20, item.Weapon, 1.5, 2, item.AttackingItem, nil),
+				&item1,
+				&item2,
+				&item3,
+				&item4,
 			},
 			InactiveItems: []*item.Item{},
 		},
@@ -114,7 +151,6 @@ func GeneratePlayer2(env environment.Env) *player.Player {
 }
 
 func SetupLogger() *slog.Logger {
-
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.TimeKey {

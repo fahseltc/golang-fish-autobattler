@@ -2,20 +2,25 @@ package item
 
 import (
 	"fishgame/environment"
+	"fishgame/util"
+	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/hajimehoshi/ebiten"
 )
 
 var Env *environment.Env
 
 // add json tags for the struct
 type Item struct {
-	Id          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Type        Type      `json:"type"`
-	Life        int       `json:"max_life"`
-	CurrentLife int       `json:"current_life"`
-	Alive       bool      `json:"alive"`
+	Id          uuid.UUID     `json:"id"`
+	Name        string        `json:"name"`
+	Type        Type          `json:"type"`
+	Life        int           `json:"max_life"`
+	CurrentLife int           `json:"current_life"`
+	Alive       bool          `json:"alive"`
+	Sprite      *ebiten.Image `json:"-"`
 
 	Duration    float32 `json:"duration"`
 	CurrentTime float32 `json:"current_time"`
@@ -26,12 +31,14 @@ type Item struct {
 	Reacted  bool                    `json:"reacted"`
 }
 
-func NewItem(env environment.Env, name string, life int, iType Type, duration float32, damage int, activate func(*Item, *Item) bool, react func(*Item, *Item) bool) *Item {
+func NewItem(env environment.Env, name string, iType Type, life int, duration float32, damage int, activate func(*Item, *Item) bool, react func(*Item, *Item) bool) *Item {
 	it := new(Item)
 	Env = &env
 	it.Id = uuid.New()
 	it.Name = name
 	it.Alive = true
+
+	it.Sprite = util.LoadImage(env, fmt.Sprintf("assets/%s.png", strings.ToLower(it.Name)))
 
 	it.Life = life
 	it.CurrentLife = life
@@ -49,6 +56,10 @@ func NewItem(env environment.Env, name string, life int, iType Type, duration fl
 	return it
 }
 
+func (it *Item) RegenerateUuid() {
+	it.Id = uuid.New()
+}
+
 func (it *Item) Update(dt float32, enemyItems *Collection) bool {
 	// Check if the item is alive
 	if !it.Alive || it.CurrentLife <= 0 {
@@ -63,7 +74,8 @@ func (it *Item) Update(dt float32, enemyItems *Collection) bool {
 		it.Reacted = false
 		it.CurrentTime -= it.Duration
 		index, target := enemyItems.GetRandomActive()
-		if !it.Activate(it, target) { // return value false means the target item just died
+
+		if target != nil && !it.Activate(it, target) { // return value false means the target item just died
 			// remove the item from the enemy's active items and add it to the inactive items
 			enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
 			enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
