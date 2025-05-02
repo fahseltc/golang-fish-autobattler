@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var Env *environment.Env
@@ -22,16 +22,16 @@ type Item struct {
 	Alive       bool          `json:"alive"`
 	Sprite      *ebiten.Image `json:"-"`
 
-	Duration    float32 `json:"duration"`
-	CurrentTime float32 `json:"current_time"`
+	Duration    float64 `json:"duration"`
+	CurrentTime float64 `json:"current_time"`
 	Damage      int     `json:"damage"`
 
 	Activate func(*Item, *Item) bool `json:"-"`
-	React    func(*Item, *Item) bool `json:"-"`
-	Reacted  bool                    `json:"reacted"`
+	// React        func(*Item, *Item) bool `json:"-"`
+	HitLastFrame bool `json:"-"`
 }
 
-func NewItem(env environment.Env, name string, iType Type, life int, duration float32, damage int, activate func(*Item, *Item) bool, react func(*Item, *Item) bool) *Item {
+func NewItem(env environment.Env, name string, iType Type, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
 	it := new(Item)
 	Env = &env
 	it.Id = uuid.New()
@@ -50,8 +50,7 @@ func NewItem(env environment.Env, name string, iType Type, life int, duration fl
 	it.Damage = damage
 
 	it.Activate = activate
-	it.React = react
-	it.Reacted = false
+	it.HitLastFrame = false
 
 	return it
 }
@@ -60,7 +59,7 @@ func (it *Item) RegenerateUuid() {
 	it.Id = uuid.New()
 }
 
-func (it *Item) Update(dt float32, enemyItems *Collection) bool {
+func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 	// Check if the item is alive
 	if !it.Alive || it.CurrentLife <= 0 {
 		it.CurrentLife = 0
@@ -71,17 +70,26 @@ func (it *Item) Update(dt float32, enemyItems *Collection) bool {
 	// Update
 	it.CurrentTime += dt
 	if it.CurrentTime >= it.Duration {
-		it.Reacted = false
 		it.CurrentTime -= it.Duration
 		index, target := enemyItems.GetRandomActive()
 
-		if target != nil && !it.Activate(it, target) { // return value false means the target item just died
-			// remove the item from the enemy's active items and add it to the inactive items
-			enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
-			enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
+		if target != nil {
+			// trigger weapon item
+			if it.Activate != nil && it.Type.String() == "weapon" {
+				if !it.Activate(it, target) {
+					// remove the item from the enemy's active items and add it to the inactive items
+					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
+					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
+				}
+			}
+			// trigger reactive item
+			if it.Activate != nil && target.Type.String() == "reactive" && it.HitLastFrame {
+				it.Activate(it, target)
+				it.HitLastFrame = false
+			}
 		}
 	}
-	it.Print()
+	//it.Print()
 	return true
 }
 
@@ -91,11 +99,7 @@ func (it *Item) TakeDamage(source *Item) bool {
 		it.CurrentLife = 0
 		it.Alive = false
 	}
-	// if !it.Reacted {
-	// 	// logic isnt great, needs some work!
-	// 	it.React(it, source)
-	// 	it.Reacted = true
-	// }
+	it.HitLastFrame = true
 
 	return it.Alive
 }

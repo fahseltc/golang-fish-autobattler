@@ -2,11 +2,10 @@ package item
 
 import (
 	"fishgame/environment"
-	"image/color"
+	"fishgame/util"
 	"math/rand"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Collection struct {
@@ -14,7 +13,7 @@ type Collection struct {
 	InactiveItems []*Item
 }
 
-func (ic *Collection) Update(dt float32, enemyItems *Collection) {
+func (ic *Collection) Update(dt float64, enemyItems *Collection) {
 	for index, item := range ic.ActiveItems {
 		if !item.Alive {
 			// remove item from active items and add to inactive items
@@ -44,16 +43,19 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 }
 
 func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player int) {
+	screenWidth := env.Get("width").(int)
+	screenHeight := env.Get("height").(int)
+
 	spriteX := 0.0
-	spriteY := 100.0
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.2)
 	if player == 1 {
-		spriteX = 100.0
+		spriteX = 0.40 * float64(screenHeight)
 	}
 	if player == 2 {
-		spriteX = 500.0
+		spriteX = 0.60 * float64(screenWidth)
 	}
 	for index, item := range coll.ActiveItems {
-		spriteY = 100 + 64*float64(index)
+		spriteY := spriteYSpacingFromTop + 64*float64(index)
 		if item != nil {
 			op := &ebiten.DrawImageOptions{}
 			if player == 1 {
@@ -65,9 +67,8 @@ func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player i
 			screen.DrawImage(item.Sprite, op)
 
 			// draw life bar above each sprite
-			healthRatio := float64(item.CurrentLife) / float64(item.Life)
-			healthLength := float64(64 * healthRatio)
-			ebitenutil.DrawRect(screen, spriteX, spriteY+64, healthLength, 4, color.White)
+			util.DrawLifeBar(screen, float64(item.CurrentLife)/float64(item.Life), spriteX, spriteY)
+			util.DrawProgressBar(screen, float64(item.CurrentTime)/float64(item.Duration), spriteX, spriteY)
 		}
 	}
 

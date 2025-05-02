@@ -20,8 +20,19 @@ func LoadCsv(Env environment.Env) *item.Registry {
 		life, _ := strconv.Atoi(fish[2])
 		duration, _ := strconv.ParseFloat(fish[3], 32)
 		damage, _ := strconv.Atoi(fish[4])
+		itemType := item.TypeFromString(fish[1])
+		var behaviorFunc func(*item.Item, *item.Item) bool
+		switch itemType {
+		case item.Weapon:
+			behaviorFunc = item.AttackingBehavior
+		case item.Reactive:
+			behaviorFunc = item.ReactingBehavior
+		default:
+			behaviorFunc = nil
+		}
+
 		// todo update fish function type from file, or use switch statement
-		item := item.NewItem(Env, fish[0], item.TypeFromString(fish[1]), life, float32(duration), int(damage), item.AttackingItem, nil)
+		item := item.NewItem(Env, fish[0], item.TypeFromString(fish[1]), life, float64(duration), int(damage), behaviorFunc)
 		registry.Add(fish[0], *item)
 	}
 	return registry
