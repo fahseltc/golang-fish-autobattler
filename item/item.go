@@ -29,6 +29,13 @@ type Item struct {
 	Activate func(*Item, *Item) bool `json:"-"`
 	// React        func(*Item, *Item) bool `json:"-"`
 	HitLastFrame bool `json:"-"`
+
+	X, Y     int
+	Width    int
+	Height   int
+	Dragging bool
+	OffsetX  int
+	OffsetY  int
 }
 
 func NewItem(env environment.Env, name string, iType Type, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
@@ -38,7 +45,7 @@ func NewItem(env environment.Env, name string, iType Type, life int, duration fl
 	it.Name = name
 	it.Alive = true
 
-	it.Sprite = util.LoadImage(env, fmt.Sprintf("assets/%s.png", strings.ToLower(it.Name)))
+	it.Sprite = util.LoadImage(env, fmt.Sprintf("assets/fish/%s.png", strings.ToLower(it.Name)))
 
 	it.Life = life
 	it.CurrentLife = life

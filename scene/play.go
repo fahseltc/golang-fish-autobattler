@@ -5,14 +5,9 @@ import (
 	"fishgame/item"
 	"fishgame/loader"
 	"fishgame/player"
-	"fishgame/util"
+	"fishgame/ui"
 	"fmt"
-	img "image"
-	"image/color"
 
-	"github.com/ebitenui/ebitenui"
-	"github.com/ebitenui/ebitenui/image"
-	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -21,7 +16,7 @@ type Play struct {
 	SceneManager  *Manager
 	State         GameState
 	ItemsRegistry *item.Registry
-	Ui            *ebitenui.UI
+	Ui            *ui.UI
 	Player1       *player.Player
 	Player2       *player.Player
 }
@@ -30,9 +25,18 @@ func (s *Play) Init(sm *Manager) {
 	s.SceneManager = sm
 	s.State = PlayState
 	s.ItemsRegistry = loader.LoadCsv(*s.Env)
-	s.Ui = buildUi()
+	s.Ui = ui.NewUI(s.Env)
+
+	//s.Ui = buildUi()
 	s.Player1 = generatePlayer1(*s.Env, s.ItemsRegistry)
 	s.Player2 = generatePlayer2(*s.Env, s.ItemsRegistry)
+
+	for index, item := range s.Player1.Items.ActiveItems {
+		fmt.Printf("%v", item)
+		s.Ui.AddSlot(100, 100+(index*64), item)
+
+	}
+
 }
 
 func (s *Play) Update(dt float64) error {
@@ -113,6 +117,10 @@ func (s *Play) GetName() string {
 	return "Play"
 }
 
+func (s *Play) changeGameState(state GameState) {
+	s.State = state
+}
+
 func generatePlayer1(env environment.Env, items *item.Registry) *player.Player {
 	item1, err := items.Get("Goldfish")
 	if err {
@@ -189,95 +197,95 @@ func generatePlayer2(env environment.Env, items *item.Registry) *player.Player {
 	return p
 }
 
-func buildUi() *ebitenui.UI {
-	face, _ := util.LoadFont(20)
-	rootContainer := widget.NewContainer(
-		// the container will use a plain color as its background
-		//widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff})),
+// func buildUi() *ebitenui.UI {
+// 	face, _ := util.LoadFont(20)
+// 	rootContainer := widget.NewContainer(
+// 		// the container will use a plain color as its background
+// 		//widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{0x13, 0x1a, 0x22, 0xff})),
 
-		// the container will use a grid layout to layout to split the layout in half down the middle
-		widget.ContainerOpts.Layout(widget.NewGridLayout(
-			widget.GridLayoutOpts.Columns(3),
-			widget.GridLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-			widget.GridLayoutOpts.Spacing(10, 10),
+// 		// the container will use a grid layout to layout to split the layout in half down the middle
+// 		widget.ContainerOpts.Layout(widget.NewGridLayout(
+// 			widget.GridLayoutOpts.Columns(3),
+// 			widget.GridLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+// 			widget.GridLayoutOpts.Spacing(10, 10),
 
-			widget.GridLayoutOpts.Stretch([]bool{true, true}, []bool{true}),
-		)),
-	)
+// 			widget.GridLayoutOpts.Stretch([]bool{true, true}, []bool{true}),
+// 		)),
+// 	)
 
-	centerColumn := widget.NewContainer(
-		widget.ContainerOpts.Layout(
-			widget.NewRowLayout(
-				widget.RowLayoutOpts.Spacing(0),
-				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-			),
-		),
-	)
+// 	centerColumn := widget.NewContainer(
+// 		widget.ContainerOpts.Layout(
+// 			widget.NewRowLayout(
+// 				widget.RowLayoutOpts.Spacing(0),
+// 				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+// 				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+// 			),
+// 		),
+// 	)
 
-	leftSide := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
-		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{100, 100, 100, 255})),
-		widget.ContainerOpts.WidgetOpts(
-			//This command indicates this widget is the source of Drag and Drop.
-			widget.WidgetOpts.EnableDragAndDrop(
-				widget.NewDragAndDrop(
-					//The object which will create/update the dragged element. Required.
-					widget.DragAndDropOpts.ContentsCreater(&item.Slot{}),
-					//How many pixels the user must drag their cursor before the drag begins.
-					//This is an optional parameter that defaults to 15 pixels
-					widget.DragAndDropOpts.MinDragStartDistance(15),
-					//This sets where to anchor the widget to the cursor
-					widget.DragAndDropOpts.ContentsOriginVertical(widget.DND_ANCHOR_MIDDLE),
-					//This sets where to anchor the widget to the cursor
-					widget.DragAndDropOpts.ContentsOriginHorizontal(widget.DND_ANCHOR_MIDDLE),
-					//This sets of far off the cursor to offset the dragged element
-					widget.DragAndDropOpts.Offset(img.Point{-5, -5}),
-					//This will turn of Drag to initiate drag and drop
-					//Primary use case will be click to drag
-					//widget.DragAndDropOpts.DisableDrag(),
-				),
-			),
-			widget.WidgetOpts.MouseButtonReleasedHandler(func(args *widget.WidgetMouseButtonReleasedEventArgs) {
-				if args.Inside && args.Button == ebiten.MouseButtonLeft && ebiten.IsKeyPressed(ebiten.KeyControl) {
-					args.Widget.DragAndDrop.StartDrag()
-				}
-				if args.Button == ebiten.MouseButtonRight {
-					args.Widget.DragAndDrop.StopDrag()
-				}
-			}),
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionCenter,
-				Stretch:  true,
-			}),
-		),
-	)
+// 	leftSide := widget.NewContainer(
+// 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()),
+// 		widget.ContainerOpts.BackgroundImage(image.NewNineSliceColor(color.NRGBA{100, 100, 100, 255})),
+// 		widget.ContainerOpts.WidgetOpts(
+// 			//This command indicates this widget is the source of Drag and Drop.
+// 			widget.WidgetOpts.EnableDragAndDrop(
+// 				widget.NewDragAndDrop(
+// 					//The object which will create/update the dragged element. Required.
+// 					widget.DragAndDropOpts.ContentsCreater(&item.Slot{}),
+// 					//How many pixels the user must drag their cursor before the drag begins.
+// 					//This is an optional parameter that defaults to 15 pixels
+// 					widget.DragAndDropOpts.MinDragStartDistance(15),
+// 					//This sets where to anchor the widget to the cursor
+// 					widget.DragAndDropOpts.ContentsOriginVertical(widget.DND_ANCHOR_MIDDLE),
+// 					//This sets where to anchor the widget to the cursor
+// 					widget.DragAndDropOpts.ContentsOriginHorizontal(widget.DND_ANCHOR_MIDDLE),
+// 					//This sets of far off the cursor to offset the dragged element
+// 					widget.DragAndDropOpts.Offset(img.Point{-5, -5}),
+// 					//This will turn of Drag to initiate drag and drop
+// 					//Primary use case will be click to drag
+// 					//widget.DragAndDropOpts.DisableDrag(),
+// 				),
+// 			),
+// 			widget.WidgetOpts.MouseButtonReleasedHandler(func(args *widget.WidgetMouseButtonReleasedEventArgs) {
+// 				if args.Inside && args.Button == ebiten.MouseButtonLeft && ebiten.IsKeyPressed(ebiten.KeyControl) {
+// 					args.Widget.DragAndDrop.StartDrag()
+// 				}
+// 				if args.Button == ebiten.MouseButtonRight {
+// 					args.Widget.DragAndDrop.StopDrag()
+// 				}
+// 			}),
+// 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+// 				Position: widget.RowLayoutPositionCenter,
+// 				Stretch:  true,
+// 			}),
+// 		),
+// 	)
 
-	leftSide.AddChild(
-		widget.NewText(widget.TextOpts.Text("Drag from Here\nOr Ctrl-Click", face, color.Black), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-			HorizontalPosition: widget.AnchorLayoutPositionCenter,
-			VerticalPosition:   widget.AnchorLayoutPositionCenter,
-		}))))
-	centerColumn.AddChild(widget.NewContainer())
-	centerColumn.AddChild(leftSide)
-	rootContainer.AddChild(widget.NewContainer())
-	rootContainer.AddChild(centerColumn)
+// 	leftSide.AddChild(
+// 		widget.NewText(widget.TextOpts.Text("Drag from Here\nOr Ctrl-Click", face, color.Black), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+// 			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+// 			VerticalPosition:   widget.AnchorLayoutPositionCenter,
+// 		}))))
+// 	centerColumn.AddChild(widget.NewContainer())
+// 	centerColumn.AddChild(leftSide)
+// 	rootContainer.AddChild(widget.NewContainer())
+// 	rootContainer.AddChild(centerColumn)
 
-	//rootContainer.AddChild(centerColumn)
-	rootContainer.AddChild(widget.NewContainer())
+// 	//rootContainer.AddChild(centerColumn)
+// 	rootContainer.AddChild(widget.NewContainer())
 
-	//rootContainer.AddChild(widget.NewContainer())
+// 	//rootContainer.AddChild(widget.NewContainer())
 
-	//rootContainer.AddChild(leftSide)
+// 	//rootContainer.AddChild(leftSide)
 
-	// window := widget.NewContainer()
-	// window.AddChild(leftSide)
-	// window.SetLocation(img.Rect(0, 0, 400, 400))
-	//rootContainer.AddChild(window)
+// 	// window := widget.NewContainer()
+// 	// window.AddChild(leftSide)
+// 	// window.SetLocation(img.Rect(0, 0, 400, 400))
+// 	//rootContainer.AddChild(window)
 
-	ui := &ebitenui.UI{
-		Container: rootContainer,
-	}
+// 	ui := &ebitenui.UI{
+// 		Container: rootContainer,
+// 	}
 
-	return ui
-}
+// 	return ui
+// }
