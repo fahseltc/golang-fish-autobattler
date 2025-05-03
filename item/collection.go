@@ -2,15 +2,25 @@ package item
 
 import (
 	"fishgame/environment"
-	"fishgame/util"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var SlotCount int = 5
+
 type Collection struct {
+	env           *environment.Env
 	ActiveItems   []*Item
 	InactiveItems []*Item
+}
+
+func NewCollection(env *environment.Env, playerNum int) *Collection {
+	coll := Collection{
+		env: env,
+	}
+
+	return &coll
 }
 
 func (ic *Collection) Update(dt float64, enemyItems *Collection) {
@@ -43,6 +53,7 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 }
 
 func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player int) {
+
 	screenWidth := env.Get("width").(int)
 	screenHeight := env.Get("height").(int)
 
@@ -63,12 +74,10 @@ func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player i
 				op.GeoM.Translate(float64(item.Sprite.Bounds().Dx()), 0) // translate the image to the right
 			}
 			op.GeoM.Translate(spriteX, spriteY)
+			item.X = int(spriteX)
+			item.Y = int(spriteY)
 
 			screen.DrawImage(item.Sprite, op)
-
-			// draw life bar above each sprite
-			util.DrawLifeBar(screen, float64(item.CurrentLife)/float64(item.Life), spriteX, spriteY)
-			util.DrawProgressBar(screen, float64(item.CurrentTime)/float64(item.Duration), spriteX, spriteY)
 		}
 	}
 

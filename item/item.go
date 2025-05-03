@@ -4,6 +4,8 @@ import (
 	"fishgame/environment"
 	"fishgame/util"
 	"fmt"
+	"image"
+	"image/color"
 	"strings"
 
 	"github.com/google/uuid"
@@ -21,6 +23,7 @@ type Item struct {
 	CurrentLife int           `json:"current_life"`
 	Alive       bool          `json:"alive"`
 	Sprite      *ebiten.Image `json:"-"`
+	hitbox      *image.Alpha
 
 	Duration    float64 `json:"duration"`
 	CurrentTime float64 `json:"current_time"`
@@ -67,6 +70,17 @@ func (it *Item) RegenerateUuid() {
 }
 
 func (it *Item) Update(dt float64, enemyItems *Collection) bool {
+	if it.hitbox == nil {
+		bounds := it.Sprite.Bounds()
+		ebitenAlphaImage := image.NewAlpha(bounds)
+		for j := bounds.Min.Y; j < bounds.Max.Y; j++ {
+			for i := bounds.Min.X; i < bounds.Max.X; i++ {
+				ebitenAlphaImage.Set(i, j, it.Sprite.At(i, j))
+			}
+		}
+
+		it.hitbox = ebitenAlphaImage
+	}
 	// Check if the item is alive
 	if !it.Alive || it.CurrentLife <= 0 {
 		it.CurrentLife = 0
@@ -96,6 +110,7 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 			}
 		}
 	}
+	it.handleDrag()
 	//it.Print()
 	return true
 }
@@ -109,4 +124,38 @@ func (it *Item) TakeDamage(source *Item) bool {
 	it.HitLastFrame = true
 
 	return it.Alive
+}
+
+func (it *Item) handleDrag() {
+	// if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	// 	mx, my := ebiten.CursorPosition()
+	// 	fmt.Printf("Cursor position: Mouse Pressed: %v, %v\n", mx, my)
+	// 	if it.Collides(mx, my) {
+	// 		fmt.Println("Collides")
+	// 		it.Dragging = true
+	// 		it.OffsetX = mx - it.Sprite.Bounds().Max.X
+	// 		it.OffsetY = my - it.Sprite.Bounds().Max.X
+	// 	}
+	// }
+
+	// if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+	// 	mx, my := ebiten.CursorPosition()
+	// 	if it.Dragging {
+	// 		it.Dragging = false
+	// 		//if mx >= slot.X && mx <= slot.X+slot.Width && my >= slot.Y && my <= slot.Y+slot.Height {
+	// 		// TODO: Find slot to put it in
+	// 		it.X = mx
+	// 		it.Y = my
+	// 	}
+	// }
+
+	// if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	// 	mx, my := ebiten.CursorPosition()
+	// 	it.Sprite.Pos = mx - it.OffsetX
+	// 	it.Y = my - it.OffsetY
+	// }
+}
+
+func (it *Item) Collides(x, y int) bool {
+	return it.hitbox.At(x-it.X, y-it.Y).(color.Alpha).A > 0
 }

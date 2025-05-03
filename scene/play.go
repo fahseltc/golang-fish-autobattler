@@ -31,10 +31,12 @@ func (s *Play) Init(sm *Manager) {
 	s.Player1 = generatePlayer1(*s.Env, s.ItemsRegistry)
 	s.Player2 = generatePlayer2(*s.Env, s.ItemsRegistry)
 
-	for index, item := range s.Player1.Items.ActiveItems {
-		fmt.Printf("%v", item)
-		s.Ui.AddSlot(100, 100+(index*64), item)
+	for index, it := range s.Player1.Items.ActiveItems {
+		s.Ui.Player1Slots[index].AddItem(index, it)
+	}
 
+	for index, it := range s.Player2.Items.ActiveItems {
+		s.Ui.Player2Slots[index].AddItem(index, it)
 	}
 
 }
