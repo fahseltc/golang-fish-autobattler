@@ -33,12 +33,14 @@ type Item struct {
 	// React        func(*Item, *Item) bool `json:"-"`
 	HitLastFrame bool `json:"-"`
 
-	X, Y     int
-	Width    int
-	Height   int
-	Dragging bool
-	OffsetX  int
-	OffsetY  int
+	X, Y      int
+	Width     int
+	Height    int
+	Dragging  bool
+	SlotIndex int
+
+	OffsetX int
+	OffsetY int
 }
 
 func NewItem(env environment.Env, name string, iType Type, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
@@ -61,6 +63,8 @@ func NewItem(env environment.Env, name string, iType Type, life int, duration fl
 
 	it.Activate = activate
 	it.HitLastFrame = false
+	it.OffsetX = 32
+	it.OffsetY = 32
 
 	return it
 }
@@ -92,23 +96,23 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 	it.CurrentTime += dt
 	if it.CurrentTime >= it.Duration {
 		it.CurrentTime -= it.Duration
-		index, target := enemyItems.GetRandomActive()
+		//index, target := enemyItems.GetRandomActive()
 
-		if target != nil {
-			// trigger weapon item
-			if it.Activate != nil && it.Type.String() == "weapon" {
-				if !it.Activate(it, target) {
-					// remove the item from the enemy's active items and add it to the inactive items
-					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
-					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
-				}
-			}
-			// trigger reactive item
-			if it.Activate != nil && target.Type.String() == "reactive" && it.HitLastFrame {
-				it.Activate(it, target)
-				it.HitLastFrame = false
-			}
-		}
+		// if target != nil {
+		// 	// trigger weapon item
+		// 	if it.Activate != nil && it.Type.String() == "weapon" {
+		// 		if !it.Activate(it, target) {
+		// 			// remove the item from the enemy's active items and add it to the inactive items
+		// 			enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
+		// 			enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
+		// 		}
+		// 	}
+		// 	// trigger reactive item
+		// 	if it.Activate != nil && target.Type.String() == "reactive" && it.HitLastFrame {
+		// 		it.Activate(it, target)
+		// 		it.HitLastFrame = false
+		// 	}
+		// }
 	}
 	it.handleDrag()
 	//it.Print()
@@ -157,5 +161,13 @@ func (it *Item) handleDrag() {
 }
 
 func (it *Item) Collides(x, y int) bool {
-	return it.hitbox.At(x-it.X, y-it.Y).(color.Alpha).A > 0
+	if it.hitbox == nil {
+		return false
+	}
+
+	collides := it.hitbox.At(x-it.X, y-it.Y).(color.Alpha).A > 0
+	// if collides {
+	// 	fmt.Printf("collision: %v\n", collides)
+	// }
+	return collides
 }

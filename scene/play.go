@@ -33,10 +33,12 @@ func (s *Play) Init(sm *Manager) {
 
 	for index, it := range s.Player1.Items.ActiveItems {
 		s.Ui.Player1Slots[index].AddItem(index, it)
+		it.SlotIndex = index
 	}
 
 	for index, it := range s.Player2.Items.ActiveItems {
 		s.Ui.Player2Slots[index].AddItem(index, it)
+		it.SlotIndex = index
 	}
 
 }
@@ -140,18 +142,12 @@ func generatePlayer1(env environment.Env, items *item.Registry) *player.Player {
 	if err {
 		panic(err)
 	}
+	itemsArr := []*item.Item{&item1, &item2, &item3, &item4}
+	coll := item.NewCollection(&env, 1, itemsArr)
 	p := &player.Player{
-		Env:  env,
-		Name: "Player 1",
-		Items: &item.Collection{
-			ActiveItems: []*item.Item{
-				&item1,
-				&item2,
-				&item3,
-				&item4,
-			},
-			InactiveItems: []*item.Item{},
-		},
+		Env:   env,
+		Name:  "Player 1",
+		Items: coll,
 	}
 	fmt.Printf("Player 1 active items length: %d\n", len(p.Items.ActiveItems))
 
@@ -179,20 +175,13 @@ func generatePlayer2(env environment.Env, items *item.Registry) *player.Player {
 	if err {
 		panic(err)
 	}
+	itemsArr := []*item.Item{&item1, &item2, &item3, &item4, &item5}
+	coll := item.NewCollection(&env, 2, itemsArr)
 
 	p := &player.Player{
-		Env:  env,
-		Name: "Player 2",
-		Items: &item.Collection{
-			ActiveItems: []*item.Item{
-				&item1,
-				&item2,
-				&item3,
-				&item4,
-				&item5,
-			},
-			InactiveItems: []*item.Item{},
-		},
+		Env:   env,
+		Name:  "Player 2",
+		Items: coll,
 	}
 	fmt.Printf("Player 1 active items length: %d\n", len(p.Items.ActiveItems))
 

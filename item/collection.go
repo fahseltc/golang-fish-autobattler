@@ -15,9 +15,30 @@ type Collection struct {
 	InactiveItems []*Item
 }
 
-func NewCollection(env *environment.Env, playerNum int) *Collection {
+func NewCollection(env *environment.Env, playerNum int, items []*Item) *Collection {
+	// setup items
+	screenWidth := env.Get("width").(int)
+	screenHeight := env.Get("height").(int)
+
+	spriteX := 0.0
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.2)
+	if playerNum == 1 {
+		spriteX = 0.40 * float64(screenHeight)
+	}
+	if playerNum == 2 {
+		spriteX = 0.60 * float64(screenWidth)
+	}
+	for index, item := range items {
+		spriteY := spriteYSpacingFromTop + 64*float64(index)
+		if item != nil {
+			item.X = int(spriteX)
+			item.Y = int(spriteY)
+		}
+	}
+
 	coll := Collection{
-		env: env,
+		env:         env,
+		ActiveItems: items,
 	}
 
 	return &coll
@@ -53,29 +74,14 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 }
 
 func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player int) {
-
-	screenWidth := env.Get("width").(int)
-	screenHeight := env.Get("height").(int)
-
-	spriteX := 0.0
-	spriteYSpacingFromTop := float64(screenHeight) * float64(0.2)
-	if player == 1 {
-		spriteX = 0.40 * float64(screenHeight)
-	}
-	if player == 2 {
-		spriteX = 0.60 * float64(screenWidth)
-	}
-	for index, item := range coll.ActiveItems {
-		spriteY := spriteYSpacingFromTop + 64*float64(index)
+	for _, item := range coll.ActiveItems {
 		if item != nil {
 			op := &ebiten.DrawImageOptions{}
 			if player == 1 {
 				op.GeoM.Scale(-1, 1)                                     // flip the image horizontally for player 1
 				op.GeoM.Translate(float64(item.Sprite.Bounds().Dx()), 0) // translate the image to the right
 			}
-			op.GeoM.Translate(spriteX, spriteY)
-			item.X = int(spriteX)
-			item.Y = int(spriteY)
+			op.GeoM.Translate(float64(item.X), float64(item.Y))
 
 			screen.DrawImage(item.Sprite, op)
 		}
