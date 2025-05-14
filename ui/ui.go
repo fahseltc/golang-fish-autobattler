@@ -5,7 +5,6 @@ import (
 	"fishgame/item"
 	"fishgame/util"
 	"fmt"
-	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -13,7 +12,9 @@ import (
 )
 
 var SlotCount int = 5
-var robotoTTF []byte
+
+var spriteScale float64
+var spriteSizePx int
 
 type UI struct {
 	env          *environment.Env
@@ -21,25 +22,33 @@ type UI struct {
 	Player2Slots map[int]*Slot
 	slotImg      *ebiten.Image
 	font         text.Face
+	smallFont    text.Face
 }
 
 func NewUI(env *environment.Env) *UI {
+	// set package consts
+	spriteScale = env.Get("spriteScale").(float64)
+	spriteSizePx = env.Get("spriteSizePx").(int)
+
 	font, _ := util.LoadFont(20)
+	smallFont, _ := util.LoadFont(12)
+
 	ui := &UI{
-		env:     env,
-		slotImg: util.LoadImage(*env, "assets/slot.png"),
-		font:    font,
+		env:       env,
+		slotImg:   util.LoadImage(*env, "assets/slot.png"),
+		font:      font,
+		smallFont: smallFont,
 	}
 
 	ui.Player1Slots = make(map[int]*Slot, SlotCount)
 	for index := range SlotCount {
-		ui.Player1Slots[index] = NewSlot(env, 1, index)
+		ui.Player1Slots[index] = NewPlayerSlot(env, index)
 	}
 
-	ui.Player2Slots = make(map[int]*Slot, SlotCount)
-	for index := range SlotCount {
-		ui.Player2Slots[index] = NewSlot(env, 2, index)
-	}
+	// ui.Player2Slots = make(map[int]*Slot, SlotCount)
+	// for index := range SlotCount {
+	// 	ui.Player2Slots[index] = NewSlot(env, 2, index)
+	// }
 	return ui
 }
 
@@ -75,12 +84,12 @@ func (ui *UI) Update() {
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && draggingItem != nil {
 		mx, my := ebiten.CursorPosition()
 		for index, slot := range ui.Player1Slots {
-			collisionType := slot.Collides(mx, my)
-			if collisionType != CollisionNone {
+			collision := slot.Collides(mx, my)
+			if collision.Collides {
 				if slot.item != nil { // the slot is occupied already
 					fmt.Printf("Item: %v dropped onto a occupied slot.\n", draggingItem.Name)
 					// we need to move ItemToMove up/down based
-					ui.cascadeItem(draggingItem, collisionType, slot)
+					ui.cascadeItem(draggingItem, collision.Type, slot)
 
 				} else {
 					// the slot is empty, put the item in it
@@ -103,18 +112,6 @@ func (ui *UI) Update() {
 			}
 		}
 	}
-	// 	// 		item.Dragging = false
-	// 	// 		for _, slot := range ui.Slots {
-	// 	// 			if mx >= slot.x && mx <= slot.x+slot.width && my >= slot.y && my <= slot.y+slot.height {
-	// 	// 				item.X = slot.x
-	// 	// 				item.Y = slot.y
-	// 	// 				slot.item = item
-	// 	// 				break
-	// 	// 			}
-	// 	// 		}
-	// 	// 	}
-	// 	// }
-	// }
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
@@ -128,44 +125,34 @@ func (ui *UI) Update() {
 }
 
 func (ui *UI) Draw(screen *ebiten.Image) {
-	for _, slot := range ui.Player1Slots {
-		if slot.item != nil {
-			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
-			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
-		}
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(slot.x), float64(slot.y))
-		screen.DrawImage(ui.slotImg, op)
-	}
-	for _, slot := range ui.Player2Slots {
-		if slot.item != nil {
-			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
-			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
-		}
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(slot.x), float64(slot.y))
-		screen.DrawImage(ui.slotImg, op)
-	}
-
-	// handle hover tooltip
 	mx, my := ebiten.CursorPosition()
+
+	for _, slot := range ui.Player1Slots {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(spriteScale, spriteScale)
+		op.GeoM.Translate(float64(slot.x), float64(slot.y))
+
+		screen.DrawImage(ui.slotImg, op)
+		if slot.item != nil {
+			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
+			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
+		}
+	}
+	// Draw tooltips on top
 	for _, slot := range ui.Player1Slots {
 		if slot.item != nil {
-			if slot.item.Collides(mx, my) {
-				opt := &text.DrawOptions{}
-				opt.GeoM.Translate(float64(slot.item.X+64), float64(slot.item.Y))
-				text.Draw(screen, strconv.Itoa(slot.item.SlotIndex), ui.font, opt)
-				opt = &text.DrawOptions{}
-				opt.GeoM.Translate(float64(slot.item.X+64), float64(slot.item.Y+16))
-				text.Draw(screen, slot.item.Name, ui.font, opt)
-			}
-		} else {
-			opt := &text.DrawOptions{}
-			opt.GeoM.Translate(float64(slot.x+64), float64(slot.y+32))
-			text.Draw(screen, "itemNil", ui.font, opt)
+			slot.DrawTooltip(screen, ui, mx, my)
 		}
-
 	}
+	// for _, slot := range ui.Player2Slots {
+	// 	if slot.item != nil {
+	// 		DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
+	// 		DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
+	// 	}
+	// 	op := &ebiten.DrawImageOptions{}
+	// 	op.GeoM.Translate(float64(slot.x), float64(slot.y))
+	// 	screen.DrawImage(ui.slotImg, op)
+	// }
 }
 
 func (ui *UI) setItemSlot(it *item.Item, slot *Slot) {

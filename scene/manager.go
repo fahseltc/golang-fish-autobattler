@@ -24,15 +24,16 @@ func NewSceneManager(Env *environment.Env) *Manager {
 
 func (sm *Manager) Init() {
 	sm.Scenes = make(map[string]Scene)
-	menuScene := &Menu{Env: sm.Env}
-	menuScene.Init(sm)
-	sm.Current = menuScene
+
+	menuScene := NewMenuScene(sm)
 	sm.Scenes[menuScene.GetName()] = menuScene
-	sm.Scenes = make(map[string]Scene)
+
 	playScene := &Play{Env: sm.Env}
 	playScene.Init(sm)
-	sm.Next = playScene
 	sm.Scenes[playScene.GetName()] = playScene
+
+	sm.Current = menuScene
+	sm.Next = playScene
 }
 
 func (sm *Manager) SwitchTo(scene string, destroyOld bool) {
@@ -57,12 +58,8 @@ func (sm *Manager) SwitchToNext() {
 
 func (sm *Manager) Update(dt float64) error {
 	if sm.Current != nil {
-		err := sm.Current.Update(dt)
-		if err != nil {
-			return err
-		} else {
-			return nil
-		}
+		sm.Current.Update(dt)
+		return nil
 	}
 	return fmt.Errorf("scenemanager has no current scene to update")
 }

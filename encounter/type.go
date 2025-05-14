@@ -3,8 +3,8 @@ package encounter
 type Type int
 
 const (
-	Initial Type = iota
-	Shop
-	Choice
-	Battle
+	EncounterTypeInitial Type = iota
+	EncounterTypeShop
+	EncounterTypeChoice
+	EncounterTypeBattle
 )

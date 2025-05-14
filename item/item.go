@@ -19,6 +19,7 @@ type Item struct {
 	Id          uuid.UUID     `json:"id"`
 	Name        string        `json:"name"`
 	Type        Type          `json:"type"`
+	Description string        `json:"description"`
 	Life        int           `json:"max_life"`
 	CurrentLife int           `json:"current_life"`
 	Alive       bool          `json:"alive"`
@@ -29,13 +30,10 @@ type Item struct {
 	CurrentTime float64 `json:"current_time"`
 	Damage      int     `json:"damage"`
 
-	Activate func(*Item, *Item) bool `json:"-"`
-	// React        func(*Item, *Item) bool `json:"-"`
-	HitLastFrame bool `json:"-"`
+	Activate     func(*Item, *Item) bool `json:"-"`
+	HitLastFrame bool                    `json:"-"`
 
 	X, Y      int
-	Width     int
-	Height    int
 	Dragging  bool
 	SlotIndex int
 
@@ -43,14 +41,22 @@ type Item struct {
 	OffsetY int
 }
 
-func NewItem(env environment.Env, name string, iType Type, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
+func NewItem(env environment.Env, name string, iType Type, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
 	it := new(Item)
 	Env = &env
 	it.Id = uuid.New()
 	it.Name = name
 	it.Alive = true
 
-	it.Sprite = util.LoadImage(env, fmt.Sprintf("assets/fish/%s.png", strings.ToLower(it.Name)))
+	spriteScale := env.Get("spriteScale").(float64)
+	originalSprite := util.LoadImage(env, fmt.Sprintf("assets/fish/%s.png", strings.ToLower(it.Name)))
+	w, h := originalSprite.Size()
+	scaled := ebiten.NewImage(int(float64(w)*spriteScale), int(float64(h)*spriteScale))
+	op := &ebiten.DrawImageOptions{} // Draw original onto the new image with scaling
+	op.GeoM.Scale(spriteScale, spriteScale)
+	scaled.DrawImage(originalSprite, op)
+
+	it.Sprite = scaled
 
 	it.Life = life
 	it.CurrentLife = life
@@ -114,7 +120,6 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 		// 	}
 		// }
 	}
-	it.handleDrag()
 	//it.Print()
 	return true
 }
@@ -130,36 +135,6 @@ func (it *Item) TakeDamage(source *Item) bool {
 	return it.Alive
 }
 
-func (it *Item) handleDrag() {
-	// if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-	// 	mx, my := ebiten.CursorPosition()
-	// 	fmt.Printf("Cursor position: Mouse Pressed: %v, %v\n", mx, my)
-	// 	if it.Collides(mx, my) {
-	// 		fmt.Println("Collides")
-	// 		it.Dragging = true
-	// 		it.OffsetX = mx - it.Sprite.Bounds().Max.X
-	// 		it.OffsetY = my - it.Sprite.Bounds().Max.X
-	// 	}
-	// }
-
-	// if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-	// 	mx, my := ebiten.CursorPosition()
-	// 	if it.Dragging {
-	// 		it.Dragging = false
-	// 		//if mx >= slot.X && mx <= slot.X+slot.Width && my >= slot.Y && my <= slot.Y+slot.Height {
-	// 		// TODO: Find slot to put it in
-	// 		it.X = mx
-	// 		it.Y = my
-	// 	}
-	// }
-
-	// if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-	// 	mx, my := ebiten.CursorPosition()
-	// 	it.Sprite.Pos = mx - it.OffsetX
-	// 	it.Y = my - it.OffsetY
-	// }
-}
-
 func (it *Item) Collides(x, y int) bool {
 	if it.hitbox == nil {
 		return false
@@ -170,4 +145,11 @@ func (it *Item) Collides(x, y int) bool {
 	// 	fmt.Printf("collision: %v\n", collides)
 	// }
 	return collides
+}
+
+func (it *Item) Dps() float32 {
+	if it.Damage > 0 && it.Duration > 0 {
+		return float32(it.Damage) / float32(it.Duration)
+	}
+	return 0
 }

@@ -1,16 +1,18 @@
 package environment
 
-import "log/slog"
+import (
+	"log/slog"
+)
 
 type Env struct {
 	slog.Logger
-	*Registry
+	*Config
 }
 
-func NewEnv(logger *slog.Logger, registry *Registry) *Env {
+func NewEnv(logger *slog.Logger, config *Config) *Env {
 	return &Env{
-		Logger:   *logger,
-		Registry: registry,
+		Logger: *logger,
+		Config: config,
 	}
 }
 

@@ -32,7 +32,7 @@ func LoadCsv(Env environment.Env) *item.Registry {
 		}
 
 		// todo update fish function type from file, or use switch statement
-		item := item.NewItem(Env, fish[0], item.TypeFromString(fish[1]), life, float64(duration), int(damage), behaviorFunc)
+		item := item.NewItem(Env, fish[0], item.TypeFromString(fish[1]), fish[5], life, float64(duration), int(damage), behaviorFunc)
 		registry.Add(fish[0], *item)
 	}
 	return registry

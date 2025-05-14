@@ -13,23 +13,19 @@ type Collection struct {
 	env           *environment.Env
 	ActiveItems   []*Item
 	InactiveItems []*Item
+	spriteScale   float64
 }
 
-func NewCollection(env *environment.Env, playerNum int, items []*Item) *Collection {
-	// setup items
-	screenWidth := env.Get("width").(int)
-	screenHeight := env.Get("height").(int)
+func NewPlayerCollection(env *environment.Env, items []*Item) *Collection {
+	screenWidth := env.Get("screenWidth").(int)
+	screenHeight := env.Get("screenHeight").(int)
+	spriteSizePx := float64(env.Get("spriteSizePx").(int))
+	spriteScale := env.Get("spriteScale").(float64)
 
-	spriteX := 0.0
-	spriteYSpacingFromTop := float64(screenHeight) * float64(0.2)
-	if playerNum == 1 {
-		spriteX = 0.40 * float64(screenHeight)
-	}
-	if playerNum == 2 {
-		spriteX = 0.60 * float64(screenWidth)
-	}
+	spriteX := int(float64(screenWidth) * 0.4)
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
 	for index, item := range items {
-		spriteY := spriteYSpacingFromTop + 64*float64(index)
+		spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
 		if item != nil {
 			item.X = int(spriteX)
 			item.Y = int(spriteY)
@@ -39,9 +35,34 @@ func NewCollection(env *environment.Env, playerNum int, items []*Item) *Collecti
 	coll := Collection{
 		env:         env,
 		ActiveItems: items,
+		spriteScale: spriteScale,
 	}
 
 	return &coll
+}
+
+func NewEncounterCollection(env *environment.Env, items []*Item) *Collection {
+	screenWidth := env.Get("screenWidth").(int)
+	screenHeight := env.Get("screenHeight").(int)
+	spriteSizePx := float64(env.Get("spriteSizePx").(int))
+	spriteScale := env.Get("spriteScale").(float64)
+
+	spriteX := 0.60 * float64(screenWidth)
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
+	for index, item := range items {
+		spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
+		if item != nil {
+			item.X = int(spriteX)
+			item.Y = int(spriteY)
+		}
+	}
+
+	coll := &Collection{
+		env:         env,
+		ActiveItems: items,
+		spriteScale: spriteScale,
+	}
+	return coll
 }
 
 func (ic *Collection) Update(dt float64, enemyItems *Collection) {
@@ -74,6 +95,7 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 }
 
 func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player int) {
+
 	for _, item := range coll.ActiveItems {
 		if item != nil {
 			op := &ebiten.DrawImageOptions{}
@@ -87,11 +109,4 @@ func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player i
 		}
 	}
 
-	// for index, item := range coll.InactiveItems {
-	// 	if item != nil {
-	// 		op := &ebiten.DrawImageOptions{}
-	// 		op.GeoM.Translate(100, 100+(64*float64(index)))
-	// 		screen.DrawImage(item.Sprite, op)
-	// 	}
-	// }
 }

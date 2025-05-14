@@ -7,3 +7,16 @@ const (
 	CollisionBottomHalf
 	CollisionNone
 )
+
+type Collision struct {
+	Type     CollisionType
+	Collides bool
+}
+
+func (ct CollisionType) ToBool() bool {
+	if ct == CollisionBottomHalf || ct == CollisionTopHalf {
+		return true
+	} else {
+		return false
+	}
+}

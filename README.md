@@ -25,6 +25,16 @@ flying - immune to damage for some period of time
 safe burrows - digging / anenomes
 electricity - stun when attacked
 
+## Misc notes
+
+different levels like Slay the spire
+
+- The Shallows
+- The Deep
+- The Dark
+- The Trench
+  etc...
+
 ## Eventing
 
 Eventing might be useful in this project, look into this library:

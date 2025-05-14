@@ -12,19 +12,15 @@ import (
 
 func main() {
 	logger := SetupLogger()
-	registry := environment.NewRegistry()
-	registry.Add("targetFPS", 30)
-	registry.Add("width", 800)
-	registry.Add("height", 600)
+	config := environment.NewConfig()
 
-	env := environment.NewEnv(logger, registry)
-
+	env := environment.NewEnv(logger, config)
 	game := game.NewGame(env)
 
-	ebiten.SetWindowTitle("Fish Game")
-	ebiten.SetWindowSize(registry.Get("width").(int), registry.Get("height").(int))
+	ebiten.SetWindowTitle(config.Get("windowTitle").(string))
+	ebiten.SetWindowSize(config.Get("screenWidth").(int), config.Get("screenHeight").(int))
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetTPS(registry.Get("targetFPS").(int))
+	ebiten.SetTPS(config.Get("targetFPS").(int))
 
 	err := ebiten.RunGame(game)
 	if err != nil {
