@@ -15,7 +15,3 @@ func NewEnv(logger *slog.Logger, config *Config) *Env {
 		Config: config,
 	}
 }
-
-func Null() *Env {
-	return NewEnv(nil, nil)
-}

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 )
 
-func LoadImage(Env environment.Env, filePath string) *ebiten.Image {
+func LoadImage(Env *environment.Env, filePath string) *ebiten.Image {
 	img, _, err := ebitenutil.NewImageFromFile(filePath)
 	if err != nil {
 		Env.Logger.Error("Error loading image", "filePath", filePath, "error", err)

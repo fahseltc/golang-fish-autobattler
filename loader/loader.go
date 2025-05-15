@@ -8,7 +8,11 @@ import (
 	"strconv"
 )
 
-func LoadCsv(Env environment.Env) *item.Registry {
+func LoadItemRegistry(env *environment.Env) *item.Registry {
+	return parseItems(env)
+}
+
+func parseItems(Env *environment.Env) *item.Registry {
 	registry := item.NewRegistry()
 	attackingFish, err := readCsvFile("data/attacking_fish.csv")
 	if err != nil {

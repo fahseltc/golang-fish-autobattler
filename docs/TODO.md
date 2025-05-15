@@ -6,12 +6,13 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [ ] Fix drag/drop bugs
 - [x] Implement Fish drag + dropping
 - [x] Implement Scenes - Menu / Play / Options? / Credits? - 5/4/2025 menu/play implemented
-- [ ] Remove player2 and replace with something more generic
-- [ ] Implement Levels (keep choices in mind)
+- [x] Remove player2 and replace with something more generic - 5/14/2025
+- [x] Implement Levels (keep choices in mind) - 5/15/2025
 - [ ] Brainstorm + Implement level choices (perks / new fish / events)
 - [ ] Brainstorm + Implement Fish Tags
 - [ ] Implement Fish Feeding + Growth
-- [ ] Add new fish Types + bonuses
+- [ ] Add new fish Types + bonuses - topslot, bottomslot, adjacency, etc
 - [ ] Add new fish behaviors - reactive, poison, evasion, stun, schooling
-- [ ]
-- [ ]
+- [ ] Transitions between scenes / encounters
+- [ ] Get basic first choice + first battle flow working
+- [ ] Add on a choice option after the first battle

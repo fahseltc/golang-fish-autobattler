@@ -43,11 +43,9 @@ func NewConfig() *Config {
 			} else if f, err := val.Float64(); err == nil {
 				config.Add(key, f)
 			} else {
-				log.Printf("misc type in config, key: %v, val:%v, type:%v\n", key, val, reflect.TypeOf(val))
 				config.Add(key, val)
 			}
 		case string:
-			log.Printf("STRING JSON type in config, key: %v, val:%v, type:%v\n", key, val, reflect.TypeOf(val))
 			config.Add(key, val)
 		default:
 			log.Fatalf("Unknown JSON type in config, key: %v, val:%v, type:%v", key, val, reflect.TypeOf(val))

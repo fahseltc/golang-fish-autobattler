@@ -1,0 +1,20 @@
+{
+    "encounters": [
+        {
+            "title": "T1 Battle #1",
+            "encounter_type": "battle",
+            "items": [
+                "Eel"
+            ],
+            "buttons": []
+        },
+        {
+            "title": "T1 Battle #2",
+            "encounter_type": "battle",
+            "items": [
+                "Whale"
+            ],
+            "buttons": []
+        }
+    ]
+}

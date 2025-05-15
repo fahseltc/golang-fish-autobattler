@@ -1,0 +1,54 @@
+{
+    "encounters": [
+        {
+            "title": "Choose your starting fish!",
+            "encounter_type": "initial",
+            "items": [
+                "Goldfish",
+                "Shark",
+                "Puffer"
+            ],
+            "buttons": [
+                {
+                    "behavior": {
+                        "type": "add_item",
+                        "item_name": "Goldfish"
+                    },
+                    "x": 200,
+                    "y": 300,
+                    "w": 100,
+                    "h": 100,
+                    "text": "Goldfish",
+                    "color": "black",
+                    "font_size": 20
+                },
+                {
+                    "behavior": {
+                        "type": "add_item",
+                        "item_name": "Shark"
+                    },
+                    "x": 400,
+                    "y": 300,
+                    "w": 100,
+                    "h": 100,
+                    "text": "Shark",
+                    "color": "black",
+                    "font_size": 20
+                },
+                {
+                    "behavior": {
+                        "type": "add_item",
+                        "item_name": "Puffer"
+                    },
+                    "x": 600,
+                    "y": 300,
+                    "w": 100,
+                    "h": 100,
+                    "text": "Puffer",
+                    "color": "black",
+                    "font_size": 20
+                }
+            ]
+        }
+    ]
+}

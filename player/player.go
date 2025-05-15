@@ -6,7 +6,7 @@ import (
 )
 
 type Player struct {
-	Env   environment.Env
+	Env   *environment.Env
 	Name  string
 	Items *item.Collection
 }

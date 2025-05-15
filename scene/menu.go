@@ -24,7 +24,7 @@ func NewMenuScene(sm *Manager) *Menu {
 	menu := &Menu{
 		env:          sm.Env,
 		SceneManager: sm,
-		bg:           util.LoadImage(*sm.Env, "assets/bg/menu.png"),
+		bg:           util.LoadImage(sm.Env, "assets/bg/menu.png"),
 		StartBtn:     btn,
 	}
 	return menu

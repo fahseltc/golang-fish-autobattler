@@ -41,9 +41,9 @@ type Item struct {
 	OffsetY int
 }
 
-func NewItem(env environment.Env, name string, iType Type, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
+func NewItem(env *environment.Env, name string, iType Type, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
 	it := new(Item)
-	Env = &env
+	Env = env
 	it.Id = uuid.New()
 	it.Name = name
 	it.Alive = true
@@ -69,8 +69,8 @@ func NewItem(env environment.Env, name string, iType Type, desc string, life int
 
 	it.Activate = activate
 	it.HitLastFrame = false
-	it.OffsetX = 32
-	it.OffsetY = 32
+	it.OffsetX = int(float64(32) * spriteScale)
+	it.OffsetY = int(float64(32) * spriteScale)
 
 	return it
 }

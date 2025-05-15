@@ -16,53 +16,42 @@ type Collection struct {
 	spriteScale   float64
 }
 
-func NewPlayerCollection(env *environment.Env, items []*Item) *Collection {
-	screenWidth := env.Get("screenWidth").(int)
-	screenHeight := env.Get("screenHeight").(int)
-	spriteSizePx := float64(env.Get("spriteSizePx").(int))
+func NewEmptyPlayerCollection(env *environment.Env) *Collection {
 	spriteScale := env.Get("spriteScale").(float64)
-
-	spriteX := int(float64(screenWidth) * 0.4)
-	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
-	for index, item := range items {
-		spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
-		if item != nil {
-			item.X = int(spriteX)
-			item.Y = int(spriteY)
-		}
-	}
-
-	coll := Collection{
-		env:         env,
-		ActiveItems: items,
-		spriteScale: spriteScale,
-	}
-
-	return &coll
-}
-
-func NewEncounterCollection(env *environment.Env, items []*Item) *Collection {
-	screenWidth := env.Get("screenWidth").(int)
-	screenHeight := env.Get("screenHeight").(int)
-	spriteSizePx := float64(env.Get("spriteSizePx").(int))
-	spriteScale := env.Get("spriteScale").(float64)
-
-	spriteX := 0.60 * float64(screenWidth)
-	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
-	for index, item := range items {
-		spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
-		if item != nil {
-			item.X = int(spriteX)
-			item.Y = int(spriteY)
-		}
-	}
 
 	coll := &Collection{
 		env:         env,
-		ActiveItems: items,
 		spriteScale: spriteScale,
 	}
+
 	return coll
+}
+
+func NewEncounterCollection(env *environment.Env, items []*Item) *Collection {
+	coll := &Collection{
+		env:         env,
+		ActiveItems: items,
+		spriteScale: env.Get("spriteScale").(float64),
+	}
+	coll.SetItemLocations()
+	return coll
+}
+func (coll *Collection) SetItemLocations() {
+	screenWidth := coll.env.Get("screenWidth").(int)
+	screenHeight := coll.env.Get("screenHeight").(int)
+	spriteSizePx := float64(coll.env.Get("spriteSizePx").(int))
+	spriteScale := coll.env.Get("spriteScale").(float64)
+
+	spriteX := 0.60 * float64(screenWidth)
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
+	for index, item := range coll.ActiveItems {
+		spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
+		if item != nil {
+			item.X = int(spriteX)
+			item.Y = int(spriteY)
+		}
+	}
+
 }
 
 func (ic *Collection) Update(dt float64, enemyItems *Collection) {
@@ -94,8 +83,7 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 	return randomIndex, coll.ActiveItems[randomIndex]
 }
 
-func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player int) {
-
+func (coll *Collection) Draw(env *environment.Env, screen *ebiten.Image, player int) {
 	for _, item := range coll.ActiveItems {
 		if item != nil {
 			op := &ebiten.DrawImageOptions{}
@@ -109,4 +97,31 @@ func (coll *Collection) Draw(env environment.Env, screen *ebiten.Image, player i
 		}
 	}
 
+}
+func (coll *Collection) AddItem(it *Item) bool {
+	if len(coll.ActiveItems) >= SlotCount {
+		return false
+	}
+	coll.setItemSprite(it)
+	coll.ActiveItems = append(coll.ActiveItems, it)
+	return true
+}
+
+func (coll *Collection) RemoveItem(it *Item) bool { // todo implement
+	return true
+}
+
+func (coll *Collection) setItemSprite(item *Item) {
+	screenWidth := coll.env.Get("screenWidth").(int)
+	screenHeight := coll.env.Get("screenHeight").(int)
+	spriteSizePx := float64(coll.env.Get("spriteSizePx").(int))
+	spriteScale := coll.env.Get("spriteScale").(float64)
+
+	spriteX := int(float64(screenWidth) * 0.4)
+	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
+
+	itemCount := len(coll.ActiveItems)
+	spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(itemCount+1))
+	item.X = int(spriteX)
+	item.Y = int(spriteY)
 }

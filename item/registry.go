@@ -22,8 +22,8 @@ func (r *Registry) Add(name string, item Item) error {
 }
 
 func (r *Registry) Get(name string) (Item, bool) {
-	fmt.Printf("Getting item from registry: %v\n", name)
-	fmt.Printf("Items in registry: %v\n", r.Items)
+	//fmt.Printf("Getting item from registry: %v\n", name)
+	//fmt.Printf("Items in registry: %v\n", r.Items)
 	if item, ok := r.Items[name]; ok {
 		item.RegenerateUuid()
 		return item, false

@@ -87,22 +87,7 @@ func (slot *Slot) Swap(index int, newItem *item.Item) (*item.Item, error) {
 	return oldItem, nil
 }
 
-func (slot *Slot) Update() {
-
-	// if canDrop {
-	// 	slot.Text.Label = "* Can Drop *"
-	// 	if targetWidget != nil {
-	// 		targetWidget.(*widget.Container).BackgroundImage = image.NewNineSliceColor(color.NRGBA{100, 100, 255, 255})
-	// 		slot.TargetedObject = targetWidget
-	// 	}
-	// } else {
-	// 	slot.Text.Label = "Cannot Drop"
-	// 	if slot.TargetedObject != nil {
-	// 		slot.TargetedObject.(*widget.Container).BackgroundImage = image.NewNineSliceColor(color.NRGBA{100, 100, 100, 255})
-	// 		slot.TargetedObject = nil
-	// 	}
-	// }
-}
+func (slot *Slot) Update() {}
 
 func DrawLifeBar(screen *ebiten.Image, healthRatio float64, x, y float64) {
 	healthLength := float64((float64(spriteSizePx) * spriteScale) * healthRatio)
@@ -130,8 +115,6 @@ func (slot *Slot) DrawTooltip(screen *ebiten.Image, ui *UI, mx int, my int) {
 		titleY := tty + float32(slot.width)*0.15
 		DrawCenteredText(screen, ui.smallFont, slot.item.Name, int(titleX), int(titleY))
 
-		// opt = &text.DrawOptions{}
-		// opt.GeoM.Translate(float64(mx), float64(my))
 		ttstring := fmt.Sprintf("DPS: %.2f", slot.item.Dps())
 		DrawCenteredText(screen, ui.smallFont, ttstring, int(titleX), int(titleY+15))
 

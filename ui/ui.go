@@ -35,7 +35,7 @@ func NewUI(env *environment.Env) *UI {
 
 	ui := &UI{
 		env:       env,
-		slotImg:   util.LoadImage(*env, "assets/slot.png"),
+		slotImg:   util.LoadImage(env, "assets/slot.png"),
 		font:      font,
 		smallFont: smallFont,
 	}
@@ -70,7 +70,6 @@ func (ui *UI) Update() {
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		mx, my := ebiten.CursorPosition()
-		fmt.Printf("Cursor position: Mouse Pressed: %v, %v\n", mx, my)
 		for _, slot := range ui.Player1Slots {
 			if slot.item != nil {
 				if slot.item.Collides(mx, my) && !slot.item.Dragging {
