@@ -35,6 +35,43 @@ different levels like Slay the spire
 - The Trench
   etc...
 
+## Ocean Fish
+
+Predators:
+
+- Tuna - open ocean, migratory, very fast, good in the cold, cold blooded, must constantly swim, eats herring/mackerel, 150kg up to 680KG???!!!
+- Cod - lives in areas with soft bottoms, eats small fish/lobsters, 50kg
+- Salmon - rivers and coastal seas, eats small fish/invertibrates, 2-3 years of growth followed by a long migration to breed. Chinook salmon die after breeding, atlantic ones dont - 4kg usuall but up to 50kg seen
+- Sturgeon - inland sea, very old, bony plates, valuable caviar - HUGE 1,571 kg
+- Goby - rocky reefs, tiny predator, hide inside urchins, nearly always touch reef surface,pair mates,
+- Anglerfish - deep sea, ambush predator,
+  Marlin
+  Swordfish
+  Grunion - coastal open ocean, micro predator, reproduce on shore during full moon,
+
+Filter Feeders:
+
+- Mackerel - coastal to open ocean, filter feeder,
+
+Pickers
+
+- Clownfish - coral reef, plankton/algae picker, live in host anenome, changes sex throughout lifetime,
+
+  Barracuda - open ocean and reef predator,
+  Eel
+  Puffer
+  Seahorse - coral and rocky reefs, Visual planktivore (predator)
+  snapper
+  grouper
+  Sunfish - open ocean, foraging predator
+  herring
+  sardine
+  lionfish
+  flounder
+  dolphin
+  whale
+  manta ray
+
 ## Eventing
 
 Eventing might be useful in this project, look into this library:
