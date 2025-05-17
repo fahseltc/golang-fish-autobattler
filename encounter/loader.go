@@ -8,7 +8,6 @@ import (
 	"fishgame/player"
 	"fishgame/ui"
 	"fishgame/util"
-	"fmt"
 	"image/color"
 	"io"
 	"log"
@@ -61,7 +60,7 @@ func LoadEncounters(env *environment.Env, path string, player *player.Player, mg
 	if err != nil {
 		log.Fatalf("unable to Unmarshal encounter file: %v", path)
 	}
-	fmt.Printf("%v", encounterdata)
+	//fmt.Printf("%v", encounterdata)
 
 	for _, encData := range encounterdata.Encounters {
 		enc := parseJson(env, encData, player, mgr)
@@ -72,15 +71,15 @@ func LoadEncounters(env *environment.Env, path string, player *player.Player, mg
 }
 
 func parseJson(env *environment.Env, encounterData jsonEncounter, player *player.Player, mgr *Manager) EncounterInterface {
-	itemsReg := loader.LoadItemRegistry(env)
-	font, _ := util.LoadFont(30)
+	itemsReg, _ := loader.GetFishRegistry(env) // TODO handle errors
+	font, _ := util.LoadFont(30)               // TODO handle errors
 
 	var enc EncounterInterface
 	switch TypeFromString(encounterData.Type) {
 	case EncounterTypeInitial:
-		enc = generateInitialEncounter(env, font, encounterData, player, mgr, itemsReg)
+		enc = generateInitialEncounter(env, font, encounterData, player, mgr, itemsReg.Reg)
 	case EncounterTypeBattle:
-		enc = generateBattleEncounter(env, font, encounterData, player, mgr, itemsReg)
+		enc = generateBattleEncounter(env, font, encounterData, player, mgr, itemsReg.Reg)
 	}
 
 	return enc
@@ -131,14 +130,12 @@ func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, e
 		)
 		item, err := itemsReg.Get(btnData.Behavior.ItemName)
 		if err {
-			log.Fatalf("Unable to load item with name: %v", btnData.Behavior.ItemName)
+			env.Logger.Error("Unable to load item for encounter button", "item", btnData.Behavior.ItemName)
 		}
 		btn.OnClick = func() {
 			player.Items.AddItem(&item)
-			fmt.Printf("added item: %v\n", &item)
-
+			env.Logger.Info("Added item", "item", &item.Name, "recipient", player.Name)
 			enc.itemChosen = true
-			fmt.Printf("encounterItemChosen: %v\n", enc.itemChosen)
 		}
 
 		buttons = append(buttons, btn)

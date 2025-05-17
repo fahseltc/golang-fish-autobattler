@@ -1,0 +1,4 @@
+NAME,TYPE,LIFE,DURATION,DAMAGE,DESCRIPTION
+Minnow,weapon,5,0.5,1,
+Eel,weapon,25,2,3,
+Whale,weapon,10,4,5,

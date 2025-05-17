@@ -28,6 +28,9 @@ func (sm *Manager) Init() {
 	menuScene := NewMenuScene(sm)
 	sm.Scenes[menuScene.GetName()] = menuScene
 
+	gameOverScene := NewGameOverScene(sm.Env, sm)
+	sm.Scenes[gameOverScene.GetName()] = gameOverScene
+
 	playScene := &Play{Env: sm.Env}
 	playScene.Init(sm)
 	sm.Scenes[playScene.GetName()] = playScene
@@ -45,16 +48,21 @@ func (sm *Manager) SwitchTo(scene string, destroyOld bool) {
 	if destroyOld && sm.Current != nil {
 		sm.Current.Destroy()
 	}
+	if scene == "Play" {
+		playScene := &Play{Env: sm.Env}
+		playScene.Init(sm)
+		sm.Scenes[playScene.GetName()] = playScene
+	}
 	sm.Current = newScene
 }
 
-func (sm *Manager) SwitchToNext() {
-	if sm.Next != nil {
-		sm.Current.Destroy()
-		sm.Current = sm.Next
-		sm.Next = nil
-	}
-}
+// func (sm *Manager) SwitchToNext() {
+// 	if sm.Next != nil {
+// 		sm.Current.Destroy()
+// 		sm.Current = sm.Next
+// 		sm.Next = nil
+// 	}
+// }
 
 func (sm *Manager) Update(dt float64) error {
 	if sm.Current != nil {

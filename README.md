@@ -19,11 +19,20 @@ schooling - bonus damage (and life?) for adjacent schooling fish
 camouflage - percent change to evade
 speed + manueverability
 spines - damage when attacked
-poison - applies damage over time effect when attacking
+venom - applies damage over time effect when attacking
 mimicry - copy some other fish
 flying - immune to damage for some period of time
 safe burrows - digging / anenomes
 electricity - stun when attacked
+
+Initial 3 choices:
+
+- Schooling Fish (adjacency damage bonus)
+- Predator Fish (bonus to damage when attacking smaller prey)
+- Venomous Fish (On hit, apply damage-over-time effect)
+  MORE TO COME and be prioritized
+
+ROCK PAPER SCISSORS relationship???
 
 ## Misc notes
 
@@ -61,16 +70,33 @@ Pickers
   Eel
   Puffer
   Seahorse - coral and rocky reefs, Visual planktivore (predator)
-  snapper
-  grouper
-  Sunfish - open ocean, foraging predator
-  herring
-  sardine
-  lionfish
-  flounder
+  snapper - rocky bottoms, active predator,
+  grouper - reefs, sit and wait predator,
+  Sunfish - open ocean, foraging predator but mostly jellyfish, high growth rate - very large 2,744 kg
+  herring - coastal seas and estuaries, Foraging predator, camouflage, large schools - 1kg
+  sardine - coastal to open ocean, filter feeder, tons of eggs, oily - 0.5 kg
+  lionfish - coral reefs, ambush predator, moves slow, eats anything, territorial, venomous spines, - 1/2kg
+  flounder - Seagrass beds and offshore soft bottoms, ambush, live on seafloor, camoflauge, good at swimming, 10kg or so
   dolphin
-  whale
-  manta ray
+  whale - 190 tonnes
+  manta ray - huge 1350 kg
+  octopus
+  squid
+  crab
+  lobster
+  anenome
+  urchin
+
+## Types
+
+- Filter Feeders
+  these fish would not deal much damage, but would gather lots of food?
+- Schooling
+  these fish get adjacency bonuses to damage/health/evasion
+- Predator
+  these fish get bloodlust and get more damage from hitting other fish of the correct prey size
+- PartnersWith
+  these fish get huge benefits from a single fish type nearby.
 
 ## Eventing
 

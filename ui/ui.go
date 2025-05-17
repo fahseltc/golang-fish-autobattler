@@ -45,10 +45,10 @@ func NewUI(env *environment.Env) *UI {
 		ui.Player1Slots[index] = NewPlayerSlot(env, index)
 	}
 
-	// ui.Player2Slots = make(map[int]*Slot, SlotCount)
-	// for index := range SlotCount {
-	// 	ui.Player2Slots[index] = NewSlot(env, 2, index)
-	// }
+	ui.Player2Slots = make(map[int]*Slot, SlotCount)
+	for index := range SlotCount {
+		ui.Player2Slots[index] = NewEncounterSlot(env, 2, index)
+	}
 	return ui
 }
 
@@ -137,21 +137,26 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
 		}
 	}
-	// Draw tooltips on top
+	//Draw tooltips on top of items
 	for _, slot := range ui.Player1Slots {
 		if slot.item != nil {
-			slot.DrawTooltip(screen, ui, mx, my)
+			slot.DrawTooltip(screen, ui, mx, my, 1)
 		}
 	}
-	// for _, slot := range ui.Player2Slots {
-	// 	if slot.item != nil {
-	// 		DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
-	// 		DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
-	// 	}
-	// 	op := &ebiten.DrawImageOptions{}
-	// 	op.GeoM.Translate(float64(slot.x), float64(slot.y))
-	// 	screen.DrawImage(ui.slotImg, op)
-	// }
+	for _, slot := range ui.Player2Slots {
+		if slot.item != nil {
+			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
+			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
+		}
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(spriteScale, spriteScale)
+		op.GeoM.Translate(float64(slot.x), float64(slot.y))
+		screen.DrawImage(ui.slotImg, op)
+	}
+
+	for _, slot := range ui.Player2Slots {
+		slot.DrawTooltip(screen, ui, mx, my, 2)
+	}
 }
 
 func (ui *UI) setItemSlot(it *item.Item, slot *Slot) {

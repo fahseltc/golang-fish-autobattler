@@ -53,3 +53,6 @@ func (i Initial) IsDone() bool {
 func (i Initial) GetType() Type {
 	return i.Type
 }
+func (i Initial) IsGameOver() bool {
+	return false
+}

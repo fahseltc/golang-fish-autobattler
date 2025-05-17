@@ -12,9 +12,9 @@ import (
 )
 
 type Play struct {
-	Env              *environment.Env
-	SceneManager     *Manager
-	State            GameState
+	Env          *environment.Env
+	SceneManager *Manager
+	//State            GameState
 	ItemsRegistry    *item.Registry
 	Ui               *ui.UI
 	Player1          *player.Player
@@ -23,8 +23,8 @@ type Play struct {
 
 func (s *Play) Init(sm *Manager) {
 	s.SceneManager = sm
-	s.State = PlayState
-	s.ItemsRegistry = loader.LoadItemRegistry(s.Env)
+	itemReg, _ := loader.GetFishRegistry(s.Env)
+	s.ItemsRegistry = itemReg.Reg
 	s.Ui = ui.NewUI(s.Env)
 
 	s.Player1 = &player.Player{
@@ -37,18 +37,7 @@ func (s *Play) Init(sm *Manager) {
 }
 
 func (s *Play) Update(dt float64) {
-	switch s.State {
-	case PlayState:
-		updateDuringPlayState(s, dt)
-	case MapState:
-		updateDuringMapState(s, dt)
-	case InventoryState:
-		// Show the inventory
-	case GameOverState:
-		// Show the game over screen
-	case PauseState:
-		// Pause the game
-	}
+	updateDuringPlayState(s, dt)
 }
 
 func updateDuringPlayState(s *Play, dt float64) {
@@ -56,35 +45,33 @@ func updateDuringPlayState(s *Play, dt float64) {
 		s.Ui.Update()
 	}
 	// switch based on encounter type?
-	s.Player1.Items.Update(dt, s.EncounterManager.Current.GetItems())
+	encItems := s.EncounterManager.Current.GetItems()
+	if encItems != nil {
+		s.Player1.Items.Update(dt, encItems)
+	}
 	s.EncounterManager.Current.Update(dt, s.Player1)
-	//return nil
+
+	if s.EncounterManager.Current.IsDone() {
+		s.EncounterManager.NextEncounter()
+	}
+	if s.EncounterManager.Current.IsGameOver() {
+		s.Env.Logger.Info("GameOver")
+		s.SceneManager.SwitchTo("GameOver", true)
+	}
 }
 
-func updateDuringMapState(s *Play, dt float64) error {
+func updateDuringGameOverState(s *Play, dt float64) error {
 	return nil
 }
 
 func (s *Play) Draw(screen *ebiten.Image) {
-	switch s.State {
-	case PlayState:
-		if s.Ui != nil {
-			s.Ui.Draw(screen)
-		}
-		if s.Player1 != nil {
-			s.Player1.Items.Draw(s.Env, screen, 1)
-		}
-		s.EncounterManager.Current.Draw(screen)
-
-	case MapState:
-		return
-	case InventoryState:
-		return
-	case GameOverState:
-		return
-	case PauseState:
-		return
+	if s.Ui != nil {
+		s.Ui.Draw(screen)
 	}
+	if s.Player1 != nil {
+		s.Player1.Items.Draw(s.Env, screen, 1)
+	}
+	s.EncounterManager.Current.Draw(screen)
 }
 
 func (s *Play) Destroy() {

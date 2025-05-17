@@ -55,6 +55,7 @@ func (coll *Collection) SetItemLocations() {
 }
 
 func (ic *Collection) Update(dt float64, enemyItems *Collection) {
+	// assume enemyItems will be not-nil
 	for index, item := range ic.ActiveItems {
 		if !item.Alive {
 			// remove item from active items and add to inactive items
@@ -92,7 +93,6 @@ func (coll *Collection) Draw(env *environment.Env, screen *ebiten.Image, player 
 				op.GeoM.Translate(float64(item.Sprite.Bounds().Dx()), 0) // translate the image to the right
 			}
 			op.GeoM.Translate(float64(item.X), float64(item.Y))
-
 			screen.DrawImage(item.Sprite, op)
 		}
 	}
@@ -121,7 +121,7 @@ func (coll *Collection) setItemSprite(item *Item) {
 	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
 
 	itemCount := len(coll.ActiveItems)
-	spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(itemCount+1))
+	spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(itemCount))
 	item.X = int(spriteX)
 	item.Y = int(spriteY)
 }

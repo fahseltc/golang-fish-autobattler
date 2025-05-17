@@ -44,27 +44,27 @@ func NewPlayerSlot(env *environment.Env, index int) *Slot {
 	return &slot
 }
 
-// func NewEncounterSlot(env *environment.Env, playerNum int, index int) *Slot {
-// 	screenWidth := env.Get("screenWidth").(int)
-// 	screenHeight := env.Get("screenHeight").(int)
-// 	spriteSizePx := float64(env.Get("spriteSizePx").(int))
-// 	spriteScale := env.Get("spriteScale").(float64)
+func NewEncounterSlot(env *environment.Env, playerNum int, index int) *Slot {
+	screenWidth := env.Get("screenWidth").(int)
+	screenHeight := env.Get("screenHeight").(int)
+	spriteSizePx := float64(env.Get("spriteSizePx").(int))
+	spriteScale := env.Get("spriteScale").(float64)
 
-// 	slotX := int(float64(screenWidth) * 0.6)
+	slotX := int(float64(screenWidth) * 0.6)
 
-// 	slotYSpacingFromTop := float64(screenHeight) * float64(0.1)
-// 	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
+	slotYSpacingFromTop := float64(screenHeight) * float64(0.1)
+	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
 
-// 	slot := Slot{
-// 		env:    env,
-// 		index:  index,
-// 		x:      slotX,
-// 		y:      slotY,
-// 		height: int(float64(spriteSizePx) * spriteScale),
-// 		width:  int(float64(spriteSizePx) * spriteScale),
-// 	}
-// 	return &slot
-// }
+	slot := Slot{
+		env:    env,
+		index:  index,
+		x:      slotX,
+		y:      slotY,
+		height: int(float64(spriteSizePx) * spriteScale),
+		width:  int(float64(spriteSizePx) * spriteScale),
+	}
+	return &slot
+}
 
 func (slot *Slot) AddItem(index int, it *item.Item) bool {
 	if slot.item == nil { // only replace the item if its already empty
@@ -99,14 +99,17 @@ func DrawProgressBar(screen *ebiten.Image, progressRatio float64, x, y float64) 
 	ebitenutil.DrawRect(screen, x, y+(float64(spriteSizePx)*spriteScale)-8, progressLength, 4, color.White)
 }
 
-func (slot *Slot) DrawTooltip(screen *ebiten.Image, ui *UI, mx int, my int) {
-
+func (slot *Slot) DrawTooltip(screen *ebiten.Image, ui *UI, mx int, my int, playerNum int) {
 	mb := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	coll := slot.Collides(mx, my)
-
 	if !mb && coll.Collides && slot.item != nil {
+		var ttx float32
+		if playerNum == 1 {
+			ttx = float32(slot.x) - float32(slot.height)
+		} else {
+			ttx = float32(slot.x) + float32(slot.height)
+		}
 
-		ttx := float32(slot.x) - float32(slot.height)
 		tty := float32(slot.y)
 
 		vector.DrawFilledRect(screen, ttx, tty, float32(slot.width), float32(slot.width), color.RGBA{128, 128, 128, 255}, true)

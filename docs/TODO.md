@@ -8,7 +8,10 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [x] Remove player2 and replace with something more generic - 5/14/2025
 - [x] Implement Levels (keep choices in mind) - 5/15/2025
 - [x] Implement first fish choice - 5/15/2025
-
+- [x] Item Debuff framework - 5/16/2025
+- [x] Add enemy item tooltips on hover - 5/16/2025
+- [x] Implement 'game over' screen - 5/16/2025
+- [ ] Add items with debuffs
 - [ ] Prevent dragging during battle
 - [ ] Add delay/button before battle starts
 - [ ] Implement fish pond storage area
@@ -23,13 +26,15 @@ https://trello.com/b/mqUYXtuY/work-tasks
 
 - [ ] Fix drag/drop bugs
 - [ ] Fix drag/drop upwards/downwards
-- [ ] Issue when fish is picked is visibly in slot 1 though its storing slot 0
+- [x] Issue when fish is picked is visibly in slot 1 though its storing slot 0 - 5/16/2025
+- [ ] Enemy UI slots should be shown during battle
 
 # BRAINSTORM
 
 - [ ] Brainstorm + Implement level choices (perks / new fish / events)
 - [ ] Brainstorm + Implement Fish Tags
 - [ ] Change to all ocean-based fish
+- [ ] Add fish sizes
 
 # ART / UI
 

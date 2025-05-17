@@ -32,6 +32,7 @@ type Item struct {
 
 	Activate     func(*Item, *Item) bool `json:"-"`
 	HitLastFrame bool                    `json:"-"`
+	debuffs      []*Debuff
 
 	X, Y      int
 	Dragging  bool
@@ -98,41 +99,69 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 		return false
 	}
 
-	// Update
+	// Update items debuffs
+	it.updateDebuffs(dt)
+	if !it.Alive {
+		return false
+	}
+
+	// Update Items counters
 	it.CurrentTime += dt
 	if it.CurrentTime >= it.Duration {
 		it.CurrentTime -= it.Duration
-		//index, target := enemyItems.GetRandomActive()
+		index, target := enemyItems.GetRandomActive()
 
-		// if target != nil {
-		// 	// trigger weapon item
-		// 	if it.Activate != nil && it.Type.String() == "weapon" {
-		// 		if !it.Activate(it, target) {
-		// 			// remove the item from the enemy's active items and add it to the inactive items
-		// 			enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
-		// 			enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
-		// 		}
-		// 	}
-		// 	// trigger reactive item
-		// 	if it.Activate != nil && target.Type.String() == "reactive" && it.HitLastFrame {
-		// 		it.Activate(it, target)
-		// 		it.HitLastFrame = false
-		// 	}
-		// }
+		if target != nil && it.Activate != nil {
+			// trigger weapon item
+			if it.Type.String() == "weapon" {
+				if !it.Activate(it, target) {
+					// remove the item from the enemy's active items and add it to the inactive items
+					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
+					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
+				}
+			}
+			// trigger reactive item
+			if target.Type.String() == "reactive" && it.HitLastFrame {
+				it.Activate(it, target)
+				it.HitLastFrame = false
+			}
+		}
 	}
 	//it.Print()
 	return true
 }
+func (it *Item) updateDebuffs(dt float64) {
+	if len(it.debuffs) > 0 {
+		for index, dbf := range it.debuffs {
+			if dbf.IsDone() {
+				// remove the finished debuff from the list
+				it.debuffs = append(it.debuffs[:index], it.debuffs[index+1:]...)
+			} else {
+				dbf.Update(dt)
+			}
+		}
+	}
+}
 
-func (it *Item) TakeDamage(source *Item) bool {
-	it.CurrentLife -= source.Damage
+func (it *Item) TakeDamage(amt int, debuff bool) bool {
+	it.CurrentLife -= amt
 	if it.CurrentLife <= 0 {
 		it.CurrentLife = 0
 		it.Alive = false
 	}
-	it.HitLastFrame = true
+	if !debuff { // only trigger reactive stuff on hits, not debuff ticks
+		it.HitLastFrame = true
+	}
 
 	return it.Alive
+}
+
+func (it *Item) AddDebuff(dbf *Debuff) bool {
+	if it.Alive {
+		it.debuffs = append(it.debuffs, dbf)
+		return true
+	}
+	return false
 }
 
 func (it *Item) Collides(x, y int) bool {
