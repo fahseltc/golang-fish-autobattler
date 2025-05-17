@@ -8,16 +8,26 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [x] Remove player2 and replace with something more generic - 5/14/2025
 - [x] Implement Levels (keep choices in mind) - 5/15/2025
 - [x] Implement first fish choice - 5/15/2025
-- [x] Item Debuff framework - 5/16/2025
 - [x] Add enemy item tooltips on hover - 5/16/2025
 - [x] Implement 'game over' screen - 5/16/2025
+- [x] Item Debuff framework - 5/16/2025
+- [x] Add venomous fish (On hit, apply damage-over-time effect) - 5/17/2025
+- [x] Add fish sizes - 5/17/2025
+- [x] SceneManager stores different tiers of encounters and can move between them - 5/17/2025
+- [x] Add predator fix (bonus to damage when attacking smaller prey) - 5/17/2025
+- [x] Add random index to SceneManager picking levels from a tier. - 5/17/2025
+- [ ] Add schooling fish (adjacency)
+
 - [ ] Add items with debuffs
+- [ ] Draw Debuff (venom/double damage) effects
+- [ ] Add tooltips to Initial Scene
+
 - [ ] Prevent dragging during battle
 - [ ] Add delay/button before battle starts
 - [ ] Implement fish pond storage area
 - [ ] Implement Fish Feeding + Growth
-- [ ] Add new fish Types + bonuses - topslot, bottomslot, adjacency, etc
-- [ ] Add new fish behaviors - reactive, poison, evasion, stun, schooling
+- [ ] Add new fish Types + bonuses - topslot, bottomslot, etc
+- [ ] Add new fish behaviors - reactive, evasion, stun, schooling
 - [ ] Transitions between scenes / encounters
 - [ ] Get basic first choice + first battle complete flow working
 - [ ] Add on a choice option after the first battle
@@ -28,13 +38,14 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [ ] Fix drag/drop upwards/downwards
 - [x] Issue when fish is picked is visibly in slot 1 though its storing slot 0 - 5/16/2025
 - [ ] Enemy UI slots should be shown during battle
+- [ ] Venomous fish show DPS - check its close to right or change this?
+- [ ] Should venom stack and does it already???
 
 # BRAINSTORM
 
 - [ ] Brainstorm + Implement level choices (perks / new fish / events)
 - [ ] Brainstorm + Implement Fish Tags
 - [ ] Change to all ocean-based fish
-- [ ] Add fish sizes
 
 # ART / UI
 
@@ -42,3 +53,4 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [ ] Button OnHover animation
 - [ ] Button OnClick animation
 - [ ] initial choice background art
+- [ ] Tooltips to use background image and set layout

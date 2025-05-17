@@ -14,14 +14,14 @@ import (
 
 var Env *environment.Env
 
-// add json tags for the struct
-type Item struct {
+type Item struct { // I dont think any of these json tags are relevant, we read fish from a csv
 	Id          uuid.UUID     `json:"id"`
 	Name        string        `json:"name"`
 	Type        Type          `json:"type"`
 	Description string        `json:"description"`
 	Life        int           `json:"max_life"`
 	CurrentLife int           `json:"current_life"`
+	Size        Size          `json:"size"`
 	Alive       bool          `json:"alive"`
 	Sprite      *ebiten.Image `json:"-"`
 	hitbox      *image.Alpha
@@ -42,12 +42,13 @@ type Item struct {
 	OffsetY int
 }
 
-func NewItem(env *environment.Env, name string, iType Type, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
+func NewItem(env *environment.Env, name string, iType Type, sz Size, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
 	it := new(Item)
 	Env = env
 	it.Id = uuid.New()
 	it.Name = name
 	it.Alive = true
+	it.Size = sz
 
 	spriteScale := env.Get("spriteScale").(float64)
 	originalSprite := util.LoadImage(env, fmt.Sprintf("assets/fish/%s.png", strings.ToLower(it.Name)))
@@ -112,18 +113,23 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 		index, target := enemyItems.GetRandomActive()
 
 		if target != nil && it.Activate != nil {
-			// trigger weapon item
-			if it.Type.String() == "weapon" {
+			// trigger all weapon item
+			if it.Type.String() == "weapon" || it.Type.String() == "sizeBasedWeapon" {
 				if !it.Activate(it, target) {
 					// remove the item from the enemy's active items and add it to the inactive items
 					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
 					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
 				}
 			}
-			// trigger reactive item
+			// trigger reactive item that was targetted
 			if target.Type.String() == "reactive" && it.HitLastFrame {
 				it.Activate(it, target)
 				it.HitLastFrame = false
+			}
+
+			// trigger Venomous and size-based items
+			if it.Type.String() == "venomous" {
+				it.Activate(it, target)
 			}
 		}
 	}

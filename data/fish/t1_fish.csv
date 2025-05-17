@@ -1,4 +1,5 @@
-NAME,TYPE,LIFE,DURATION,DAMAGE,DESCRIPTION
-Minnow,weapon,5,0.5,1,
-Eel,weapon,25,2,3,
-Whale,weapon,10,4,5,
+NAME,TYPE,LIFE,SIZE,DURATION,DAMAGE,DESCRIPTION
+Minnow,weapon,5,tiny,0.5,1,
+Puffer,reactive,20,tiny,0,1,
+Whale,weapon,40,huge,4,5,
+Eel,weapon,25,small,3,2,long boy

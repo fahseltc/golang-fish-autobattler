@@ -1,6 +1,10 @@
 package item
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"fmt"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 // this will handle DOT effects for now, but other things are possible.
 
@@ -39,6 +43,7 @@ func NewItemDebuff(it *Item, dbt DebuffType, dur float64, tickRate float64, dam 
 		item:              it,
 		damage:            dam,
 	}
+	fmt.Printf("creat debuff, remainingDur: %v, tickRate: %v\n", debuff.RemainingDuration, debuff.TickRate)
 	return debuff
 }
 
@@ -71,5 +76,5 @@ func (dbf *Debuff) Update(dt float64) {
 }
 
 func (dbf *Debuff) IsDone() bool {
-	return dbf.RemainingDuration > 0
+	return dbf.RemainingDuration <= 0
 }

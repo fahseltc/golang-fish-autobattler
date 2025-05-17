@@ -56,23 +56,31 @@ func parseItems(Env *environment.Env, filepath string, reg *item.Registry) error
 
 	// loop  fish and create items
 	for _, fish := range fileFish {
-		life, _ := strconv.Atoi(fish[2])
-		duration, _ := strconv.ParseFloat(fish[3], 32)
-		damage, _ := strconv.Atoi(fish[4])
+		name := fish[0]
 		itemType := item.TypeFromString(fish[1])
+		life, _ := strconv.Atoi(fish[2])
+		size := item.SizeFromString(fish[3])
+		duration, _ := strconv.ParseFloat(fish[4], 32)
+		damage, _ := strconv.Atoi(fish[5])
+		description := fish[6]
+
 		var behaviorFunc func(*item.Item, *item.Item) bool
 		switch itemType {
 		case item.Weapon:
 			behaviorFunc = item.AttackingBehavior
+		case item.SizeBasedWeapon:
+			behaviorFunc = item.LargerSizeAttackingBehavior
 		case item.Reactive:
 			behaviorFunc = item.ReactingBehavior
+		case item.Venomous:
+			behaviorFunc = item.VenomousBehavior
 		default:
 			behaviorFunc = nil
 		}
 
 		// todo update fish function type from file, or use switch statement
-		item := item.NewItem(Env, fish[0], item.TypeFromString(fish[1]), fish[5], life, float64(duration), int(damage), behaviorFunc)
-		added := reg.Add(fish[0], *item)
+		item := item.NewItem(Env, name, itemType, size, description, life, float64(duration), int(damage), behaviorFunc)
+		added := reg.Add(name, *item)
 		if added != nil {
 			Env.Error("failed to add duplicate item to registry", "filepath", filepath, "item", item)
 		}

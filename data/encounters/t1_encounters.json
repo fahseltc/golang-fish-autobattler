@@ -15,6 +15,14 @@
                 "Whale"
             ],
             "buttons": []
+        },
+        {
+            "title": "T1 Battle #3",
+            "encounter_type": "battle",
+            "items": [
+                "Minnow"
+            ],
+            "buttons": []
         }
     ]
 }

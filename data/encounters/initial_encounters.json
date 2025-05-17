@@ -3,11 +3,7 @@
         {
             "title": "Choose your starting fish!",
             "encounter_type": "initial",
-            "items": [
-                "Goldfish",
-                "Shark",
-                "Puffer"
-            ],
+            "items": [],
             "buttons": [
                 {
                     "behavior": {
@@ -38,13 +34,13 @@
                 {
                     "behavior": {
                         "type": "add_item",
-                        "item_name": "Puffer"
+                        "item_name": "Lionfish"
                     },
                     "x": 600,
                     "y": 300,
                     "w": 100,
                     "h": 100,
-                    "text": "Puffer",
+                    "text": "Lionfish",
                     "color": "black",
                     "font_size": 20
                 }

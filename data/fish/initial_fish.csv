@@ -1,4 +1,4 @@
-NAME,TYPE,LIFE,DURATION,DAMAGE,DESCRIPTION
-Goldfish,weapon,10,1,1,Commonly kept as a pet. Gets +1 damage when it has no adjacent fish.
-Shark,weapon,15,1.5,2,Big scary sharks eat stuff.
-Puffer,reactive,20,0,1,
+NAME,TYPE,LIFE,SIZE,DURATION,DAMAGE,DESCRIPTION
+Goldfish,weapon,10,tiny,1,1,Commonly kept as a pet. Gets +1 damage when it has no adjacent fish.
+Shark,sizeBasedWeapon,15,medium,1.5,2,Big scary sharks eat stuff.
+Lionfish,venomous,25,small,3,2,spiky boy

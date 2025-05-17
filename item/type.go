@@ -4,23 +4,23 @@ type Type int
 
 const (
 	Weapon Type = iota
-	Defensive
+	SizeBasedWeapon
 	Reactive
-	Misc
+	Venomous
 )
 
 var itemNames = map[Type]string{
-	Weapon:    "weapon",
-	Defensive: "defensive",
-	Reactive:  "reactive",
-	Misc:      "misc",
+	Weapon:          "weapon",
+	SizeBasedWeapon: "sizeBasedWeapon",
+	Reactive:        "reactive",
+	Venomous:        "venomous",
 }
 
 var itemTypes = map[string]Type{
-	"weapon":    Weapon,
-	"defensive": Defensive,
-	"reactive":  Reactive,
-	"misc":      Misc,
+	"weapon":          Weapon,
+	"sizeBasedWeapon": SizeBasedWeapon,
+	"reactive":        Reactive,
+	"venomous":        Venomous,
 }
 
 func (it Type) String() string {
@@ -31,6 +31,6 @@ func TypeFromString(s string) Type {
 	if t, ok := itemTypes[s]; ok {
 		return t
 	} else {
-		return Misc
+		return Weapon
 	}
 }
