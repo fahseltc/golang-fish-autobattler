@@ -3,3 +3,4 @@ Minnow,weapon,5,tiny,0.5,1,
 Puffer,reactive,20,tiny,0,1,
 Whale,weapon,40,huge,4,5,
 Eel,weapon,25,small,3,2,long boy
+Goldfish,weapon,10,tiny,1,1,Commonly kept as a pet. Gets +1 damage when it has no adjacent fish.

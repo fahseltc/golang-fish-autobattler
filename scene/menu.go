@@ -17,7 +17,8 @@ type Menu struct {
 }
 
 func NewMenuScene(sm *Manager) *Menu {
-	btn := ui.NewButton(sm.Env, 400, 450, 200, 100, "Start", color.Black, 30)
+	img := util.LoadImage(sm.Env, "assets/ui/btn.png")
+	btn := ui.NewButton(sm.Env, 400, 450, 300, 150, "Start", color.Black, 30, img)
 	btn.OnClick = func() {
 		sm.SwitchTo("Play", true)
 	}

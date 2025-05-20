@@ -21,16 +21,22 @@ type Button struct {
 	text  string
 	font  text.Face
 	color color.Color
+	bg    *ebiten.Image
 	// todo bg image?
 	OnClick func()
+	//tt      *Tooltip
 }
 
-func NewButton(env *environment.Env, x, y, w, h float32, txt string, clr color.Color, fntSize float64) *Button {
+func NewButton(env *environment.Env, x, y, w, h float32, txt string, clr color.Color, fntSize float64, img *ebiten.Image) *Button {
 	font, _ := util.LoadFont(fntSize)
 
 	// make button centered on given coordinates
 	centeredX := x - 0.5*w
 	centeredY := y - 0.5*h
+	var btnImg *ebiten.Image
+	if img != nil {
+		btnImg = util.ScaleImage(img, w, h)
+	}
 
 	btn := &Button{
 		env:    env,
@@ -41,13 +47,22 @@ func NewButton(env *environment.Env, x, y, w, h float32, txt string, clr color.C
 		text:   txt,
 		font:   font,
 		color:  clr,
+		bg:     btnImg,
 	}
+	// btn.tt = NewInitialTooltip(btn, int(centeredX), int(centeredY), int(w), int(h), nil)
+
 	return btn
 }
 
 func (btn *Button) Draw(screen *ebiten.Image) {
-	// draw button background
-	vector.DrawFilledRect(screen, btn.x, btn.y, btn.width, btn.height, btn.color, true)
+	if btn.bg == nil {
+		vector.DrawFilledRect(screen, btn.x, btn.y, btn.width, btn.height, btn.color, true)
+	} else {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(btn.x), float64(btn.y))
+		screen.DrawImage(btn.bg, op)
+	}
+
 	// draw text centered
 	centerX, centerY := btn.GetCenter()
 	DrawCenteredText(screen, btn.font, btn.text, centerX, centerY)

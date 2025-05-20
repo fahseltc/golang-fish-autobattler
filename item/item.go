@@ -15,7 +15,8 @@ import (
 var Env *environment.Env
 
 type Item struct { // I dont think any of these json tags are relevant, we read fish from a csv
-	Id          uuid.UUID     `json:"id"`
+	Id          uuid.UUID `json:"id"`
+	coll        *Collection
 	Name        string        `json:"name"`
 	Type        Type          `json:"type"`
 	Description string        `json:"description"`
@@ -30,9 +31,9 @@ type Item struct { // I dont think any of these json tags are relevant, we read 
 	CurrentTime float64 `json:"current_time"`
 	Damage      int     `json:"damage"`
 
-	Activate     func(*Item, *Item) bool `json:"-"`
-	HitLastFrame bool                    `json:"-"`
-	debuffs      []*Debuff
+	Activate     func(*Item, *Item, *BehaviorProps) bool `json:"-"`
+	HitLastFrame bool                                    `json:"-"`
+	debuffs      []DebuffInterface
 
 	X, Y      int
 	Dragging  bool
@@ -42,10 +43,11 @@ type Item struct { // I dont think any of these json tags are relevant, we read 
 	OffsetY int
 }
 
-func NewItem(env *environment.Env, name string, iType Type, sz Size, desc string, life int, duration float64, damage int, activate func(*Item, *Item) bool) *Item {
+func NewItem(env *environment.Env, coll *Collection, name string, iType Type, sz Size, desc string, life int, duration float64, damage int, activate func(*Item, *Item, *BehaviorProps) bool) *Item {
 	it := new(Item)
 	Env = env
 	it.Id = uuid.New()
+	it.coll = coll
 	it.Name = name
 	it.Alive = true
 	it.Size = sz
@@ -81,8 +83,11 @@ func (it *Item) RegenerateUuid() {
 	it.Id = uuid.New()
 }
 
-func (it *Item) Update(dt float64, enemyItems *Collection) bool {
-	if it.hitbox == nil {
+func (it *Item) Update(dt float64, enemyItems *Collection, ic *Collection, index int) bool {
+	if it == nil {
+		return false
+	}
+	if it.hitbox == nil { // run once on first loop to generate hitbox once.(cant be done before update loop in ebiten) TODO move this
 		bounds := it.Sprite.Bounds()
 		ebitenAlphaImage := image.NewAlpha(bounds)
 		for j := bounds.Min.Y; j < bounds.Max.Y; j++ {
@@ -115,7 +120,7 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 		if target != nil && it.Activate != nil {
 			// trigger all weapon item
 			if it.Type.String() == "weapon" || it.Type.String() == "sizeBasedWeapon" {
-				if !it.Activate(it, target) {
+				if !it.Activate(it, target, nil) {
 					// remove the item from the enemy's active items and add it to the inactive items
 					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
 					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
@@ -123,17 +128,27 @@ func (it *Item) Update(dt float64, enemyItems *Collection) bool {
 			}
 			// trigger reactive item that was targetted
 			if target.Type.String() == "reactive" && it.HitLastFrame {
-				it.Activate(it, target)
+				it.Activate(it, target, nil)
 				it.HitLastFrame = false
 			}
 
 			// trigger Venomous and size-based items
 			if it.Type.String() == "venomous" {
-				it.Activate(it, target)
+				it.Activate(it, target, nil)
+			}
+
+			// trigger adjancency-based weapons
+			if it.Type.String() == "adjacencyBasedWeapon" {
+
+				props := &BehaviorProps{
+					data: make(map[string]any),
+				}
+				props.data["itemAbove"] = ic.GetItemAbove(it.SlotIndex)
+				props.data["itemBelow"] = ic.GetItemBelow(it.SlotIndex)
+				it.Activate(it, target, props)
 			}
 		}
 	}
-	//it.Print()
 	return true
 }
 func (it *Item) updateDebuffs(dt float64) {
@@ -162,7 +177,7 @@ func (it *Item) TakeDamage(amt int, debuff bool) bool {
 	return it.Alive
 }
 
-func (it *Item) AddDebuff(dbf *Debuff) bool {
+func (it *Item) AddDebuff(dbf DebuffInterface) bool {
 	if it.Alive {
 		it.debuffs = append(it.debuffs, dbf)
 		return true

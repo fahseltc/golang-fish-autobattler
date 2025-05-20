@@ -64,12 +64,14 @@ func parseItems(Env *environment.Env, filepath string, reg *item.Registry) error
 		damage, _ := strconv.Atoi(fish[5])
 		description := fish[6]
 
-		var behaviorFunc func(*item.Item, *item.Item) bool
+		var behaviorFunc func(*item.Item, *item.Item, *item.BehaviorProps) bool
 		switch itemType {
 		case item.Weapon:
 			behaviorFunc = item.AttackingBehavior
 		case item.SizeBasedWeapon:
 			behaviorFunc = item.LargerSizeAttackingBehavior
+		case item.AdjacencyBasedWeapon:
+			behaviorFunc = item.AdjacentAttackingBehavior
 		case item.Reactive:
 			behaviorFunc = item.ReactingBehavior
 		case item.Venomous:
@@ -79,7 +81,7 @@ func parseItems(Env *environment.Env, filepath string, reg *item.Registry) error
 		}
 
 		// todo update fish function type from file, or use switch statement
-		item := item.NewItem(Env, name, itemType, size, description, life, float64(duration), int(damage), behaviorFunc)
+		item := item.NewItem(Env, nil, name, itemType, size, description, life, float64(duration), int(damage), behaviorFunc)
 		added := reg.Add(name, *item)
 		if added != nil {
 			Env.Error("failed to add duplicate item to registry", "filepath", filepath, "item", item)

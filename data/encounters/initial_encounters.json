@@ -8,24 +8,29 @@
                 {
                     "behavior": {
                         "type": "add_item",
-                        "item_name": "Goldfish"
+                        "items": [
+                            "Salmon",
+                            "Salmon"
+                        ]
                     },
                     "x": 200,
                     "y": 300,
-                    "w": 100,
+                    "w": 150,
                     "h": 100,
-                    "text": "Goldfish",
+                    "text": "Salmon",
                     "color": "black",
                     "font_size": 20
                 },
                 {
                     "behavior": {
                         "type": "add_item",
-                        "item_name": "Shark"
+                        "items": [
+                            "Shark"
+                        ]
                     },
                     "x": 400,
                     "y": 300,
-                    "w": 100,
+                    "w": 150,
                     "h": 100,
                     "text": "Shark",
                     "color": "black",
@@ -34,17 +39,20 @@
                 {
                     "behavior": {
                         "type": "add_item",
-                        "item_name": "Lionfish"
+                        "items": [
+                            "Lionfish"
+                        ]
                     },
                     "x": 600,
                     "y": 300,
-                    "w": 100,
+                    "w": 150,
                     "h": 100,
                     "text": "Lionfish",
                     "color": "black",
                     "font_size": 20
                 }
-            ]
+            ],
+            "rewards": []
         }
     ]
 }

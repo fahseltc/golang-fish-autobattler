@@ -4,6 +4,7 @@ import (
 	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/player"
+	"fishgame/reward"
 	"fishgame/ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,6 +22,7 @@ type Initial struct {
 	bg      *ebiten.Image
 	font    *text.Face
 	buttons []*ui.Button
+	rewards []*reward.Reward
 
 	itemChosen bool
 }
@@ -55,4 +57,10 @@ func (i Initial) GetType() Type {
 }
 func (i Initial) IsGameOver() bool {
 	return false
+}
+func (i Initial) GetRewards() []*reward.Reward {
+	return i.rewards
+}
+func (i Initial) AddReward(reward *reward.Reward) {
+	i.rewards = append(i.rewards, reward)
 }

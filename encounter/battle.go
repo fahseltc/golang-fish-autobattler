@@ -4,6 +4,7 @@ import (
 	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/player"
+	"fishgame/reward"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -14,7 +15,8 @@ type Battle struct {
 	items *item.Collection
 	Type  Type
 
-	player *player.Player
+	player  *player.Player
+	rewards []*reward.Reward
 }
 
 func (battle *Battle) Update(dt float64, player *player.Player) {
@@ -39,4 +41,12 @@ func (battle *Battle) IsGameOver() bool {
 
 func (battle Battle) GetType() Type {
 	return battle.Type
+}
+
+func (battle Battle) GetRewards() []*reward.Reward {
+	return battle.rewards
+}
+
+func (battle *Battle) AddReward(reward *reward.Reward) {
+	battle.rewards = append(battle.rewards, reward)
 }

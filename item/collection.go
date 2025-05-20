@@ -2,6 +2,7 @@ package item
 
 import (
 	"fishgame/environment"
+	"fmt"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -22,6 +23,10 @@ func NewEmptyPlayerCollection(env *environment.Env) *Collection {
 	coll := &Collection{
 		env:         env,
 		spriteScale: spriteScale,
+	}
+	for i := 0; i < SlotCount; i++ {
+		coll.ActiveItems = append(coll.ActiveItems, nil)
+		coll.InactiveItems = append(coll.InactiveItems, nil)
 	}
 
 	return coll
@@ -57,12 +62,12 @@ func (coll *Collection) SetItemLocations() {
 func (ic *Collection) Update(dt float64, enemyItems *Collection) {
 	// assume enemyItems will be not-nil
 	for index, item := range ic.ActiveItems {
-		if !item.Alive {
+		if item != nil && !item.Alive {
 			// remove item from active items and add to inactive items
 			ic.ActiveItems = append(ic.ActiveItems[:index], ic.ActiveItems[index+1:]...)
 			ic.InactiveItems = append(ic.InactiveItems, item)
 		}
-		item.Update(dt, enemyItems)
+		item.Update(dt, enemyItems, ic, index)
 	}
 }
 
@@ -94,16 +99,38 @@ func (coll *Collection) Draw(env *environment.Env, screen *ebiten.Image, player 
 			}
 			op.GeoM.Translate(float64(item.X), float64(item.Y))
 			screen.DrawImage(item.Sprite, op)
+
+			// Draw Debuffs
+			for _, dbf := range item.debuffs {
+				dbf.Draw(screen)
+			}
 		}
+
 	}
 
 }
 func (coll *Collection) AddItem(it *Item) bool {
-	if len(coll.ActiveItems) >= SlotCount {
+	if coll.SlotsFull() {
 		return false
 	}
+	// if len(coll.ActiveItems) >= SlotCount {
+	// 	return false
+	// }
+
+	emptyIndex := coll.FirstEmptyIndex()
+	coll.ActiveItems[emptyIndex] = it
+	it.SlotIndex = emptyIndex
 	coll.setItemSprite(it)
-	coll.ActiveItems = append(coll.ActiveItems, it)
+	return true
+}
+
+func (coll *Collection) AddItems(items []*Item) bool {
+	for _, it := range items {
+		res := coll.AddItem(it)
+		if !res {
+			return false
+		}
+	}
 	return true
 }
 
@@ -120,8 +147,43 @@ func (coll *Collection) setItemSprite(item *Item) {
 	spriteX := int(float64(screenWidth) * 0.4)
 	spriteYSpacingFromTop := float64(screenHeight) * float64(0.1)
 
-	itemCount := len(coll.ActiveItems)
-	spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(itemCount))
+	itemIndex := item.SlotIndex
+	spriteY := int(spriteYSpacingFromTop + (spriteSizePx*spriteScale)*float64(itemIndex))
 	item.X = int(spriteX)
 	item.Y = int(spriteY)
+}
+
+func (coll *Collection) GetItemAbove(index int) *Item {
+	fmt.Printf("GetItemAbove - itemIndex: %v\n", index)
+	if index == 0 || coll.ActiveItems[index-1] == nil {
+		return nil
+	}
+	fmt.Printf("GetItemAbove-notnil - itemName: %v\n", coll.ActiveItems[index-1].Name)
+	return coll.ActiveItems[index-1]
+}
+func (coll *Collection) GetItemBelow(index int) *Item {
+	fmt.Printf("GetItemBelow - itemIndex: %v\n", index)
+	if index+1 >= SlotCount || coll.ActiveItems[index+1] == nil {
+		return nil
+	}
+	fmt.Printf("GetItemAbove-notnil - itemName: %v\n", coll.ActiveItems[index+1].Name)
+	return coll.ActiveItems[index+1]
+}
+
+func (coll *Collection) SlotsFull() bool {
+	for _, it := range coll.ActiveItems {
+		if it == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func (coll *Collection) FirstEmptyIndex() int {
+	for index, it := range coll.ActiveItems {
+		if it == nil {
+			return index
+		}
+	}
+	return 999
 }

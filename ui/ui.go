@@ -21,8 +21,9 @@ type UI struct {
 	Player1Slots map[int]*Slot
 	Player2Slots map[int]*Slot
 	slotImg      *ebiten.Image
-	font         text.Face
+	Font         text.Face
 	smallFont    text.Face
+	CurrencyImg  *ebiten.Image
 }
 
 func NewUI(env *environment.Env) *UI {
@@ -34,10 +35,11 @@ func NewUI(env *environment.Env) *UI {
 	smallFont, _ := util.LoadFont(12)
 
 	ui := &UI{
-		env:       env,
-		slotImg:   util.LoadImage(env, "assets/slot.png"),
-		font:      font,
-		smallFont: smallFont,
+		env:         env,
+		slotImg:     util.LoadImage(env, "assets/slot.png"),
+		CurrencyImg: util.LoadImage(env, "assets/ui/icons/fishfood.png"),
+		Font:        font,
+		smallFont:   smallFont,
 	}
 
 	ui.Player1Slots = make(map[int]*Slot, SlotCount)
@@ -126,6 +128,7 @@ func (ui *UI) Update() {
 func (ui *UI) Draw(screen *ebiten.Image) {
 	mx, my := ebiten.CursorPosition()
 
+	// Draw player slots / progress bars
 	for _, slot := range ui.Player1Slots {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(spriteScale, spriteScale)
@@ -137,7 +140,8 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
 		}
 	}
-	//Draw tooltips on top of items
+
+	// Draw tooltips on top of items
 	for _, slot := range ui.Player1Slots {
 		if slot.item != nil {
 			slot.DrawTooltip(screen, ui, mx, my, 1)
@@ -154,6 +158,7 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		screen.DrawImage(ui.slotImg, op)
 	}
 
+	// Draw enemy slots
 	for _, slot := range ui.Player2Slots {
 		slot.DrawTooltip(screen, ui, mx, my, 2)
 	}

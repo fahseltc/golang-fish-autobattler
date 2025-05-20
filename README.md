@@ -1,5 +1,7 @@
 # Golang Fishgame (WIP title)
 
+https://behrcorp.codecks.io
+
 ## Overall gameplay ideas
 
 Something like Slay the Sprite/FTL/The Bazaar, but in the ocean.
@@ -10,8 +12,26 @@ Combats are an option, the school will fight an array of other fish in an auto-b
 Fish can be rearranged in your school.
 Fish can grow when fed a certain number of times and gain stats.
 Some fish might eat other fish and replace them in your school.
+Some fish can have downsides.
 Fish can have adjacency bonuses for being next to other fish.
 Some fish might not be beneficial to its neighbors.
+dumb title fishter than light
+
+PAT
+resource management with fish types breeding behind
+think about job classes and how that might apply to fish.
+perks?
+perks as items placed physically into the background of a fishtank
+sandcastle, shell, filter
+
+APO
+make it an idle game or something, constant stuff going on.
+limit micro
+resource management style to the game, where fish are constantly reproducing. economy of fish.
+some fish make money/food, some battle, etc
+each fish has some pond ability, and some way to battle.
+fish has chainmail armor / fireball spell
+final fishtasy / final fish fantasy
 
 ## Fish defensive mechanisms research
 
@@ -24,6 +44,8 @@ mimicry - copy some other fish
 flying - immune to damage for some period of time
 safe burrows - digging / anenomes
 electricity - stun when attacked
+taunt - tank fish that can block or fights a specific enemy
+healer fish
 
 Initial 3 choices:
 
@@ -32,7 +54,15 @@ Initial 3 choices:
 - Venomous Fish (On hit, apply damage-over-time effect)
   MORE TO COME and be prioritized
 
-ROCK PAPER SCISSORS relationship???
+ROCK PAPER SCISSORS relationship??? implies effective against one and weak against another
+APO says use stats instead of stuff - linear algebra?
+5x rock paper scissors, everything is strong to 2 and weak to 2
+
+Pats idea: lanes, fish in each slot fight each opposing numbered fish
+what happens when there are uneven amounts of fish?
+can drag during battle
+
+some kind of drawback to some fish
 
 ## Misc notes
 

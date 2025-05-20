@@ -5,22 +5,25 @@ type Type int
 const (
 	Weapon Type = iota
 	SizeBasedWeapon
+	AdjacencyBasedWeapon
 	Reactive
 	Venomous
 )
 
 var itemNames = map[Type]string{
-	Weapon:          "weapon",
-	SizeBasedWeapon: "sizeBasedWeapon",
-	Reactive:        "reactive",
-	Venomous:        "venomous",
+	Weapon:               "weapon",
+	SizeBasedWeapon:      "sizeBasedWeapon",
+	AdjacencyBasedWeapon: "adjacencyBasedWeapon",
+	Reactive:             "reactive",
+	Venomous:             "venomous",
 }
 
 var itemTypes = map[string]Type{
-	"weapon":          Weapon,
-	"sizeBasedWeapon": SizeBasedWeapon,
-	"reactive":        Reactive,
-	"venomous":        Venomous,
+	"weapon":               Weapon,
+	"sizeBasedWeapon":      SizeBasedWeapon,
+	"adjacencyBasedWeapon": AdjacencyBasedWeapon,
+	"reactive":             Reactive,
+	"venomous":             Venomous,
 }
 
 func (it Type) String() string {

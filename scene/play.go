@@ -7,6 +7,7 @@ import (
 	"fishgame/loader"
 	"fishgame/player"
 	"fishgame/ui"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -52,6 +53,12 @@ func updateDuringPlayState(s *Play, dt float64) {
 	s.EncounterManager.Current.Update(dt, s.Player1)
 
 	if s.EncounterManager.Current.IsDone() {
+		for _, reward := range s.EncounterManager.Current.GetRewards() {
+			res := reward.Obtain(s.Player1)
+			if !res {
+				s.Env.Logger.Error("unable to add item", "itemName", reward.Item.Name)
+			}
+		}
 		s.EncounterManager.NextEncounter()
 	}
 	if s.EncounterManager.Current.IsGameOver() {
@@ -72,6 +79,12 @@ func (s *Play) Draw(screen *ebiten.Image) {
 		s.Player1.Items.Draw(s.Env, screen, 1)
 	}
 	s.EncounterManager.Current.Draw(screen)
+
+	// Draw fish food currency UI
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(32, 32)
+	screen.DrawImage(s.Ui.CurrencyImg, op)
+	ui.DrawCenteredText(screen, s.Ui.Font, fmt.Sprintf("%v", s.Player1.Currency), 120, 64)
 }
 
 func (s *Play) Destroy() {

@@ -1,0 +1,19 @@
+{
+    "encounters": [
+        {
+            "title": "T2 Battle #1",
+            "encounter_type": "battle",
+            "items": [
+                "Eel",
+                "Eel"
+            ],
+            "buttons": [],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "Whale"
+                }
+            ]
+        }
+    ]
+}

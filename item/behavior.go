@@ -5,7 +5,11 @@ import (
 	"log/slog"
 )
 
-func AttackingBehavior(source *Item, target *Item) bool {
+type BehaviorProps struct {
+	data map[string]any
+}
+
+func AttackingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
 	// print into and args
 	//Env.Logger.Info("ItemAttacked", "source", source.Name, "target", target.Name, "damage", source.Damage)
 	//fmt.Printf("SourceItem: '%v' deals '%v' Damage to Target: '%s'\n", source.Name, source.Damage, target.Name)
@@ -26,7 +30,7 @@ func AttackingBehavior(source *Item, target *Item) bool {
 }
 
 // In a reactingBehavior, the source fish has already hit the target fish and this method handles the damage done back to source
-func ReactingBehavior(source *Item, target *Item) bool {
+func ReactingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
 	// print into and args
 	//Env.Logger.Info("ItemReacted", "source", source.Name, "target", target.Name, "damage", source.Damage)
 	//fmt.Printf("SourceItem: '%v' deals '%v' Damage to Target: '%s'\n", source.Name, source.Damage, target.Name)
@@ -49,7 +53,7 @@ func ReactingBehavior(source *Item, target *Item) bool {
 	return target.Alive
 }
 
-func VenomousBehavior(source *Item, target *Item) bool {
+func VenomousBehavior(source *Item, target *Item, props *BehaviorProps) bool {
 	if target.Alive {
 		// TODO: Should venom to stack, or for only one instance to be on a target?
 		fmt.Printf("Created debf: %v, duration: %v\n", source.Name, source.Duration)
@@ -60,7 +64,7 @@ func VenomousBehavior(source *Item, target *Item) bool {
 	return target.Alive
 }
 
-func LargerSizeAttackingBehavior(source *Item, target *Item) bool {
+func LargerSizeAttackingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
 	if target.Alive {
 		fmt.Printf("LargerSizeAttackingBehavior, source: %v, target: %v\n", source.Size, target.Size)
 		if source.Size > target.Size {
@@ -69,6 +73,35 @@ func LargerSizeAttackingBehavior(source *Item, target *Item) bool {
 		} else {
 			target.TakeDamage(source.Damage, false)
 		}
+
+		if !target.Alive {
+			Env.Logger.Info("ItemDied",
+				slog.Group(
+					"source", source.ToSlogGroup()...,
+				),
+				slog.Group(
+					"target", target.ToSlogGroup()...,
+				))
+		}
+	}
+	return target.Alive
+}
+
+func AdjacentAttackingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
+	if target.Alive {
+		adjacentCount := 0
+		if props.data["itemAbove"] != nil &&
+			props.data["itemAbove"].(*Item) != nil &&
+			props.data["itemAbove"].(*Item).Name == source.Name {
+			adjacentCount += 1
+		}
+		if props.data["itemBelow"] != nil &&
+			props.data["itemBelow"].(*Item) != nil &&
+			props.data["itemBelow"].(*Item).Name == source.Name {
+			adjacentCount += 1
+		}
+		fmt.Printf("adjacentFishCount: %v\n", adjacentCount)
+		target.TakeDamage(source.Damage+adjacentCount, false) // add adjacent count to damage done TODO: make this a variable number
 
 		if !target.Alive {
 			Env.Logger.Info("ItemDied",

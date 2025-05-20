@@ -6,8 +6,10 @@ import (
 	"fishgame/item"
 	"fishgame/loader"
 	"fishgame/player"
+	"fishgame/reward"
 	"fishgame/ui"
 	"fishgame/util"
+	"fmt"
 	"image/color"
 	"io"
 	"log"
@@ -25,6 +27,13 @@ type jsonEncounter struct {
 	Title     string       `json:"title"`
 	Buttons   []buttonJson `json:"buttons"`
 	Type      string       `json:"encounter_type"`
+	Rewards   []jsonReward `json:"rewards"`
+}
+
+type jsonReward struct {
+	Type     string `json:"type"`
+	ItemName string `json:"item"`
+	Currency int    `json:"currency"`
 }
 
 type buttonJson struct {
@@ -39,8 +48,8 @@ type buttonJson struct {
 }
 
 type buttonBehavior struct {
-	Type     string `json:"type"`
-	ItemName string `json:"item_name"`
+	Type      string   `json:"type"`
+	ItemNames []string `json:"items"`
 }
 
 func LoadEncounters(env *environment.Env, path string, player *player.Player, mgr *Manager) []EncounterInterface {
@@ -60,7 +69,6 @@ func LoadEncounters(env *environment.Env, path string, player *player.Player, mg
 	if err != nil {
 		log.Fatalf("unable to Unmarshal encounter file: %v", path)
 	}
-	//fmt.Printf("%v", encounterdata)
 
 	for _, encData := range encounterdata.Encounters {
 		enc := parseJson(env, encData, player, mgr)
@@ -81,7 +89,19 @@ func parseJson(env *environment.Env, encounterData jsonEncounter, player *player
 	case EncounterTypeBattle:
 		enc = generateBattleEncounter(env, font, encounterData, player, mgr, itemsReg.Reg)
 	}
+	enc = generateRewards(env, enc, encounterData, itemsReg.Reg)
+	fmt.Printf("rewards: %v\n", enc.GetRewards())
 
+	return enc
+}
+
+func generateRewards(env *environment.Env, enc EncounterInterface, encounterData jsonEncounter, reg *item.Registry) EncounterInterface {
+	for _, data := range encounterData.Rewards {
+		it, _ := reg.Get(data.ItemName)
+
+		reward := reward.NewReward(env, reward.TypeFromString(data.Type), &it, data.Currency)
+		enc.AddReward(reward)
+	}
 	return enc
 }
 
@@ -98,7 +118,6 @@ func generateInitialEncounter(env *environment.Env, font text.Face, encounterDat
 		itemChosen: false,
 	}
 	enc.buttons = generateInitialButtons(env, encounterData, enc, player, mgr, itemsReg)
-
 	return enc
 }
 
@@ -127,14 +146,20 @@ func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, e
 			btnData.Text,
 			color.Black, // todo parse color from btnData.color string
 			float64(btnData.FontSize),
+			util.LoadImage(env, "assets/ui/btn.png"),
 		)
-		item, err := itemsReg.Get(btnData.Behavior.ItemName)
-		if err {
-			env.Logger.Error("Unable to load item for encounter button", "item", btnData.Behavior.ItemName)
+		var btnItems []*item.Item
+		for _, itName := range btnData.Behavior.ItemNames {
+			item, err := itemsReg.Get(itName)
+			if err {
+				env.Logger.Error("Unable to load item for encounter button", "item", itName)
+			}
+			btnItems = append(btnItems, &item)
 		}
+
 		btn.OnClick = func() {
-			player.Items.AddItem(&item)
-			env.Logger.Info("Added item", "item", &item.Name, "recipient", player.Name)
+			res := player.Items.AddItems(btnItems)
+			env.Logger.Info("Added items", "items", btnItems, "recipient", player.Name, "success", res)
 			enc.itemChosen = true
 		}
 

@@ -1,6 +1,7 @@
 package item
 
 import (
+	"fishgame/util"
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -20,7 +21,7 @@ const (
 type DebuffInterface interface { // everything has this same interface >.<?
 	Update(float64)
 	Draw(*ebiten.Image)
-	IsDone()
+	IsDone() bool
 }
 
 type Debuff struct {
@@ -31,10 +32,18 @@ type Debuff struct {
 	damage            int
 	Type              DebuffType
 	item              *Item
-	// img?
+	img               *ebiten.Image
 }
 
 func NewItemDebuff(it *Item, dbt DebuffType, dur float64, tickRate float64, dam int) *Debuff {
+	var img *ebiten.Image
+	if dbt == DebuffTypeVenom {
+		ss := Env.Get("spriteScale").(float64)
+		i := util.LoadImage(Env, "assets/ui/icons/poison.png")
+		w, h := i.Size()
+		img = util.ScaleImage(i, float32(w)*float32(ss), float32(h)*float32(ss))
+	}
+
 	debuff := &Debuff{
 		RemainingDuration: dur,
 		CurrentTime:       0,
@@ -42,6 +51,7 @@ func NewItemDebuff(it *Item, dbt DebuffType, dur float64, tickRate float64, dam 
 		Type:              dbt,
 		item:              it,
 		damage:            dam,
+		img:               img,
 	}
 	fmt.Printf("creat debuff, remainingDur: %v, tickRate: %v\n", debuff.RemainingDuration, debuff.TickRate)
 	return debuff
@@ -69,6 +79,19 @@ func (dbf *Debuff) Update(dt float64) {
 			return
 		case DebuffTypeSlow:
 			return
+		default:
+			return
+		}
+	}
+}
+
+func (dbf *Debuff) Draw(screen *ebiten.Image) {
+	if dbf.img != nil {
+		switch dbf.Type {
+		case DebuffTypeVenom:
+			opts := &ebiten.DrawImageOptions{}
+			opts.GeoM.Translate(float64(dbf.item.X+64), float64(dbf.item.Y+64))
+			screen.DrawImage(dbf.img, opts)
 		default:
 			return
 		}

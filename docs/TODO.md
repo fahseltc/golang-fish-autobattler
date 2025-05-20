@@ -16,9 +16,11 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [x] SceneManager stores different tiers of encounters and can move between them - 5/17/2025
 - [x] Add predator fix (bonus to damage when attacking smaller prey) - 5/17/2025
 - [x] Add random index to SceneManager picking levels from a tier. - 5/17/2025
-- [ ] Add schooling fish (adjacency)
+- [x] Draw Debuff venom effects - 5/18/2025
+- [x] Add schooling fish (adjacency) - 5/18/2025 kinda but its buggy
 
 - [ ] Add items with debuffs
+
 - [ ] Draw Debuff (venom/double damage) effects
 - [ ] Add tooltips to Initial Scene
 
@@ -40,6 +42,7 @@ https://trello.com/b/mqUYXtuY/work-tasks
 - [ ] Enemy UI slots should be shown during battle
 - [ ] Venomous fish show DPS - check its close to right or change this?
 - [ ] Should venom stack and does it already???
+- [ ] bug with adjacent fish sometimes seeing other fish that arent there.
 
 # BRAINSTORM
 

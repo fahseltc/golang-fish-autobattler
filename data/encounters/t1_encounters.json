@@ -6,7 +6,13 @@
             "items": [
                 "Eel"
             ],
-            "buttons": []
+            "buttons": [],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "Whale"
+                }
+            ]
         },
         {
             "title": "T1 Battle #2",
@@ -14,7 +20,13 @@
             "items": [
                 "Whale"
             ],
-            "buttons": []
+            "buttons": [],
+            "rewards": [
+                {
+                    "type": "currency",
+                    "currency": 999
+                }
+            ]
         },
         {
             "title": "T1 Battle #3",
@@ -22,7 +34,8 @@
             "items": [
                 "Minnow"
             ],
-            "buttons": []
+            "buttons": [],
+            "rewards": []
         }
     ]
 }
