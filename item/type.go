@@ -7,7 +7,7 @@ const (
 	SizeBasedWeapon
 	AdjacencyBasedWeapon
 	Reactive
-	Venomous
+	VenomousBasedWeapon
 )
 
 var itemNames = map[Type]string{
@@ -15,7 +15,7 @@ var itemNames = map[Type]string{
 	SizeBasedWeapon:      "sizeBasedWeapon",
 	AdjacencyBasedWeapon: "adjacencyBasedWeapon",
 	Reactive:             "reactive",
-	Venomous:             "venomous",
+	VenomousBasedWeapon:  "venomousBasedWeapon",
 }
 
 var itemTypes = map[string]Type{
@@ -23,7 +23,7 @@ var itemTypes = map[string]Type{
 	"sizeBasedWeapon":      SizeBasedWeapon,
 	"adjacencyBasedWeapon": AdjacencyBasedWeapon,
 	"reactive":             Reactive,
-	"venomous":             Venomous,
+	"venomousBasedWeapon":  VenomousBasedWeapon,
 }
 
 func (it Type) String() string {

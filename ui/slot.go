@@ -116,15 +116,15 @@ func (slot *Slot) DrawTooltip(screen *ebiten.Image, ui *UI, mx int, my int, play
 
 		titleX := ttx + float32(slot.height)*0.5
 		titleY := tty + float32(slot.width)*0.15
-		DrawCenteredText(screen, ui.smallFont, slot.item.Name, int(titleX), int(titleY))
+		DrawCenteredText(screen, ui.smallFont, slot.item.Name, int(titleX), int(titleY), nil)
 
 		ttstring := fmt.Sprintf("DPS: %.2f", slot.item.Dps())
-		DrawCenteredText(screen, ui.smallFont, ttstring, int(titleX), int(titleY+15))
+		DrawCenteredText(screen, ui.smallFont, ttstring, int(titleX), int(titleY+15), nil)
 
 		hpstring := fmt.Sprintf("HP: %v/%v", slot.item.CurrentLife, slot.item.Life)
-		DrawCenteredText(screen, ui.smallFont, hpstring, int(titleX), int(titleY+30))
+		DrawCenteredText(screen, ui.smallFont, hpstring, int(titleX), int(titleY+30), nil)
 
-		DrawCenteredText(screen, ui.smallFont, slot.item.Description, int(titleX), int(titleY+45))
+		DrawCenteredText(screen, ui.smallFont, slot.item.Description, int(titleX), int(titleY+45), nil)
 	}
 }
 

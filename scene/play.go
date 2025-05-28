@@ -7,15 +7,13 @@ import (
 	"fishgame/loader"
 	"fishgame/player"
 	"fishgame/ui"
-	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Play struct {
-	Env          *environment.Env
-	SceneManager *Manager
-	//State            GameState
+	Env              *environment.Env
+	SceneManager     *Manager
 	ItemsRegistry    *item.Registry
 	Ui               *ui.UI
 	Player1          *player.Player
@@ -33,6 +31,7 @@ func (s *Play) Init(sm *Manager) {
 		Name:  "p1",
 		Items: item.NewEmptyPlayerCollection(s.Env),
 	}
+	s.Player1.Inventory = player.NewInventory(s.Player1)
 
 	s.EncounterManager = encounter.NewManager(s.Env, s.Player1, s.Ui)
 }
@@ -43,11 +42,11 @@ func (s *Play) Update(dt float64) {
 
 func updateDuringPlayState(s *Play, dt float64) {
 	if s.Ui != nil {
-		s.Ui.Update()
+		s.Ui.Update(dt)
 	}
 	// switch based on encounter type?
 	encItems := s.EncounterManager.Current.GetItems()
-	if encItems != nil {
+	if encItems != nil && s.EncounterManager.Current.IsStarted() {
 		s.Player1.Items.Update(dt, encItems)
 	}
 	s.EncounterManager.Current.Update(dt, s.Player1)
@@ -59,8 +58,10 @@ func updateDuringPlayState(s *Play, dt float64) {
 				s.Env.Logger.Error("unable to add item", "itemName", reward.Item.Name)
 			}
 		}
+		s.Ui.ClearSlots()
 		s.EncounterManager.NextEncounter()
 	}
+
 	if s.EncounterManager.Current.IsGameOver() {
 		s.Env.Logger.Info("GameOver")
 		s.SceneManager.SwitchTo("GameOver", true)
@@ -72,23 +73,21 @@ func updateDuringGameOverState(s *Play, dt float64) error {
 }
 
 func (s *Play) Draw(screen *ebiten.Image) {
+	if s.Player1 != nil {
+		s.Player1.Inventory.Draw(screen)
+		s.Player1.Items.Draw(s.Env, screen, 1)
+
+	}
 	if s.Ui != nil {
 		s.Ui.Draw(screen)
-	}
-	if s.Player1 != nil {
-		s.Player1.Items.Draw(s.Env, screen, 1)
+		s.Ui.DrawPlayerCurrency(screen, s.Player1.Currency)
 	}
 	s.EncounterManager.Current.Draw(screen)
-
-	// Draw fish food currency UI
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(32, 32)
-	screen.DrawImage(s.Ui.CurrencyImg, op)
-	ui.DrawCenteredText(screen, s.Ui.Font, fmt.Sprintf("%v", s.Player1.Currency), 120, 64)
 }
 
 func (s *Play) Destroy() {
 	// Clean up resources if necessary
+	s.Env.EventBus.Unsubscribe("ItemAttackedEvent")
 	s.Env = nil
 	s.Player1 = nil
 }

@@ -24,6 +24,8 @@ type UI struct {
 	Font         text.Face
 	smallFont    text.Face
 	CurrencyImg  *ebiten.Image
+
+	attackLines []*AttackLine
 }
 
 func NewUI(env *environment.Env) *UI {
@@ -51,10 +53,13 @@ func NewUI(env *environment.Env) *UI {
 	for index := range SlotCount {
 		ui.Player2Slots[index] = NewEncounterSlot(env, 2, index)
 	}
+
+	env.EventBus.Subscribe("ItemAttackedEvent", ui.ItemAttackedEventHandler)
+	ui.attackLines = make([]*AttackLine, 0)
 	return ui
 }
 
-func (ui *UI) Update() {
+func (ui *UI) Update(dt float64) {
 	var draggingItem *item.Item
 	var previousSlot *Slot
 
@@ -123,6 +128,14 @@ func (ui *UI) Update() {
 			}
 		}
 	}
+
+	for _, line := range ui.attackLines {
+		line.Update(float32(dt))
+		if !line.enabled {
+			// remove it from the slice
+			ui.attackLines = append(ui.attackLines[:0], ui.attackLines[1:]...)
+		}
+	}
 }
 
 func (ui *UI) Draw(screen *ebiten.Image) {
@@ -161,6 +174,13 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 	// Draw enemy slots
 	for _, slot := range ui.Player2Slots {
 		slot.DrawTooltip(screen, ui, mx, my, 2)
+	}
+
+	// draw attack lines
+	for _, line := range ui.attackLines {
+		if line.enabled {
+			line.Draw(screen)
+		}
 	}
 }
 
@@ -234,4 +254,43 @@ func (ui *UI) cascadeDownRecursively(traversedCount int, currentItem *item.Item,
 		ui.setItemSlot(currentItem, targetSlot)
 		oldSlot.item = nil
 	}
+}
+
+func (ui *UI) ClearSlots() {
+	ui.Player2Slots = make(map[int]*Slot, SlotCount)
+	for index := range SlotCount {
+		ui.Player2Slots[index] = NewEncounterSlot(ui.env, 2, index)
+	}
+}
+
+func (ui *UI) DrawPlayerCurrency(screen *ebiten.Image, currency int) {
+	// Draw fish food currency UI
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(32, 32)
+	screen.DrawImage(ui.CurrencyImg, op)
+	DrawCenteredText(screen, ui.Font, fmt.Sprintf("%v", currency), 120, 64, nil)
+}
+
+func (ui *UI) ItemAttackedEventHandler(event environment.Event) {
+	ItemAttackedEvent, ok := event.Data.(item.ItemAttackedEvent)
+	if !ok {
+		fmt.Println("Invalid ItemAttackedEvent data")
+		return
+	}
+
+	// Handle the event
+	fmt.Printf("ItemAttacked Recieved in UI layer: %v\n", ItemAttackedEvent.Source)
+
+	ui.attackLines = append(ui.attackLines, NewAttackLine(
+		ui.env,
+		ItemAttackedEvent.Source.X,
+		ItemAttackedEvent.Source.Y,
+		ItemAttackedEvent.Target.X,
+		ItemAttackedEvent.Target.Y,
+		float32(ItemAttackedEvent.Source.Duration)-0.5,
+	))
+
+	//point1 := ItemAttackedEvent.Source.SlotIndex
+	//point2 := ItemAttackedEvent.Target.SlotIndex
+	// we dont have access to the Screen here, so we need to create a line image in an array and draw it later in the Draw method)
 }

@@ -1,4 +1,4 @@
 NAME,TYPE,LIFE,SIZE,DURATION,DAMAGE,DESCRIPTION
-Salmon,adjacencyBasedWeapon,10,tiny,1,1,yummy guy
-Shark,sizeBasedWeapon,15,medium,1.5,2,Big scary sharks eat stuff.
-Lionfish,venomous,25,small,3,2,spiky boy
+Salmon,adjacencyBasedWeapon,10,tiny,1,1,Extra damage for adjacent salmon
+Shark,sizeBasedWeapon,15,medium,1.5,2,Extra damage to smaller fish
+Lionfish,venomousBasedWeapon,25,small,3,2,Inflicts venom DOT

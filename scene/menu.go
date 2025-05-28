@@ -4,7 +4,6 @@ import (
 	"fishgame/environment"
 	"fishgame/ui"
 	"fishgame/util"
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -17,8 +16,7 @@ type Menu struct {
 }
 
 func NewMenuScene(sm *Manager) *Menu {
-	img := util.LoadImage(sm.Env, "assets/ui/btn.png")
-	btn := ui.NewButton(sm.Env, 400, 450, 300, 150, "Start", color.Black, 30, img)
+	btn := ui.NewButton(sm.Env, 400, 450, 250, 100, "Start", 30)
 	btn.OnClick = func() {
 		sm.SwitchTo("Play", true)
 	}

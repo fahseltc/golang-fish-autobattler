@@ -9,8 +9,6 @@ import (
 	"fishgame/reward"
 	"fishgame/ui"
 	"fishgame/util"
-	"fmt"
-	"image/color"
 	"io"
 	"log"
 	"os"
@@ -90,8 +88,6 @@ func parseJson(env *environment.Env, encounterData jsonEncounter, player *player
 		enc = generateBattleEncounter(env, font, encounterData, player, mgr, itemsReg.Reg)
 	}
 	enc = generateRewards(env, enc, encounterData, itemsReg.Reg)
-	fmt.Printf("rewards: %v\n", enc.GetRewards())
-
 	return enc
 }
 
@@ -122,12 +118,7 @@ func generateInitialEncounter(env *environment.Env, font text.Face, encounterDat
 }
 
 func generateBattleEncounter(env *environment.Env, font text.Face, encounterData jsonEncounter, player *player.Player, mgr *Manager, itemsReg *item.Registry) EncounterInterface {
-	enc := &Battle{
-		env:    env,
-		Name:   encounterData.Title,
-		Type:   EncounterTypeBattle,
-		player: player,
-	}
+	enc := NewBattleScene(env, encounterData, player)
 	enc.items = generateBattleItems(env, encounterData, itemsReg)
 	// todo: add to ui/slots?
 	return enc
@@ -144,9 +135,7 @@ func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, e
 			float32(btnData.W),
 			float32(btnData.H),
 			btnData.Text,
-			color.Black, // todo parse color from btnData.color string
 			float64(btnData.FontSize),
-			util.LoadImage(env, "assets/ui/btn.png"),
 		)
 		var btnItems []*item.Item
 		for _, itName := range btnData.Behavior.ItemNames {
@@ -162,6 +151,14 @@ func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, e
 			env.Logger.Info("Added items", "items", btnItems, "recipient", player.Name, "success", res)
 			enc.itemChosen = true
 		}
+
+		btn.ToolTip = ui.NewInitialTooltip(
+			float32(btnData.X),
+			float32(btnData.Y),
+			float32(btnData.W)+150,
+			float32(btnData.H)+100,
+			btnItems[0], // Assuming the first item is the one to show in tooltip
+		)
 
 		buttons = append(buttons, btn)
 	}

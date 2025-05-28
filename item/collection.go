@@ -77,13 +77,21 @@ func (coll *Collection) Reset() {
 }
 
 func (coll *Collection) GetRandomActive() (int, *Item) {
-	if len(coll.ActiveItems) == 0 {
-		return 0, nil
+	var validIndexes []int
+
+	for idx, it := range coll.ActiveItems {
+		if it != nil {
+			validIndexes = append(validIndexes, idx)
+		}
 	}
-	randomIndex := rand.Intn(len(coll.ActiveItems))
-	randomItem := coll.ActiveItems[randomIndex]
+	if len(validIndexes) == 0 {
+		return 999, nil
+	}
+
+	randomIndex := rand.Intn(len(validIndexes))
+	randomItem := coll.ActiveItems[validIndexes[randomIndex]]
 	if randomItem == nil || !randomItem.Alive {
-		return 0, nil
+		return 999, nil
 	}
 
 	return randomIndex, coll.ActiveItems[randomIndex]
@@ -91,7 +99,7 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 
 func (coll *Collection) Draw(env *environment.Env, screen *ebiten.Image, player int) {
 	for _, item := range coll.ActiveItems {
-		if item != nil {
+		if item != nil && item.Alive {
 			op := &ebiten.DrawImageOptions{}
 			if player == 1 {
 				op.GeoM.Scale(-1, 1)                                     // flip the image horizontally for player 1

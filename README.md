@@ -128,7 +128,11 @@ Pickers
 - PartnersWith
   these fish get huge benefits from a single fish type nearby.
 
-## Eventing
+## Other libraries to look into
 
 Eventing might be useful in this project, look into this library:
 https://github.com/maniartech/signals
+https://github.com/sedyh/awesome-ebitengine
+ECS https://github.com/yottahmd/donburi
+scene manager https://github.com/joelschutz/stagehand
+graphics https://github.com/quasilyte/ebitengine-graphics

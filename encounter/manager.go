@@ -31,6 +31,7 @@ type EncounterInterface interface {
 	GetItems() *item.Collection
 
 	IsDone() bool
+	IsStarted() bool
 	IsGameOver() bool
 	GetType() Type
 

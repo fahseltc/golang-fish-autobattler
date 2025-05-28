@@ -38,7 +38,7 @@ func (i Initial) Update(dt float64, p *player.Player) {
 
 func (i Initial) Draw(screen *ebiten.Image) {
 	screen.DrawImage(i.bg, nil)
-	ui.DrawCenteredText(screen, *i.font, i.text, 400, 100)
+	ui.DrawCenteredText(screen, *i.font, i.text, 400, 100, nil)
 	// get 3 starter fishes, put buttons of them on screen, wait for user to click a button
 	for _, button := range i.buttons {
 		button.Draw(screen)
@@ -57,6 +57,9 @@ func (i Initial) GetType() Type {
 }
 func (i Initial) IsGameOver() bool {
 	return false
+}
+func (i Initial) IsStarted() bool {
+	return true
 }
 func (i Initial) GetRewards() []*reward.Reward {
 	return i.rewards

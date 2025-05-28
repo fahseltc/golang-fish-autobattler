@@ -4,7 +4,6 @@ import (
 	"fishgame/environment"
 	"fishgame/ui"
 	"fishgame/util"
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -23,11 +22,11 @@ type GameOver struct {
 }
 
 func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
-	restartBtn := ui.NewButton(env, 200, 450, 150, 150, "Restart", color.Black, 20, nil)
+	restartBtn := ui.NewButton(env, 200, 450, 150, 150, "Restart", 20)
 	restartBtn.OnClick = func() {
 		sm.SwitchTo("Play", false)
 	}
-	menuBtn := ui.NewButton(env, 600, 450, 150, 150, "Menu", color.Black, 20, nil)
+	menuBtn := ui.NewButton(env, 600, 450, 150, 150, "Menu", 20)
 	menuBtn.OnClick = func() {
 		sm.SwitchTo("Menu", false)
 	}

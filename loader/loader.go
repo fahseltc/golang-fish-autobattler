@@ -74,7 +74,7 @@ func parseItems(Env *environment.Env, filepath string, reg *item.Registry) error
 			behaviorFunc = item.AdjacentAttackingBehavior
 		case item.Reactive:
 			behaviorFunc = item.ReactingBehavior
-		case item.Venomous:
+		case item.VenomousBasedWeapon:
 			behaviorFunc = item.VenomousBehavior
 		default:
 			behaviorFunc = nil

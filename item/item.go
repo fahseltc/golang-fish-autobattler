@@ -5,8 +5,8 @@ import (
 	"fishgame/util"
 	"fmt"
 	"image"
-	"image/color"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,7 +14,7 @@ import (
 
 var Env *environment.Env
 
-type Item struct { // I dont think any of these json tags are relevant, we read fish from a csv
+type Item struct {
 	Id          uuid.UUID `json:"id"`
 	coll        *Collection
 	Name        string        `json:"name"`
@@ -66,6 +66,7 @@ func NewItem(env *environment.Env, coll *Collection, name string, iType Type, sz
 	it.CurrentLife = life
 
 	it.Type = iType
+	it.Description = desc
 
 	it.Duration = duration
 	it.CurrentTime = 0
@@ -118,6 +119,15 @@ func (it *Item) Update(dt float64, enemyItems *Collection, ic *Collection, index
 		index, target := enemyItems.GetRandomActive()
 
 		if target != nil && it.Activate != nil {
+			Env.EventBus.Publish(environment.Event{
+				Type:      "ItemAttackedEvent",
+				Timestamp: time.Now(),
+				Data: ItemAttackedEvent{
+					Source: it,
+					Target: target,
+					Damage: it.Damage,
+				},
+			})
 			// trigger all weapon item
 			if it.Type.String() == "weapon" || it.Type.String() == "sizeBasedWeapon" {
 				if !it.Activate(it, target, nil) {
@@ -133,7 +143,7 @@ func (it *Item) Update(dt float64, enemyItems *Collection, ic *Collection, index
 			}
 
 			// trigger Venomous and size-based items
-			if it.Type.String() == "venomous" {
+			if it.Type.String() == "venomousBasedWeapon" {
 				it.Activate(it, target, nil)
 			}
 
@@ -143,6 +153,7 @@ func (it *Item) Update(dt float64, enemyItems *Collection, ic *Collection, index
 				props := &BehaviorProps{
 					data: make(map[string]any),
 				}
+				// Bug here
 				props.data["itemAbove"] = ic.GetItemAbove(it.SlotIndex)
 				props.data["itemBelow"] = ic.GetItemBelow(it.SlotIndex)
 				it.Activate(it, target, props)
@@ -186,14 +197,7 @@ func (it *Item) AddDebuff(dbf DebuffInterface) bool {
 }
 
 func (it *Item) Collides(x, y int) bool {
-	if it.hitbox == nil {
-		return false
-	}
-
-	collides := it.hitbox.At(x-it.X, y-it.Y).(color.Alpha).A > 0
-	// if collides {
-	// 	fmt.Printf("collision: %v\n", collides)
-	// }
+	collides := x > int(it.X) && x < int(it.X+it.Sprite.Bounds().Dx()) && y > int(it.Y) && y < int(it.Y+it.Sprite.Bounds().Dy())
 	return collides
 }
 
