@@ -22,14 +22,23 @@ type GameOver struct {
 }
 
 func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
-	restartBtn := ui.NewButton(env, 200, 450, 150, 150, "Restart", 20)
-	restartBtn.OnClick = func() {
-		sm.SwitchTo("Play", false)
-	}
-	menuBtn := ui.NewButton(env, 600, 450, 150, 150, "Menu", 20)
-	menuBtn.OnClick = func() {
-		sm.SwitchTo("Menu", false)
-	}
+	restartBtn := ui.NewButton(env,
+		ui.WithRect(ui.Rectangle{X: 200, Y: 450, W: 150, H: 150}),
+		ui.WithText("Restart"),
+		ui.WithClickFunc(func() {
+			sm.SwitchTo("Play", false)
+		}),
+		ui.WithCenteredPos(),
+	)
+
+	menuBtn := ui.NewButton(env,
+		ui.WithRect(ui.Rectangle{X: 600, Y: 450, W: 150, H: 150}),
+		ui.WithText("Menu"),
+		ui.WithClickFunc(func() {
+			sm.SwitchTo("Menu", false)
+		}),
+		ui.WithCenteredPos(),
+	)
 
 	g := &GameOver{
 		env:          env,

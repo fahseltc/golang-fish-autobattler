@@ -3,6 +3,7 @@ package ui
 import (
 	"fishgame/environment"
 	"fishgame/item"
+
 	"fmt"
 	"image/color"
 
@@ -74,18 +75,18 @@ func (slot *Slot) AddItem(index int, it *item.Item) bool {
 	return false
 }
 
-func (slot *Slot) IsEmpty(index int) bool {
+func (slot *Slot) IsEmpty() bool {
 	return slot.item == nil
 }
 
-func (slot *Slot) Swap(index int, newItem *item.Item) (*item.Item, error) {
-	if slot.IsEmpty(index) {
-		return nil, fmt.Errorf("item slot with index: %v is empty; unable to swap", index)
-	}
-	oldItem := slot.item
-	slot.item = newItem
-	return oldItem, nil
-}
+// func (slot *Slot) Swap(index int, newItem *item.Item) (*item.Item, error) {
+// 	if slot.IsEmpty() {
+// 		return nil, fmt.Errorf("item slot with index: %v is empty; unable to swap", index)
+// 	}
+// 	oldItem := slot.item
+// 	slot.item = newItem
+// 	return oldItem, nil
+// }
 
 func (slot *Slot) Update() {}
 

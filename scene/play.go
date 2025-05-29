@@ -18,13 +18,14 @@ type Play struct {
 	Ui               *ui.UI
 	Player1          *player.Player
 	EncounterManager *encounter.Manager
+
+	CurrentState PlayState
 }
 
 func (s *Play) Init(sm *Manager) {
 	s.SceneManager = sm
 	itemReg, _ := loader.GetFishRegistry(s.Env)
 	s.ItemsRegistry = itemReg.Reg
-	s.Ui = ui.NewUI(s.Env)
 
 	s.Player1 = &player.Player{
 		Env:   s.Env,
@@ -32,15 +33,28 @@ func (s *Play) Init(sm *Manager) {
 		Items: item.NewEmptyPlayerCollection(s.Env),
 	}
 	s.Player1.Inventory = player.NewInventory(s.Player1)
+	s.Ui = ui.NewUI(s.Env, s.Player1.Items)
 
 	s.EncounterManager = encounter.NewManager(s.Env, s.Player1, s.Ui)
+
+	s.CurrentState = EncounterState
 }
 
 func (s *Play) Update(dt float64) {
-	updateDuringPlayState(s, dt)
+	switch s.CurrentState {
+	case PreparingState:
+		//s.updatePreparingState(dt)
+	case EncounterState:
+		updateDuringPlayingState(s, dt)
+	case RewardState:
+		// s.Env.Logger.Info("GameOver state reached, switching to GameOver scene")
+		// s.SceneManager.SwitchTo("GameOver", true)
+	default:
+		s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
+	}
 }
 
-func updateDuringPlayState(s *Play, dt float64) {
+func updateDuringPlayingState(s *Play, dt float64) {
 	if s.Ui != nil {
 		s.Ui.Update(dt)
 	}
@@ -68,21 +82,26 @@ func updateDuringPlayState(s *Play, dt float64) {
 	}
 }
 
-func updateDuringGameOverState(s *Play, dt float64) error {
-	return nil
-}
-
 func (s *Play) Draw(screen *ebiten.Image) {
-	if s.Player1 != nil {
-		s.Player1.Inventory.Draw(screen)
-		s.Player1.Items.Draw(s.Env, screen, 1)
+	switch s.CurrentState {
+	case PreparingState:
+		s.Env.Logger.Info("Preparing state, nothing to draw")
+	case EncounterState:
+		//s.drawEncounterState(screen)
+	case RewardState:
+		s.Env.Logger.Info("Reward state, nothing to draw")
+	default:
+		s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
+	}
 
-	}
-	if s.Ui != nil {
-		s.Ui.Draw(screen)
-		s.Ui.DrawPlayerCurrency(screen, s.Player1.Currency)
-	}
+	s.Player1.Inventory.Draw(screen)
+	s.Player1.Items.Draw(s.Env, screen, 1)
+
+	s.Ui.Draw(screen)
+	s.Ui.DrawPlayerCurrency(screen, s.Player1.Currency)
+
 	s.EncounterManager.Current.Draw(screen)
+
 }
 
 func (s *Play) Destroy() {

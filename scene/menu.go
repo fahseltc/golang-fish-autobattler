@@ -16,15 +16,20 @@ type Menu struct {
 }
 
 func NewMenuScene(sm *Manager) *Menu {
-	btn := ui.NewButton(sm.Env, 400, 450, 250, 100, "Start", 30)
-	btn.OnClick = func() {
-		sm.SwitchTo("Play", true)
-	}
+	startBtn := ui.NewButton(sm.Env,
+		ui.WithRect(ui.Rectangle{X: 400, Y: 450, W: 250, H: 100}),
+		ui.WithText("Start"),
+		ui.WithClickFunc(func() {
+			sm.SwitchTo("Play", false)
+		}),
+		ui.WithCenteredPos(),
+	)
+
 	menu := &Menu{
 		env:          sm.Env,
 		SceneManager: sm,
 		bg:           util.LoadImage(sm.Env, "assets/bg/menu.png"),
-		StartBtn:     btn,
+		StartBtn:     startBtn,
 	}
 	return menu
 }

@@ -31,10 +31,16 @@ func NewBattleScene(env *environment.Env, encounterData jsonEncounter, player *p
 		player:  player,
 		started: false,
 	}
-	enc.startBtn = ui.NewButton(env, 100, 200, 200, 100, "Start Battle!", 20)
-	enc.startBtn.OnClick = func() {
-		enc.started = true
-	}
+
+	enc.startBtn = ui.NewButton(env,
+		ui.WithRect(ui.Rectangle{X: 450, Y: 30, W: 200, H: 50}),
+		ui.WithText("Start Battle!"),
+		ui.WithClickFunc(func() {
+			enc.started = true
+		}),
+		ui.WithCenteredPos(),
+	)
+
 	return enc
 }
 

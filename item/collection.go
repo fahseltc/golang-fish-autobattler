@@ -126,6 +126,7 @@ func (coll *Collection) AddItem(it *Item) bool {
 	// }
 
 	emptyIndex := coll.FirstEmptyIndex()
+	fmt.Printf("AddItem - emptyIndex: %v, itemName: %v\n", emptyIndex, it.Name)
 	coll.ActiveItems[emptyIndex] = it
 	it.SlotIndex = emptyIndex
 	coll.setItemSprite(it)
@@ -190,7 +191,10 @@ func (coll *Collection) SlotsFull() bool {
 func (coll *Collection) FirstEmptyIndex() int {
 	for index, it := range coll.ActiveItems {
 		if it == nil {
+			fmt.Printf("EmptyIndex? - index: %v, item NIL RETURNING IT\n", index)
 			return index
+		} else {
+			fmt.Printf("EmptyIndex? - index: %v, item: %v\n", index, it)
 		}
 	}
 	return 999

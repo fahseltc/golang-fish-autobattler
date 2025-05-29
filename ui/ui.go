@@ -17,18 +17,19 @@ var spriteScale float64
 var spriteSizePx int
 
 type UI struct {
-	env          *environment.Env
-	Player1Slots map[int]*Slot
-	Player2Slots map[int]*Slot
-	slotImg      *ebiten.Image
-	Font         text.Face
-	smallFont    text.Face
-	CurrencyImg  *ebiten.Image
+	env               *environment.Env
+	Player1Slots      map[int]*Slot
+	Player1Collection *item.Collection
+	Player2Slots      map[int]*Slot
+	slotImg           *ebiten.Image
+	Font              text.Face
+	smallFont         text.Face
+	CurrencyImg       *ebiten.Image
 
 	attackLines []*AttackLine
 }
 
-func NewUI(env *environment.Env) *UI {
+func NewUI(env *environment.Env, playerCollection *item.Collection) *UI {
 	// set package consts
 	spriteScale = env.Get("spriteScale").(float64)
 	spriteSizePx = env.Get("spriteSizePx").(int)
@@ -44,6 +45,7 @@ func NewUI(env *environment.Env) *UI {
 		smallFont:   smallFont,
 	}
 
+	ui.Player1Collection = playerCollection
 	ui.Player1Slots = make(map[int]*Slot, SlotCount)
 	for index := range SlotCount {
 		ui.Player1Slots[index] = NewPlayerSlot(env, index)
@@ -100,7 +102,9 @@ func (ui *UI) Update(dt float64) {
 				} else {
 					// the slot is empty, put the item in it
 					fmt.Printf("Item: %v dropped onto an empty slot: %v\n", draggingItem.Name, slot.index)
+					fmt.Printf("previousSlot: %v\n", previousSlot)
 					previousSlot.item = nil
+					fmt.Printf("previousSlotAfterNil: %v\n", previousSlot)
 					slot.item = draggingItem
 					slot.item.X = slot.x
 					slot.item.Y = slot.y
@@ -152,16 +156,21 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
 			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
 		}
+		if slot.item != nil {
+			DrawCenteredText(screen, ui.Font, slot.item.Name, slot.x+spriteSizePx/2, slot.y+spriteSizePx/2, nil)
+			DrawCenteredText(screen, ui.Font, fmt.Sprintf("%v", slot.item.SlotIndex), slot.x+spriteSizePx/2, slot.y+spriteSizePx, nil)
+		}
+
 	}
 
 	// Draw tooltips on top of items
 	for _, slot := range ui.Player1Slots {
-		if slot.item != nil {
+		if slot.item != nil && slot.item.Alive {
 			slot.DrawTooltip(screen, ui, mx, my, 1)
 		}
 	}
 	for _, slot := range ui.Player2Slots {
-		if slot.item != nil {
+		if slot.item != nil && slot.item.Alive {
 			DrawLifeBar(screen, float64(slot.item.CurrentLife)/float64(slot.item.Life), float64(slot.item.X), float64(slot.item.Y))
 			DrawProgressBar(screen, float64(slot.item.CurrentTime)/float64(slot.item.Duration), float64(slot.item.X), float64(slot.item.Y))
 		}
@@ -188,6 +197,7 @@ func (ui *UI) setItemSlot(it *item.Item, slot *Slot) {
 	it.X = slot.x
 	it.Y = slot.y
 	it.SlotIndex = slot.index
+	ui.Player1Collection.ActiveItems[it.SlotIndex] = it
 	it.Dragging = false
 	slot.item = it
 	fmt.Printf("Placed item: %v in slot %d\n", it.Name, slot.index)
