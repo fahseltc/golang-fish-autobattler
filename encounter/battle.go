@@ -91,3 +91,7 @@ func (battle Battle) GetRewards() []*reward.Reward {
 func (battle *Battle) AddReward(reward *reward.Reward) {
 	battle.rewards = append(battle.rewards, reward)
 }
+
+func (battle *Battle) SetRewards(rewards []*reward.Reward) {
+	battle.rewards = rewards
+}

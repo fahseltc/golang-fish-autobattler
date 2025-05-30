@@ -31,17 +31,20 @@ func (i Initial) Update(dt float64, p *player.Player) {
 	for _, button := range i.buttons {
 		button.Update()
 	}
+
 	if i.itemChosen {
 		i.manager.NextEncounter()
 	}
 }
 
 func (i Initial) Draw(screen *ebiten.Image) {
-	screen.DrawImage(i.bg, nil)
-	ui.DrawCenteredText(screen, *i.font, i.text, 400, 100, nil)
-	// get 3 starter fishes, put buttons of them on screen, wait for user to click a button
-	for _, button := range i.buttons {
-		button.Draw(screen)
+	if !i.itemChosen {
+		screen.DrawImage(i.bg, nil)
+		ui.DrawCenteredText(screen, *i.font, i.text, 400, 100, nil)
+		// get 3 starter fishes, put buttons of them on screen, wait for user to click a button
+		for _, button := range i.buttons {
+			button.Draw(screen)
+		}
 	}
 }
 
@@ -61,9 +64,13 @@ func (i Initial) IsGameOver() bool {
 func (i Initial) IsStarted() bool {
 	return true
 }
-func (i Initial) GetRewards() []*reward.Reward {
+func (i *Initial) GetRewards() []*reward.Reward {
 	return i.rewards
 }
-func (i Initial) AddReward(reward *reward.Reward) {
+func (i *Initial) AddReward(reward *reward.Reward) {
 	i.rewards = append(i.rewards, reward)
+}
+
+func (i *Initial) SetRewards(rewards []*reward.Reward) {
+	i.rewards = rewards
 }

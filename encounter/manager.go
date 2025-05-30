@@ -37,6 +37,7 @@ type EncounterInterface interface {
 
 	GetRewards() []*reward.Reward
 	AddReward(*reward.Reward)
+	SetRewards([]*reward.Reward)
 }
 
 func NewManager(env *environment.Env, player *player.Player, ui *ui.UI) *Manager {

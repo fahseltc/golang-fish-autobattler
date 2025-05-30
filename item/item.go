@@ -43,6 +43,12 @@ type Item struct {
 	OffsetY int
 }
 
+type ItemAttackedEvent struct {
+	Source *Item
+	Target *Item
+	Damage int
+}
+
 func NewItem(env *environment.Env, coll *Collection, name string, iType Type, sz Size, desc string, life int, duration float64, damage int, activate func(*Item, *Item, *BehaviorProps) bool) *Item {
 	it := new(Item)
 	Env = env

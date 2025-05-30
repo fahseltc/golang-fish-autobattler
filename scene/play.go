@@ -45,35 +45,30 @@ func (s *Play) Update(dt float64) {
 	case PreparingState:
 		//s.updatePreparingState(dt)
 	case EncounterState:
-		updateDuringPlayingState(s, dt)
+		updateDuringEncounterState(s, dt)
 	case RewardState:
-		// s.Env.Logger.Info("GameOver state reached, switching to GameOver scene")
-		// s.SceneManager.SwitchTo("GameOver", true)
+		updateDuringRewardState(s, dt)
 	default:
 		s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
 	}
 }
 
-func updateDuringPlayingState(s *Play, dt float64) {
+func updateDuringEncounterState(s *Play, dt float64) {
 	if s.Ui != nil {
 		s.Ui.Update(dt)
 	}
-	// switch based on encounter type?
+
 	encItems := s.EncounterManager.Current.GetItems()
 	if encItems != nil && s.EncounterManager.Current.IsStarted() {
 		s.Player1.Items.Update(dt, encItems)
 	}
+
 	s.EncounterManager.Current.Update(dt, s.Player1)
 
-	if s.EncounterManager.Current.IsDone() {
-		for _, reward := range s.EncounterManager.Current.GetRewards() {
-			res := reward.Obtain(s.Player1)
-			if !res {
-				s.Env.Logger.Error("unable to add item", "itemName", reward.Item.Name)
-			}
-		}
-		s.Ui.ClearSlots()
-		s.EncounterManager.NextEncounter()
+	if s.EncounterManager.Current.IsDone() && len(s.EncounterManager.Current.GetRewards()) > 0 {
+		s.Env.Logger.Info("Encounter done, switching to Reward state")
+		s.CurrentState = RewardState
+		return
 	}
 
 	if s.EncounterManager.Current.IsGameOver() {
@@ -82,17 +77,35 @@ func updateDuringPlayingState(s *Play, dt float64) {
 	}
 }
 
-func (s *Play) Draw(screen *ebiten.Image) {
-	switch s.CurrentState {
-	case PreparingState:
-		s.Env.Logger.Info("Preparing state, nothing to draw")
-	case EncounterState:
-		//s.drawEncounterState(screen)
-	case RewardState:
-		s.Env.Logger.Info("Reward state, nothing to draw")
-	default:
-		s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
+func updateDuringRewardState(s *Play, dt float64) {
+	for i, reward := range s.EncounterManager.Current.GetRewards() {
+		if !reward.Obtained {
+			reward.Update(s.Player1)
+		} else {
+			rewards := s.EncounterManager.Current.GetRewards()
+			// update the list of rewards in the encounter to remove this one
+			s.EncounterManager.Current.SetRewards(append(rewards[:i], rewards[i+1:]...))
+		}
 	}
+	if len(s.EncounterManager.Current.GetRewards()) == 0 {
+		s.Env.Logger.Info("All rewards obtained, switching to Encounter state")
+		s.Ui.ClearSlots()
+		s.CurrentState = EncounterState // todo change to preparing state
+		s.EncounterManager.NextEncounter()
+	}
+}
+
+func (s *Play) Draw(screen *ebiten.Image) {
+	// switch s.CurrentState {
+	// case PreparingState:
+	// 	s.Env.Logger.Info("Preparing state, nothing to draw")
+	// case EncounterState:
+	// 	//s.drawEncounterState(screen)
+	// case RewardState:
+
+	// default:
+	// 	s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
+	// }
 
 	s.Player1.Inventory.Draw(screen)
 	s.Player1.Items.Draw(s.Env, screen, 1)
@@ -101,7 +114,13 @@ func (s *Play) Draw(screen *ebiten.Image) {
 	s.Ui.DrawPlayerCurrency(screen, s.Player1.Currency)
 
 	s.EncounterManager.Current.Draw(screen)
-
+	if s.CurrentState == RewardState {
+		for _, reward := range s.EncounterManager.Current.GetRewards() {
+			if !reward.Obtained {
+				reward.Draw(screen)
+			}
+		}
+	}
 }
 
 func (s *Play) Destroy() {

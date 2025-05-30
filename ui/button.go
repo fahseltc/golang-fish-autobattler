@@ -9,7 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-type OptFunc func(*Button)
+type BtnOptFunc func(*Button)
 
 type Button struct {
 	env  *environment.Env
@@ -30,15 +30,15 @@ type Button struct {
 // NewButton creates a new Button with the given environment and options.
 //
 
-func NewButton(env *environment.Env, opts ...OptFunc) *Button {
-	btn := defaultOpts(env)
+func NewButton(env *environment.Env, opts ...BtnOptFunc) *Button {
+	btn := defaultBtnOpts(env)
 	for _, opt := range opts {
 		opt(&btn)
 	}
 	return &btn
 }
 
-func defaultOpts(env *environment.Env) Button {
+func defaultBtnOpts(env *environment.Env) Button {
 	defaultFontSize := 20.0
 	defaultWidth := float32(250.0)
 	defaultHeight := float32(100.0)
@@ -62,12 +62,12 @@ func defaultOpts(env *environment.Env) Button {
 		pressedImg: pressed,
 	}
 }
-func WithText(txt string) OptFunc {
+func WithText(txt string) BtnOptFunc {
 	return func(btn *Button) {
 		btn.text = txt
 	}
 }
-func WithRect(rect Rectangle) OptFunc {
+func WithRect(rect Rectangle) BtnOptFunc {
 	return func(btn *Button) {
 		btn.rect = rect
 		defaultImg := util.LoadImage(btn.env, "assets/ui/btn/green_button.png")
@@ -80,18 +80,18 @@ func WithRect(rect Rectangle) OptFunc {
 		btn.pressedImg = pressed
 	}
 }
-func WithClickFunc(f func()) OptFunc {
+func WithClickFunc(f func()) BtnOptFunc {
 	return func(btn *Button) {
 		btn.OnClick = f
 	}
 }
-func WithToolTip(tt TooltipInterface) OptFunc {
+func WithToolTip(tt TooltipInterface) BtnOptFunc {
 	return func(btn *Button) {
 		btn.ToolTip = tt
 		btn.ToolTip.GetAlignment().Align(btn.rect, tt.GetRect())
 	}
 }
-func WithCenteredPos() OptFunc {
+func WithCenteredPos() BtnOptFunc {
 	return func(btn *Button) {
 		centeredX := btn.rect.X - 0.5*btn.rect.W
 		centeredY := btn.rect.Y - 0.5*btn.rect.H

@@ -27,6 +27,7 @@ type UI struct {
 	CurrencyImg       *ebiten.Image
 
 	attackLines []*AttackLine
+	dialogs     []*Dialog
 }
 
 func NewUI(env *environment.Env, playerCollection *item.Collection) *UI {

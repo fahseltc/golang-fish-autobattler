@@ -191,10 +191,10 @@ func (coll *Collection) SlotsFull() bool {
 func (coll *Collection) FirstEmptyIndex() int {
 	for index, it := range coll.ActiveItems {
 		if it == nil {
-			fmt.Printf("EmptyIndex? - index: %v, item NIL RETURNING IT\n", index)
+			//fmt.Printf("EmptyIndex? - index: %v, item NIL RETURNING IT\n", index)
 			return index
 		} else {
-			fmt.Printf("EmptyIndex? - index: %v, item: %v\n", index, it)
+			//fmt.Printf("EmptyIndex? - index: %v, item: %v\n", index, it)
 		}
 	}
 	return 999
