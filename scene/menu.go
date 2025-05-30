@@ -2,6 +2,7 @@ package scene
 
 import (
 	"fishgame/environment"
+	"fishgame/shapes"
 	"fishgame/ui"
 	"fishgame/util"
 
@@ -16,8 +17,8 @@ type Menu struct {
 }
 
 func NewMenuScene(sm *Manager) *Menu {
-	startBtn := ui.NewButton(sm.Env,
-		ui.WithRect(ui.Rectangle{X: 400, Y: 450, W: 250, H: 100}),
+	startBtn := ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 400, Y: 450, W: 250, H: 100}),
 		ui.WithText("Start"),
 		ui.WithClickFunc(func() {
 			sm.SwitchTo("Play", false)

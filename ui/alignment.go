@@ -1,5 +1,7 @@
 package ui
 
+import "fishgame/shapes"
+
 type Alignment int
 
 const (
@@ -10,7 +12,7 @@ const (
 	RightAlignment
 )
 
-func (alignment Alignment) Align(source Rectangle, toBeAligned *Rectangle) {
+func (alignment Alignment) Align(source shapes.Rectangle, toBeAligned *shapes.Rectangle) {
 	padding := float32(10)
 	switch alignment {
 	case CenterAlignment:
@@ -19,16 +21,14 @@ func (alignment Alignment) Align(source Rectangle, toBeAligned *Rectangle) {
 	case TopAlignment:
 		toBeAligned.X = source.X + (source.W-toBeAligned.W)/2
 		toBeAligned.Y = source.Y
-	case BottomAlignment:
-		// toBeAligned.X = source.X + (source.W-toBeAligned.W)/2
-		// toBeAligned.Y = source.Y + source.H - toBeAligned.H
+	case BottomAlignment: // works with initialChoice TT
 		toBeAligned.X = source.X - toBeAligned.W/2
 		toBeAligned.Y = source.Y + source.H/2 + padding
-	case LeftAlignment:
-		toBeAligned.X = source.X
-		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2
-	case RightAlignment:
-		toBeAligned.X = source.X + source.W - toBeAligned.W
-		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2
+	case LeftAlignment: // works with in-game TT
+		toBeAligned.X = source.X - toBeAligned.W - padding    // left TT is not centered
+		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2 // left TT is not centered
+	case RightAlignment: // SOON works with in-game TT
+		toBeAligned.X = source.X + source.W + padding         // right TT is not centered
+		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2 // right TT is not centered
 	}
 }

@@ -1,33 +1,27 @@
 package ui
 
 import (
-	"fishgame/environment"
 	"fishgame/item"
-
-	"fmt"
+	"fishgame/shapes"
+	"fishgame/util"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type Slot struct {
-	env   *environment.Env
 	index int
 
-	x      int
-	y      int
-	height int
-	width  int
-	item   *item.Item
+	rect shapes.Rectangle
+	item *item.Item
 }
 
-func NewPlayerSlot(env *environment.Env, index int) *Slot {
-	screenWidth := env.Get("screenWidth").(int)
-	screenHeight := env.Get("screenHeight").(int)
-	spriteSizePx := float64(env.Get("spriteSizePx").(int))
-	spriteScale := env.Get("spriteScale").(float64)
+func NewPlayerSlot(index int) *Slot {
+	screenWidth := ENV.Get("screenWidth").(int)
+	screenHeight := ENV.Get("screenHeight").(int)
+	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
+	spriteScale := ENV.Get("spriteScale").(float64)
 
 	slotX := int(float64(screenWidth) * 0.4)
 
@@ -35,21 +29,22 @@ func NewPlayerSlot(env *environment.Env, index int) *Slot {
 	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
 
 	slot := Slot{
-		env:    env,
-		index:  index,
-		x:      slotX,
-		y:      slotY,
-		height: int(float64(spriteSizePx) * spriteScale),
-		width:  int(float64(spriteSizePx) * spriteScale),
+		index: index,
+		rect: shapes.Rectangle{
+			X: float32(slotX),
+			Y: float32(slotY),
+			W: float32(spriteSizePx * spriteScale),
+			H: float32(spriteSizePx * spriteScale),
+		},
 	}
 	return &slot
 }
 
-func NewEncounterSlot(env *environment.Env, playerNum int, index int) *Slot {
-	screenWidth := env.Get("screenWidth").(int)
-	screenHeight := env.Get("screenHeight").(int)
-	spriteSizePx := float64(env.Get("spriteSizePx").(int))
-	spriteScale := env.Get("spriteScale").(float64)
+func NewEncounterSlot(playerNum int, index int) *Slot {
+	screenWidth := ENV.Get("screenWidth").(int)
+	screenHeight := ENV.Get("screenHeight").(int)
+	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
+	spriteScale := ENV.Get("spriteScale").(float64)
 
 	slotX := int(float64(screenWidth) * 0.6)
 
@@ -57,12 +52,13 @@ func NewEncounterSlot(env *environment.Env, playerNum int, index int) *Slot {
 	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
 
 	slot := Slot{
-		env:    env,
-		index:  index,
-		x:      slotX,
-		y:      slotY,
-		height: int(float64(spriteSizePx) * spriteScale),
-		width:  int(float64(spriteSizePx) * spriteScale),
+		index: index,
+		rect: shapes.Rectangle{
+			X: float32(slotX),
+			Y: float32(slotY),
+			W: float32(spriteSizePx * spriteScale),
+			H: float32(spriteSizePx * spriteScale),
+		},
 	}
 	return &slot
 }
@@ -104,33 +100,39 @@ func (slot *Slot) DrawTooltip(screen *ebiten.Image, ui *UI, mx int, my int, play
 	mb := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	coll := slot.Collides(mx, my)
 	if !mb && coll.Collides && slot.item != nil {
-		var ttx float32
-		if playerNum == 1 {
-			ttx = float32(slot.x) - float32(slot.height)
-		} else {
-			ttx = float32(slot.x) + float32(slot.height)
+		tt := Tooltip{
+			rect: shapes.Rectangle{
+				X: float32(slot.rect.X),
+				Y: float32(slot.rect.Y),
+				W: float32(slot.rect.W + 100),
+				H: float32(slot.rect.H + 100),
+			},
+			bg: util.LoadImage(nil, "assets/ui/tooltip/grey_panel.png"),
 		}
+		if playerNum == 1 {
+			LeftAlignment.Align(slot.rect, &tt.rect)
+		} else {
+			RightAlignment.Align(slot.rect, &tt.rect)
+		}
+		tt.Draw(screen)
+		// vector.DrawFilledRect(screen, ttx, tty, float32(slot.width), float32(slot.width), color.RGBA{128, 128, 128, 255}, true)
 
-		tty := float32(slot.y)
+		// titleX := ttx + float32(slot.height)*0.5
+		// titleY := tty + float32(slot.width)*0.15
+		// DrawCenteredText(screen, ui.smallFont, slot.item.Name, int(titleX), int(titleY), nil)
 
-		vector.DrawFilledRect(screen, ttx, tty, float32(slot.width), float32(slot.width), color.RGBA{128, 128, 128, 255}, true)
+		// ttstring := fmt.Sprintf("DPS: %.2f", slot.item.Dps())
+		// DrawCenteredText(screen, ui.smallFont, ttstring, int(titleX), int(titleY+15), nil)
 
-		titleX := ttx + float32(slot.height)*0.5
-		titleY := tty + float32(slot.width)*0.15
-		DrawCenteredText(screen, ui.smallFont, slot.item.Name, int(titleX), int(titleY), nil)
+		// hpstring := fmt.Sprintf("HP: %v/%v", slot.item.CurrentLife, slot.item.Life)
+		// DrawCenteredText(screen, ui.smallFont, hpstring, int(titleX), int(titleY+30), nil)
 
-		ttstring := fmt.Sprintf("DPS: %.2f", slot.item.Dps())
-		DrawCenteredText(screen, ui.smallFont, ttstring, int(titleX), int(titleY+15), nil)
-
-		hpstring := fmt.Sprintf("HP: %v/%v", slot.item.CurrentLife, slot.item.Life)
-		DrawCenteredText(screen, ui.smallFont, hpstring, int(titleX), int(titleY+30), nil)
-
-		DrawCenteredText(screen, ui.smallFont, slot.item.Description, int(titleX), int(titleY+45), nil)
+		// DrawCenteredText(screen, ui.smallFont, slot.item.Description, int(titleX), int(titleY+45), nil)
 	}
 }
 
 func (slot *Slot) Collides(x int, y int) Collision {
-	collidesSlot := x > slot.x && x < slot.x+slot.width && y > slot.y && y < slot.y+slot.height
+	collidesSlot := x > int(slot.rect.X) && x < int(slot.rect.X+slot.rect.W) && y > int(slot.rect.Y) && y < int(slot.rect.Y+slot.rect.H)
 	if collidesSlot {
 		//fmt.Printf("point (%v, %v) collides with slot at (%v, %v): %v\n", x, y, slot.x, slot.y, collidesSlot)
 		if slot.CollidesBottomHalf(x, y) {
@@ -152,7 +154,7 @@ func (slot *Slot) Collides(x int, y int) Collision {
 }
 
 func (slot *Slot) CollidesTopHalf(x, y int) bool {
-	collides := x > slot.x && x < slot.x+slot.width && y > slot.y && float32(y) <= float32(slot.y)+(float32(0.5)*float32(slot.height))
+	collides := x > int(slot.rect.X) && x < int(slot.rect.X+slot.rect.W) && y > int(slot.rect.Y) && y <= int(slot.rect.Y+0.5*slot.rect.H)
 
 	// if collides {
 	// 	fmt.Printf("point (%v, %v) CollidesTopHalf at (%v, %v)\n", x, y, slot.x, slot.y)
@@ -161,7 +163,7 @@ func (slot *Slot) CollidesTopHalf(x, y int) bool {
 }
 
 func (slot *Slot) CollidesBottomHalf(x, y int) bool {
-	collides := x > slot.x && x < slot.x+slot.width && float32(y) > float32(slot.y)+float32(0.5)*float32(slot.height) && y < slot.y+slot.height
+	collides := x > int(slot.rect.X) && x < int(slot.rect.X+slot.rect.W) && y > int(slot.rect.Y+float32(0.5)*float32(slot.rect.H)) && y < int(slot.rect.Y+slot.rect.H)
 
 	// if collides {
 	// 	fmt.Printf("point (%v, %v) CollidesBottomHalf at (%v, %v)\n", x, y, slot.x, slot.y)

@@ -2,6 +2,7 @@ package scene
 
 import (
 	"fishgame/environment"
+	"fishgame/shapes"
 	"fishgame/ui"
 	"fishgame/util"
 
@@ -22,8 +23,8 @@ type GameOver struct {
 }
 
 func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
-	restartBtn := ui.NewButton(env,
-		ui.WithRect(ui.Rectangle{X: 200, Y: 450, W: 150, H: 150}),
+	restartBtn := ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 200, Y: 450, W: 150, H: 150}),
 		ui.WithText("Restart"),
 		ui.WithClickFunc(func() {
 			sm.SwitchTo("Play", false)
@@ -31,8 +32,8 @@ func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
 		ui.WithCenteredPos(),
 	)
 
-	menuBtn := ui.NewButton(env,
-		ui.WithRect(ui.Rectangle{X: 600, Y: 450, W: 150, H: 150}),
+	menuBtn := ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 600, Y: 450, W: 150, H: 150}),
 		ui.WithText("Menu"),
 		ui.WithClickFunc(func() {
 			sm.SwitchTo("Menu", false)

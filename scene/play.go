@@ -32,7 +32,7 @@ func (s *Play) Init(sm *Manager) {
 		Name:  "p1",
 		Items: item.NewEmptyPlayerCollection(s.Env),
 	}
-	s.Player1.Inventory = player.NewInventory(s.Player1)
+
 	s.Ui = ui.NewUI(s.Env, s.Player1.Items)
 
 	s.EncounterManager = encounter.NewManager(s.Env, s.Player1, s.Ui)
@@ -107,7 +107,6 @@ func (s *Play) Draw(screen *ebiten.Image) {
 	// 	s.Env.Logger.Error("Unknown state in Play scene", "state", s.CurrentState)
 	// }
 
-	s.Player1.Inventory.Draw(screen)
 	s.Player1.Items.Draw(s.Env, screen, 1)
 
 	s.Ui.Draw(screen)

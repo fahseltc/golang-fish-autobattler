@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fishgame/environment"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,9 +16,9 @@ type AttackLine struct {
 	Duration float32
 }
 
-func NewAttackLine(env *environment.Env, sourceX, sourceY, targetX, targetY int, duration float32) *AttackLine {
-	spriteSizePx := float64(env.Get("spriteSizePx").(int))
-	spriteScale := env.Get("spriteScale").(float64)
+func NewAttackLine(sourceX, sourceY, targetX, targetY int, duration float32) *AttackLine {
+	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
+	spriteScale := ENV.Get("spriteScale").(float64)
 	if sourceX > targetX {
 		// If the source is on the right side, adjust the targetX to end at the right edge of the sprite
 		targetX += int(spriteSizePx * spriteScale)

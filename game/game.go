@@ -3,6 +3,7 @@ package game
 import (
 	"fishgame/environment"
 	"fishgame/scene"
+	"fishgame/ui"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -15,6 +16,7 @@ type Game struct {
 }
 
 func NewGame(env *environment.Env) *Game {
+	ui.NewUI(env, nil) // do this to set the UI packages ENV var
 	return &Game{
 		Env:          env,
 		SceneManager: scene.NewSceneManager(env),

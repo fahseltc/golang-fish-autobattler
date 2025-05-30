@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fishgame/item"
+	"fishgame/shapes"
 	"fishgame/util"
 	"fmt"
 	"image/color"
@@ -14,15 +15,25 @@ import (
 type TooltipInterface interface {
 	OnHover(screen *ebiten.Image)
 	GetAlignment() Alignment
-	GetRect() *Rectangle
+	GetRect() *shapes.Rectangle
 }
 
 type Tooltip struct {
-	rect Rectangle
+	rect shapes.Rectangle
 	bg   *ebiten.Image
 }
 
-type ItemTooltip struct {
+func (tt *Tooltip) Draw(screen *ebiten.Image) {
+	if tt.bg != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(float64(tt.rect.W)/float64(tt.bg.Bounds().Dx()), float64(tt.rect.H)/float64(tt.bg.Bounds().Dy()))
+		op.GeoM.Translate(float64(tt.rect.X), float64(tt.rect.Y))
+
+		screen.DrawImage(tt.bg, op)
+	}
+}
+
+type InitialToolTip struct {
 	tt         *Tooltip
 	font       text.Face
 	item       *item.Item
@@ -31,15 +42,15 @@ type ItemTooltip struct {
 	damageIcon *ebiten.Image
 }
 
-func NewItemToolTip(x, y, w, h float32, item *item.Item, alignment Alignment) *ItemTooltip {
-	font, _ := util.LoadFont(20)
+func NewInitialToolTip(x, y, w, h float32, item *item.Item, alignment Alignment) *InitialToolTip {
+	font := ENV.Fonts.Med
 
 	centeredX := x - 0.5*w
 	centeredY := y + 0.3*h
 
-	tt := &ItemTooltip{
+	tt := &InitialToolTip{
 		tt: &Tooltip{
-			rect: Rectangle{
+			rect: shapes.Rectangle{
 				X: centeredX,
 				Y: centeredY,
 				W: w,
@@ -56,17 +67,9 @@ func NewItemToolTip(x, y, w, h float32, item *item.Item, alignment Alignment) *I
 	return tt
 }
 
-func (i *ItemTooltip) OnHover(screen *ebiten.Image) {
+func (i *InitialToolTip) OnHover(screen *ebiten.Image) {
 	txtColor := color.RGBA{R: 0, G: 0, B: 0, A: 255}
-
-	// draw bg
-	if i.tt.bg != nil {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(float64(i.tt.rect.W)/float64(i.tt.bg.Bounds().Dx()), float64(i.tt.rect.H)/float64(i.tt.bg.Bounds().Dy()))
-		op.GeoM.Translate(float64(i.tt.rect.X), float64(i.tt.rect.Y))
-
-		screen.DrawImage(i.tt.bg, op)
-	}
+	i.tt.Draw(screen)
 
 	// draw fish sprite
 	if i.item.Sprite != nil {
@@ -86,14 +89,14 @@ func (i *ItemTooltip) OnHover(screen *ebiten.Image) {
 	titleX := float32(i.tt.rect.X) + i.percentH(85)
 	titleY := float32(i.tt.rect.Y) + i.percentW(5)
 
-	bigFont, _ := util.LoadFont(30)
+	bigFont := ENV.Fonts.Large
 	txtSpacing := float32(20)
 
 	// Draw fish name
 	DrawCenteredText(screen, bigFont, i.item.Name, int(titleX), int(titleY+10), txtColor)
 
 	// draw HP text
-	hpFont, _ := util.LoadFont(28)
+	hpFont := ENV.Fonts.Large
 	hpString := fmt.Sprintf("%v", i.item.Life)
 	DrawCenteredText(screen, hpFont, hpString, int(i.tt.rect.X+i.percentW(86)), int(i.tt.rect.Y+i.percentW(15)), txtColor)
 
@@ -119,18 +122,18 @@ func (i *ItemTooltip) OnHover(screen *ebiten.Image) {
 	DrawCenteredText(screen, i.font, i.item.Description, int(titleX), int(titleY+(txtSpacing*8)), txtColor)
 }
 
-func (i *ItemTooltip) GetAlignment() Alignment {
+func (i *InitialToolTip) GetAlignment() Alignment {
 	return i.alignment
 }
 
-func (i *ItemTooltip) GetRect() *Rectangle {
+func (i *InitialToolTip) GetRect() *shapes.Rectangle {
 	return &i.tt.rect
 }
 
-func (i *ItemTooltip) percentW(percent int) float32 {
+func (i *InitialToolTip) percentW(percent int) float32 {
 	return i.tt.rect.W * (float32(percent) / 100.0)
 }
 
-func (i *ItemTooltip) percentH(percent int) float32 {
+func (i *InitialToolTip) percentH(percent int) float32 {
 	return i.tt.rect.H * (float32(percent) / 100.0)
 }

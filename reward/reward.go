@@ -4,6 +4,7 @@ import (
 	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/player"
+	"fishgame/shapes"
 	"fishgame/ui"
 	"fishgame/util"
 	"fmt"
@@ -25,19 +26,21 @@ type Reward struct {
 	btnPressed bool
 }
 
+var ENV *environment.Env
+
 func NewReward(env *environment.Env, newType Type, it *item.Item, curr int) *Reward {
+	ENV = env
 	r := &Reward{
-		env:        env,
 		Type:       newType,
 		Obtained:   false,
 		Item:       it,
 		Currency:   curr,
 		btnPressed: false,
-		bg:         util.LoadImage(env, "assets/ui/panel/grey_panel.png"),
+		bg:         util.LoadImage(ENV, "assets/ui/panel/grey_panel.png"),
 	}
 
-	r.btn = ui.NewButton(env,
-		ui.WithRect(ui.Rectangle{X: 400, Y: 400, W: 200, H: 50}),
+	r.btn = ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 400, Y: 400, W: 200, H: 50}),
 		ui.WithText("Get Reward!"),
 		ui.WithClickFunc(func() {
 			r.btnPressed = true
@@ -56,7 +59,7 @@ func (r *Reward) Obtain(player *player.Player) bool {
 				result := player.Items.AddItem(r.Item)
 				if result {
 					r.Obtained = true
-					r.env.Logger.Info("player obtained reward item", "item", r.Item.Name)
+					ENV.Logger.Info("player obtained reward item", "item", r.Item.Name)
 				}
 				return result
 			}
@@ -66,7 +69,7 @@ func (r *Reward) Obtain(player *player.Player) bool {
 			if r.Currency != 0 {
 				player.Currency += r.Currency
 				r.Obtained = true
-				r.env.Logger.Info("player obtained reward currency", "amount", r.Currency)
+				ENV.Logger.Info("player obtained reward currency", "amount", r.Currency)
 				return true
 			}
 			return false
@@ -93,7 +96,7 @@ func (r *Reward) Draw(screen *ebiten.Image) {
 		screen.DrawImage(r.Item.Sprite, opts)
 	}
 	if r.Currency > 0 {
-		font, _ := util.LoadFont(20)
+		font := ENV.Fonts.Med
 		txtColor := color.RGBA{R: 0, G: 0, B: 0, A: 255}
 		ui.DrawCenteredText(screen, font, fmt.Sprintf("%v", r.Currency), 400, 300, txtColor)
 		// draw currency icon

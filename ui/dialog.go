@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"fishgame/environment"
+	"fishgame/shapes"
 	"fishgame/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,8 +10,7 @@ import (
 type DlgOptFunc func(*Button)
 
 type Dialog struct {
-	Env        *environment.Env
-	Rect       Rectangle // rectangle for collision detection
+	Rect       shapes.Rectangle // rectangle for collision detection
 	Title      string
 	Content    string
 	Buttons    []*Button
@@ -20,20 +19,19 @@ type Dialog struct {
 	Background *ebiten.Image
 }
 
-func NewDialog(env *environment.Env, rect Rectangle, title string, content string) *Dialog {
-	btn := NewButton(env,
+func NewDialog(rect shapes.Rectangle, title string, content string) *Dialog {
+	btn := NewButton(
 		WithText("OK"),
-		WithRect(Rectangle{X: 0, Y: 0, W: 100, H: 50}),
+		WithRect(shapes.Rectangle{X: 0, Y: 0, W: 100, H: 50}),
 	)
 	dlg := &Dialog{
-		Env:        env,
-		Rect:       Rectangle{X: 0, Y: 0, W: 800, H: 600},
+		Rect:       shapes.Rectangle{X: 0, Y: 0, W: 800, H: 600},
 		Title:      title,
 		Content:    content,
 		Buttons:    []*Button{btn},
 		Active:     false,
 		Selected:   999,
-		Background: util.LoadImage(env, "assets/ui/dialog_background.png"),
+		Background: util.LoadImage(ENV, "assets/ui/dialog_background.png"),
 	}
 
 	return dlg

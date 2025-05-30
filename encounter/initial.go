@@ -1,7 +1,6 @@
 package encounter
 
 import (
-	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/player"
 	"fishgame/reward"
@@ -12,7 +11,6 @@ import (
 )
 
 type Initial struct {
-	env     *environment.Env
 	manager *Manager
 	Type    Type
 

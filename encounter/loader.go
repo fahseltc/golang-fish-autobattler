@@ -2,11 +2,11 @@ package encounter
 
 import (
 	"encoding/json"
-	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/loader"
 	"fishgame/player"
 	"fishgame/reward"
+	"fishgame/shapes"
 	"fishgame/ui"
 	"fishgame/util"
 	"io"
@@ -51,7 +51,7 @@ type buttonBehavior struct {
 	ItemNames []string `json:"items"`
 }
 
-func LoadEncounters(env *environment.Env, path string, player *player.Player, mgr *Manager) []EncounterInterface {
+func LoadEncounters(path string, player *player.Player, mgr *Manager) []EncounterInterface {
 	var encounters []EncounterInterface
 	jsf, err := os.Open(path)
 	if err != nil {
@@ -70,83 +70,82 @@ func LoadEncounters(env *environment.Env, path string, player *player.Player, mg
 	}
 
 	for _, encData := range encounterdata.Encounters {
-		enc := parseJson(env, encData, player, mgr)
+		enc := parseJson(encData, player, mgr)
 		encounters = append(encounters, enc)
 	}
 
 	return encounters
 }
 
-func parseJson(env *environment.Env, encounterData jsonEncounter, player *player.Player, mgr *Manager) EncounterInterface {
-	itemsReg, _ := loader.GetFishRegistry(env) // TODO handle errors
-	font, _ := util.LoadFont(30)               // TODO handle errors
+func parseJson(encounterData jsonEncounter, player *player.Player, mgr *Manager) EncounterInterface {
+	itemsReg, _ := loader.GetFishRegistry(ENV)
+	font := ENV.Fonts.Large
 
 	var enc EncounterInterface
 	switch TypeFromString(encounterData.Type) {
 	case EncounterTypeInitial:
-		enc = generateInitialEncounter(env, font, encounterData, player, mgr, itemsReg.Reg)
+		enc = generateInitialEncounter(font, encounterData, player, mgr, itemsReg.Reg)
 	case EncounterTypeBattle:
-		enc = generateBattleEncounter(env, encounterData, player, mgr, itemsReg.Reg)
+		enc = generateBattleEncounter(encounterData, player, mgr, itemsReg.Reg)
 	}
-	enc = generateRewards(env, enc, encounterData, itemsReg.Reg)
+	enc = generateRewards(enc, encounterData, itemsReg.Reg)
 	return enc
 }
 
-func generateRewards(env *environment.Env, enc EncounterInterface, encounterData jsonEncounter, reg *item.Registry) EncounterInterface {
+func generateRewards(enc EncounterInterface, encounterData jsonEncounter, reg *item.Registry) EncounterInterface {
 	for _, data := range encounterData.Rewards {
 		it, _ := reg.Get(data.ItemName)
 
-		reward := reward.NewReward(env, reward.TypeFromString(data.Type), &it, data.Currency)
+		reward := reward.NewReward(ENV, reward.TypeFromString(data.Type), &it, data.Currency)
 		enc.AddReward(reward)
 	}
 	return enc
 }
 
-func generateInitialEncounter(env *environment.Env, font text.Face, encounterData jsonEncounter, player *player.Player, mgr *Manager, itemsReg *item.Registry) EncounterInterface {
+func generateInitialEncounter(font text.Face, encounterData jsonEncounter, player *player.Player, mgr *Manager, itemsReg *item.Registry) EncounterInterface {
 	enc := &Initial{
-		env:     env,
 		manager: mgr,
 		Type:    TypeFromString(encounterData.Type),
 
 		player:     player,
 		text:       encounterData.Title,
-		bg:         util.LoadImage(env, "assets/bg/initial.png"),
+		bg:         util.LoadImage(ENV, "assets/bg/initial.png"),
 		font:       &font,
 		itemChosen: false,
 	}
-	enc.buttons = generateInitialButtons(env, encounterData, enc, player, mgr, itemsReg)
+	enc.buttons = generateInitialButtons(encounterData, enc, player, mgr, itemsReg)
 	return enc
 }
 
-func generateBattleEncounter(env *environment.Env, encounterData jsonEncounter, player *player.Player, mgr *Manager, itemsReg *item.Registry) EncounterInterface {
-	enc := NewBattleScene(env, encounterData, player)
-	enc.items = generateBattleItems(env, encounterData, itemsReg)
+func generateBattleEncounter(encounterData jsonEncounter, player *player.Player, mgr *Manager, itemsReg *item.Registry) EncounterInterface {
+	enc := NewBattleScene(encounterData, player)
+	enc.items = generateBattleItems(encounterData, itemsReg)
 	// todo: add to ui/slots?
 	return enc
 }
 
-func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, enc *Initial, player *player.Player, mgr *Manager, itemsReg *item.Registry) []*ui.Button {
+func generateInitialButtons(encounterData jsonEncounter, enc *Initial, player *player.Player, mgr *Manager, itemsReg *item.Registry) []*ui.Button {
 	var buttons []*ui.Button
 	for _, btnData := range encounterData.Buttons {
 		var btnItems []*item.Item
 		for _, itName := range btnData.Behavior.ItemNames {
 			item, err := itemsReg.Get(itName)
 			if err {
-				env.Logger.Error("Unable to load item for encounter button", "item", itName)
+				ENV.Logger.Error("Unable to load item for encounter button", "item", itName)
 			}
 			btnItems = append(btnItems, &item)
 		}
 
-		btn := ui.NewButton(env,
-			ui.WithRect(ui.Rectangle{X: float32(btnData.X), Y: float32(btnData.Y), W: float32(btnData.W), H: float32(btnData.H)}),
+		btn := ui.NewButton(
+			ui.WithRect(shapes.Rectangle{X: float32(btnData.X), Y: float32(btnData.Y), W: float32(btnData.W), H: float32(btnData.H)}),
 			ui.WithText(btnItems[0].Name), // Assuming the first item is the one to show in button text
 			ui.WithClickFunc(func() {
 				res := player.Items.AddItems(btnItems)
-				env.Logger.Info("Added items", "items", btnItems, "recipient", player.Name, "success", res)
+				ENV.Logger.Info("Added items", "items", btnItems, "recipient", player.Name, "success", res)
 				enc.itemChosen = true
 			}),
 			ui.WithToolTip(
-				ui.NewItemToolTip(
+				ui.NewInitialToolTip(
 					float32(btnData.X),
 					float32(btnData.Y),
 					float32(btnData.W)+150,
@@ -163,7 +162,7 @@ func generateInitialButtons(env *environment.Env, encounterData jsonEncounter, e
 	return buttons
 }
 
-func generateBattleItems(env *environment.Env, encounterData jsonEncounter, itemsReg *item.Registry) *item.Collection {
+func generateBattleItems(encounterData jsonEncounter, itemsReg *item.Registry) *item.Collection {
 	itemsArr := []*item.Item{}
 	for _, itemName := range encounterData.FishNames {
 		item, err := itemsReg.Get(itemName)
@@ -172,5 +171,5 @@ func generateBattleItems(env *environment.Env, encounterData jsonEncounter, item
 		}
 		itemsArr = append(itemsArr, &item)
 	}
-	return item.NewEncounterCollection(env, itemsArr)
+	return item.NewEncounterCollection(ENV, itemsArr)
 }

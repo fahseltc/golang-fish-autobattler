@@ -139,7 +139,7 @@ func (it *Item) Update(dt float64, enemyItems *Collection, ic *Collection, index
 				if !it.Activate(it, target, nil) {
 					// remove the item from the enemy's active items and add it to the inactive items
 					enemyItems.ActiveItems = append(enemyItems.ActiveItems[:index], enemyItems.ActiveItems[index+1:]...)
-					enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
+					//enemyItems.InactiveItems = append(enemyItems.InactiveItems, target)
 				}
 			}
 			// trigger reactive item that was targetted

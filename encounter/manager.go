@@ -14,7 +14,6 @@ import (
 )
 
 type Manager struct {
-	env        *environment.Env
 	Current    EncounterInterface
 	Encounters [][]EncounterInterface
 	player     *player.Player
@@ -40,9 +39,11 @@ type EncounterInterface interface {
 	SetRewards([]*reward.Reward)
 }
 
+var ENV *environment.Env
+
 func NewManager(env *environment.Env, player *player.Player, ui *ui.UI) *Manager {
+	ENV = env
 	manager := &Manager{
-		env:                   env,
 		player:                player,
 		ui:                    ui,
 		Ended:                 false,
@@ -55,15 +56,15 @@ func NewManager(env *environment.Env, player *player.Player, ui *ui.UI) *Manager
 		make([]EncounterInterface, 1), // t2 encounters tier with 3 slots (adjust as needed)
 	}
 	// Load initial encounters from JSON and assign to the first tier
-	initialEnc := LoadEncounters(env, "data/encounters/initial_encounters.json", player, manager)
+	initialEnc := LoadEncounters("data/encounters/initial_encounters.json", player, manager)
 	copy(manager.Encounters[0], initialEnc)
 	manager.Current = manager.Encounters[0][0] // start with the only initial encounter, perhaps add more in the future?
 
 	// Load tier 1 encounters from JSON and assign to the second tier
-	t1Enc := LoadEncounters(env, "data/encounters/t1_encounters.json", player, manager)
+	t1Enc := LoadEncounters("data/encounters/t1_encounters.json", player, manager)
 	copy(manager.Encounters[1], t1Enc)
 
-	t2Enc := LoadEncounters(env, "data/encounters/t2_encounters.json", player, manager)
+	t2Enc := LoadEncounters("data/encounters/t2_encounters.json", player, manager)
 	copy(manager.Encounters[2], t2Enc)
 
 	return manager
@@ -78,7 +79,7 @@ func (mgr *Manager) NextEncounter() EncounterInterface {
 	mgr.currentTierIndex += 1
 	nextEnc = mgr.getRandomEncounterForTier()
 
-	mgr.env.Logger.Info("NextEncounter",
+	ENV.Logger.Info("NextEncounter",
 		"previous",
 		fmt.Sprintf("T%v:%v", mgr.currentTierIndex-1, mgr.Current.GetType().String()),
 		"next",

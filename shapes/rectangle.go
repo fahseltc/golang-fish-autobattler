@@ -1,4 +1,4 @@
-package ui
+package shapes
 
 type Rectangle struct {
 	X float32

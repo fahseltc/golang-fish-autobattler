@@ -11,10 +11,10 @@ import (
 var SlotCount int = 5
 
 type Collection struct {
-	env           *environment.Env
-	ActiveItems   []*Item
-	InactiveItems []*Item
-	spriteScale   float64
+	env         *environment.Env
+	ActiveItems []*Item
+	Inventory   *Inventory
+	spriteScale float64
 }
 
 func NewEmptyPlayerCollection(env *environment.Env) *Collection {
@@ -23,10 +23,10 @@ func NewEmptyPlayerCollection(env *environment.Env) *Collection {
 	coll := &Collection{
 		env:         env,
 		spriteScale: spriteScale,
+		Inventory:   NewInventory(),
 	}
 	for i := 0; i < SlotCount; i++ {
 		coll.ActiveItems = append(coll.ActiveItems, nil)
-		coll.InactiveItems = append(coll.InactiveItems, nil)
 	}
 
 	return coll
@@ -59,21 +59,17 @@ func (coll *Collection) SetItemLocations() {
 
 }
 
-func (ic *Collection) Update(dt float64, enemyItems *Collection) {
+func (coll *Collection) Update(dt float64, enemyItems *Collection) {
 	// assume enemyItems will be not-nil
-	for index, item := range ic.ActiveItems {
+	for index, item := range coll.ActiveItems {
 		if item != nil && !item.Alive {
 			// remove item from active items and add to inactive items
-			ic.ActiveItems = append(ic.ActiveItems[:index], ic.ActiveItems[index+1:]...)
-			ic.InactiveItems = append(ic.InactiveItems, item)
+			coll.ActiveItems = append(coll.ActiveItems[:index], coll.ActiveItems[index+1:]...)
+			coll.Inventory.AddItem(item)
 		}
-		item.Update(dt, enemyItems, ic, index)
+		item.Update(dt, enemyItems, coll, index)
 	}
-}
-
-func (coll *Collection) Reset() {
-	coll.ActiveItems = append(coll.ActiveItems, coll.InactiveItems...)
-	coll.InactiveItems = []*Item{}
+	// maybe call item.swim() or something to get them to move slowly inside the inventory.
 }
 
 func (coll *Collection) GetRandomActive() (int, *Item) {
@@ -98,6 +94,10 @@ func (coll *Collection) GetRandomActive() (int, *Item) {
 }
 
 func (coll *Collection) Draw(env *environment.Env, screen *ebiten.Image, player int) {
+	if coll.Inventory != nil {
+		coll.Inventory.Draw(screen)
+	}
+
 	for _, item := range coll.ActiveItems {
 		if item != nil && item.Alive {
 			op := &ebiten.DrawImageOptions{}

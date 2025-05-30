@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"fishgame/environment"
+	"fishgame/shapes"
 	"fishgame/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,8 +12,7 @@ import (
 type BtnOptFunc func(*Button)
 
 type Button struct {
-	env  *environment.Env
-	rect Rectangle // rectangle for collision detection
+	rect shapes.Rectangle // rectangle for collision detection
 
 	text string
 	font text.Face
@@ -30,26 +29,24 @@ type Button struct {
 // NewButton creates a new Button with the given environment and options.
 //
 
-func NewButton(env *environment.Env, opts ...BtnOptFunc) *Button {
-	btn := defaultBtnOpts(env)
+func NewButton(opts ...BtnOptFunc) *Button {
+	btn := defaultBtnOpts()
 	for _, opt := range opts {
 		opt(&btn)
 	}
 	return &btn
 }
 
-func defaultBtnOpts(env *environment.Env) Button {
-	defaultFontSize := 20.0
+func defaultBtnOpts() Button {
 	defaultWidth := float32(250.0)
 	defaultHeight := float32(100.0)
-	font, _ := util.LoadFont(defaultFontSize)
-	defaultImg := util.LoadImage(env, "assets/ui/btn/green_button.png")
+	font := ENV.Fonts.Med
+	defaultImg := util.LoadImage(ENV, "assets/ui/btn/green_button.png")
 	defaultImg = util.ScaleImage(defaultImg, defaultWidth, defaultHeight)
-	pressed := util.LoadImage(env, "assets/ui/btn/green_button_pressed.png")
+	pressed := util.LoadImage(ENV, "assets/ui/btn/green_button_pressed.png")
 	pressed = util.ScaleImage(pressed, defaultWidth, defaultHeight)
 	return Button{
-		env: env,
-		rect: Rectangle{
+		rect: shapes.Rectangle{
 			X: 0,
 			Y: 0,
 			W: 250,
@@ -67,12 +64,12 @@ func WithText(txt string) BtnOptFunc {
 		btn.text = txt
 	}
 }
-func WithRect(rect Rectangle) BtnOptFunc {
+func WithRect(rect shapes.Rectangle) BtnOptFunc {
 	return func(btn *Button) {
 		btn.rect = rect
-		defaultImg := util.LoadImage(btn.env, "assets/ui/btn/green_button.png")
+		defaultImg := util.LoadImage(ENV, "assets/ui/btn/green_button.png")
 		defaultImg = util.ScaleImage(defaultImg, rect.W, rect.H)
-		pressed := util.LoadImage(btn.env, "assets/ui/btn/green_button_pressed.png")
+		pressed := util.LoadImage(ENV, "assets/ui/btn/green_button_pressed.png")
 		pressed = util.ScaleImage(pressed, rect.W, rect.H)
 
 		btn.currentImg = defaultImg

@@ -1,17 +1,16 @@
 package encounter
 
 import (
-	"fishgame/environment"
 	"fishgame/item"
 	"fishgame/player"
 	"fishgame/reward"
+	"fishgame/shapes"
 	"fishgame/ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Battle struct {
-	env   *environment.Env
 	Name  string
 	items *item.Collection
 	Type  Type
@@ -23,17 +22,16 @@ type Battle struct {
 	startBtn *ui.Button
 }
 
-func NewBattleScene(env *environment.Env, encounterData jsonEncounter, player *player.Player) *Battle {
+func NewBattleScene(encounterData jsonEncounter, player *player.Player) *Battle {
 	enc := &Battle{
-		env:     env,
 		Name:    encounterData.Title,
 		Type:    EncounterTypeBattle,
 		player:  player,
 		started: false,
 	}
 
-	enc.startBtn = ui.NewButton(env,
-		ui.WithRect(ui.Rectangle{X: 450, Y: 30, W: 200, H: 50}),
+	enc.startBtn = ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 450, Y: 30, W: 200, H: 50}),
 		ui.WithText("Start Battle!"),
 		ui.WithClickFunc(func() {
 			enc.started = true
@@ -53,7 +51,7 @@ func (battle *Battle) Update(dt float64, player *player.Player) {
 }
 
 func (battle *Battle) Draw(screen *ebiten.Image) {
-	battle.items.Draw(battle.env, screen, 2)
+	battle.items.Draw(ENV, screen, 2)
 	if !battle.started {
 		battle.startBtn.Draw(screen)
 	}
