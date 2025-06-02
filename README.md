@@ -33,6 +33,15 @@ each fish has some pond ability, and some way to battle.
 fish has chainmail armor / fireball spell
 final fishtasy / final fish fantasy
 
+MEDGE
+seperate UI from gameplay fully.
+be able to run game on its own in just data layer.
+UI becomes more reactive to state of the world instead of them put together.
+AVOID NIL
+make a fish simulator w/ api to move stuff around, etc
+Collection.AddItem(item,index)
+add item to specific index and move things if need be
+
 ## Fish defensive mechanisms research
 
 schooling - bonus damage (and life?) for adjacent schooling fish
