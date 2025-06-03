@@ -1,13 +1,14 @@
 package simulation
 
 import (
-	"fishgame-sim/collection"
-	"fishgame-sim/environment"
-	"fishgame-sim/fish"
-	"fishgame-sim/inventory"
-	"fishgame-sim/player"
 	"fmt"
 	"time"
+
+	"fishgame-sim/simulation/collection"
+	"fishgame-sim/simulation/environment"
+	"fishgame-sim/simulation/fish"
+	"fishgame-sim/simulation/inventory"
+	"fishgame-sim/simulation/player"
 )
 
 type Simulation struct {
@@ -128,6 +129,7 @@ func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
 }
+
 func (sim *Simulation) IsGameOver() bool {
 	gameOver := sim.Player_GetFish().AllFishDead()
 	if gameOver {
