@@ -13,11 +13,11 @@ func Test_NewSimulation_Default_SubscribesToAllEvents(t *testing.T) {
 	env := environment.NewEnv(nil, nil)
 	NewSimulation(env, nil, nil)
 
-	subscriptions := env.EventBus.GetSubscribers("StartSimulation")
+	subscriptions := env.EventBus.GetSubscribers("StartSimulationEvent")
 	if len(subscriptions) < 1 {
 		t.Error("No StartSimulationEvent subscriptions registered")
 	}
-	subscriptions = env.EventBus.GetSubscribers("StopSimulation")
+	subscriptions = env.EventBus.GetSubscribers("StopSimulationEvent")
 	if len(subscriptions) < 1 {
 		t.Error("No StopSimulationEvent subscriptions registered")
 	}
@@ -31,7 +31,7 @@ func Test_StartSimulationEventHandler_WithEvent_DisablesCollectionChanges(t *tes
 	}, collection.NewCollection(env))
 
 	env.EventBus.Publish(environment.Event{
-		Type: "StartSimulation",
+		Type: "StartSimulationEvent",
 	})
 
 	if sim.Player_GetFish().IsChangeable() {

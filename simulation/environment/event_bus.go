@@ -3,17 +3,34 @@ package environment
 import (
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // based on https://medium.com/@souravchoudhary0306/implementation-of-event-driven-architecture-in-go-golang-28d9a1c01f91
 
 // Events
-// StartSimulation
-// StopSimulation
+// StartSimulationEvent - no data associated
+// StopSimulationEvent - no data associated
+// FishAttackedEvent
+// FishDiedEvent
+// GameOverEvent
+// EncounterDoneEvent
+
 type Event struct {
 	Type      string
 	Timestamp time.Time
 	Data      interface{}
+}
+
+type FishAttackedEvent struct {
+	Id     uuid.UUID
+	Type   string
+	Damage int
+}
+type FishDiedEvent struct {
+	Id     uuid.UUID
+	Killer uuid.UUID
 }
 
 type EventBus struct {

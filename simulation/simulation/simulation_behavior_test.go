@@ -8,17 +8,21 @@ import (
 	"testing"
 )
 
-func Test_Update_WithBasicWeapon_HitEachOther(t *testing.T) {
-	env := environment.NewEnv(nil, nil)
-	player := &player.Player{
+func setupPlayer() *player.Player {
+	ENV = environment.NewEnv(nil, nil)
+	return &player.Player{
 		Name: "player1",
-		Fish: collection.NewCollection(env),
+		Fish: collection.NewCollection(ENV),
 	}
-	player.Fish.AddFish(fish.NewFish("Whale", "he big", fish.NewWeaponStats(20, 1, 5)), 0)
+}
 
-	enemyItems := collection.NewCollection(env)
-	enemyItems.AddFish(fish.NewFish("Goldfish", "he little", fish.NewWeaponStats(20, 1, 5)), 0)
-	sim := NewSimulation(env, player, enemyItems)
+func Test_Update_WithBasicWeapon_HitEachOther(t *testing.T) {
+	player := setupPlayer()
+	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", fish.NewWeaponStats(20, 1, 5)), 0)
+
+	enemyItems := collection.NewCollection(ENV)
+	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", fish.NewWeaponStats(20, 1, 5)), 0)
+	sim := NewSimulation(ENV, player, enemyItems)
 	sim.Enable()
 	sim.Update(1.0)
 
@@ -31,16 +35,12 @@ func Test_Update_WithBasicWeapon_HitEachOther(t *testing.T) {
 }
 
 func Test_Update_WithSizeBasedWeapon_DoesDoubleDamageToTarget(t *testing.T) {
-	env := environment.NewEnv(nil, nil)
-	player := &player.Player{
-		Name: "player1",
-		Fish: collection.NewCollection(env),
-	}
-	player.Fish.AddFish(fish.NewFish("Whale", "he big", fish.NewStats(fish.SizeBasedWeapon, fish.SizeHuge, 20, 2, 5)), 0)
+	player := setupPlayer()
+	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", fish.NewStats(fish.SizeBasedWeapon, fish.SizeHuge, 20, 2, 5)), 0)
 
-	enemyItems := collection.NewCollection(env)
-	enemyItems.AddFish(fish.NewFish("Goldfish", "he little", fish.NewWeaponStats(10, 1, 5)), 0)
-	sim := NewSimulation(env, player, enemyItems)
+	enemyItems := collection.NewCollection(ENV)
+	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", fish.NewWeaponStats(10, 1, 5)), 0)
+	sim := NewSimulation(ENV, player, enemyItems)
 	sim.Enable()
 	sim.Update(2.0)
 
@@ -49,5 +49,32 @@ func Test_Update_WithSizeBasedWeapon_DoesDoubleDamageToTarget(t *testing.T) {
 	}
 	if sim.Player_GetFish().GetAllFish()[0].Stats.CurrentLife != 20 {
 		t.Error("Player whale should be at full life because dead goldfish tell no tales (dont attack)")
+	}
+}
+
+func Test_Update_WithVenomBasedWeapon_DoesDamageOverTimeToTarget(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	player := &player.Player{
+		Name: "player1",
+		Fish: collection.NewCollection(env),
+	}
+	player.Fish.AddFish(fish.NewFish(ENV, "Poisonous", "he ouch", fish.NewStats(fish.VenomousBasedWeapon, fish.SizeLarge, 20, 1, 5)), 0)
+
+	encounterFish := collection.NewCollection(env)
+	encounterFish.AddFish(fish.NewFish(ENV, "Goldfish", "he little", fish.NewWeaponStats(100, 999, 999)), 0)
+	sim := NewSimulation(env, player, encounterFish)
+	sim.Enable()
+	sim.Update(1.0)
+
+	if sim.Encounter_GetFish().GetAllFish()[0].Stats.CurrentLife != 95 {
+		t.Error("Encounter fish was not hurt for one application of venom")
+	}
+	sim.Update(1.0)
+	if sim.Encounter_GetFish().GetAllFish()[0].Stats.CurrentLife != 90 {
+		t.Error("Encounter fish was not hurt for second application of venom")
+	}
+	sim.Update(1.0)
+	if sim.Encounter_GetFish().GetAllFish()[0].Stats.CurrentLife != 85 {
+		t.Error("Encounter fish was not hurt for third application of venom")
 	}
 }

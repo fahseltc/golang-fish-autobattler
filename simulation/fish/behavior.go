@@ -1,16 +1,30 @@
 package fish
 
 import (
-	"fmt"
+	"fishgame-sim/environment"
+	"time"
 )
 
 // type BehaviorProps struct {
 // 	data map[string]any
 // }
 
+func sendFishAttackedEvent(source *Fish) {
+	source.env.EventBus.Publish(environment.Event{
+		Type:      "FishAttackedEvent",
+		Timestamp: time.Now(),
+		Data: environment.FishAttackedEvent{
+			Id:     source.Id,
+			Type:   source.Stats.Type.String(),
+			Damage: source.Stats.Damage,
+		},
+	})
+}
+
 func AttackingBehavior(source *Fish, target *Fish) bool {
 	if target.IsAlive() {
 		target.TakeDamage(source.Stats.Damage)
+		sendFishAttackedEvent(source)
 	}
 
 	return target.IsAlive()
@@ -40,25 +54,25 @@ func AttackingBehavior(source *Fish, target *Fish) bool {
 // 	return target.Alive
 // }
 
-// func VenomousBehavior(source *Item, target *Item, props *BehaviorProps) bool {
-// 	if target.Alive {
-// 		// TODO: Should venom to stack, or for only one instance to be on a target?
-// 		fmt.Printf("Created debf: %v, duration: %v\n", source.Name, source.Duration)
-// 		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Duration, 1, source.Damage)
-// 		target.debuffs = append(target.debuffs, dbf)
-// 		fmt.Printf("Applying venom debuff to: %v\n", target.Name)
-// 	}
-// 	return target.Alive
-// }
+func VenomousBehavior(source *Fish, target *Fish) bool {
+	if target.IsAlive() {
+		// TODO: Should venom to stack, or for only one instance to be on a target?
+		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Stats.MaxDuration, 1, source.Stats.Damage)
+		target.AddDebuff(dbf)
+		sendFishAttackedEvent(source)
+	}
+	return target.IsAlive()
+}
 
 func LargerSizeAttackingBehavior(source *Fish, target *Fish) bool {
 	if target.IsAlive() {
 		//fmt.Printf("LargerSizeAttackingBehavior, source: %v, target: %v\n", source.Size, target.Size)
 		if source.Stats.Size > target.Stats.Size {
 			target.TakeDamage(source.Stats.Damage * 2) // double damage to smaller fish
-			fmt.Printf("did double damage\n")
+			sendFishAttackedEvent(source)
 		} else {
 			target.TakeDamage(source.Stats.Damage)
+			sendFishAttackedEvent(source)
 		}
 
 		// if !target.Alive {

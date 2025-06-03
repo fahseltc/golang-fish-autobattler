@@ -7,6 +7,7 @@ import (
 	"fishgame-sim/inventory"
 	"fishgame-sim/player"
 	"fmt"
+	"time"
 )
 
 type Simulation struct {
@@ -28,6 +29,8 @@ type SimulationInterface interface {
 	Player_StoreExistingFish(id string) error
 	Player_GetStoredFish(id string)
 	// MovePlayerItem(*Slot, *Slot) slot object but thats in UI for now and we dont want that?
+	IsGameOver() bool
+	IsDone() bool
 }
 
 // this should have all of the game logic in it and nothing external
@@ -46,8 +49,8 @@ func NewSimulation(env *environment.Env, player *player.Player, enemyFish *colle
 		enabled:   false,
 	}
 
-	ENV.EventBus.Subscribe("StartSimulation", sim.startSimulationEventHandler)
-	ENV.EventBus.Subscribe("StopSimulation", sim.stopSimulationEventHandler)
+	ENV.EventBus.Subscribe("StartSimulationEvent", sim.startSimulationEventHandler)
+	ENV.EventBus.Subscribe("StopSimulationEvent", sim.stopSimulationEventHandler)
 
 	return sim
 }
@@ -58,6 +61,10 @@ func (sim *Simulation) Update(dt float64) {
 		// calc DT?
 		sim.player.Fish.Update(dt, sim.Encounter_GetFish())
 		sim.enemyFish.Update(dt, sim.Player_GetFish())
+
+		// Check if the simulation should stop
+		sim.IsDone()
+		sim.IsGameOver()
 	}
 }
 
@@ -120,4 +127,28 @@ func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 
 func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
+}
+func (sim *Simulation) IsGameOver() bool {
+	gameOver := sim.Player_GetFish().AllFishDead()
+	if gameOver {
+		sim.Disable()
+		ENV.EventBus.Publish(environment.Event{
+			Type:      "GameOverEvent",
+			Timestamp: time.Now(),
+			// do we need data in there? who killed you maybe?
+		})
+	}
+	return gameOver
+}
+func (sim *Simulation) IsDone() bool {
+	encounterDone := sim.Encounter_GetFish().AllFishDead()
+	if encounterDone {
+		sim.Disable()
+		ENV.EventBus.Publish(environment.Event{
+			Type:      "EncounterDoneEvent",
+			Timestamp: time.Now(),
+			// do we need data in there
+		})
+	}
+	return encounterDone
 }

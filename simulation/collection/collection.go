@@ -22,8 +22,8 @@ func NewCollection(env *environment.Env) *Collection {
 	coll.fishSlotMap[3] = nil
 	coll.fishSlotMap[4] = nil
 
-	env.EventBus.Subscribe("StartSimulation", coll.startSimulationEventHandler)
-	env.EventBus.Subscribe("StopSimulation", coll.stopSimulationEventHandler)
+	env.EventBus.Subscribe("StartSimulationEvent", coll.startSimulationEventHandler)
+	env.EventBus.Subscribe("StopSimulationEvent", coll.stopSimulationEventHandler)
 	return coll
 }
 
@@ -126,6 +126,14 @@ func (coll *Collection) EnableChanges() {
 }
 func (coll *Collection) IsChangeable() bool {
 	return !coll.preventChanges
+}
+func (coll *Collection) AllFishDead() bool {
+	for _, fish := range coll.fishSlotMap {
+		if fish != nil && fish.IsAlive() {
+			return false
+		}
+	}
+	return true
 }
 
 // Event handlers

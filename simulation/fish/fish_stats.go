@@ -9,12 +9,11 @@ type Stats struct {
 
 	MaxDuration     float64
 	CurrentDuration float64
+	// SecondaryDuration for extended poison duration?
 
 	Damage int
 
 	ActivateFunc func(source *Fish, target *Fish) bool
-
-	// Activate func?
 }
 
 type FishSize int
@@ -31,7 +30,7 @@ func NewWeaponStats(life int, duration int, damage int) *Stats {
 		MaxLife:         life,
 		CurrentLife:     life,
 		MaxDuration:     float64(duration),
-		CurrentDuration: float64(duration),
+		CurrentDuration: 0,
 		Damage:          damage,
 
 		ActivateFunc: AttackingBehavior,
@@ -45,7 +44,7 @@ func NewStats(fishType Type, size Size, life int, duration int, damage int) *Sta
 		MaxLife:         life,
 		CurrentLife:     life,
 		MaxDuration:     float64(duration),
-		CurrentDuration: float64(duration),
+		CurrentDuration: 0,
 		Damage:          damage,
 	}
 	switch fishType {
@@ -53,6 +52,8 @@ func NewStats(fishType Type, size Size, life int, duration int, damage int) *Sta
 		stats.ActivateFunc = AttackingBehavior
 	case SizeBasedWeapon:
 		stats.ActivateFunc = LargerSizeAttackingBehavior
+	case VenomousBasedWeapon:
+		stats.ActivateFunc = VenomousBehavior
 	}
 
 	return stats

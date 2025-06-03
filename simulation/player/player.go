@@ -11,7 +11,7 @@ type Player struct {
 	Name      string
 	Fish      *collection.Collection
 	Inventory *inventory.Inventory
-	Currency  int
+	currency  int
 }
 
 func NewPlayer(env *environment.Env, name string) *Player {
@@ -20,6 +20,23 @@ func NewPlayer(env *environment.Env, name string) *Player {
 		Name:      name,
 		Fish:      collection.NewCollection(env),
 		Inventory: inventory.NewInventory(),
-		Currency:  0,
+		currency:  0,
 	}
+}
+func (p *Player) GetCurrencyAmount() int {
+	return p.currency
+}
+func (p *Player) SpendCurrency(amt int) bool {
+	valid := (p.currency - amt) >= 0
+
+	if valid {
+		p.currency = p.currency - amt
+		return true
+	} else {
+		return false
+	}
+}
+
+func (p *Player) AddCurrency(amt int) {
+	p.currency = p.currency + amt
 }
