@@ -1,14 +1,21 @@
 package collection
 
 import (
+	"fishgame-sim/environment"
 	"fishgame-sim/fish"
 	"testing"
+	"time"
 )
+
+func setupCollection() *Collection {
+	env := environment.NewEnv(nil, nil)
+	return NewCollection(env)
+}
 
 // [UnitOfWork_StateUnderTest_ExpectedBehaviour]
 // https://osherove.com/blog/2005/4/3/naming-standards-for-unit-tests.html
 func Test_NewCollection_Constructor_InitializedNil(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	for key, val := range coll.fishSlotMap {
 		if val != nil {
 			t.Errorf("NewCollection initialized non-nil - key: %v, val:%v", key, val)
@@ -17,21 +24,21 @@ func Test_NewCollection_Constructor_InitializedNil(t *testing.T) {
 }
 
 func Test_GetRandomFish_WithOneFish_IsReturned(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 0)
 	if coll.GetRandomFish() == nil {
 		t.Error("GetRandomFish in collection with 1 fish returned nil!")
 	}
 }
 func Test_GetRandomFish_WithNoFish_ReturnsNil(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	if coll.GetRandomFish() != nil {
 		t.Error("GetRandomFish returned non-nil when initialized nil")
 	}
 }
 
 func Test_AddFish_OccupiedSlot_ReturnsFalse(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	if !coll.AddFish(fish.NewFish("test1", "test-fish1", nil), 0) {
 		t.Error("Couldnt add fish to empty slot!")
 	}
@@ -41,14 +48,14 @@ func Test_AddFish_OccupiedSlot_ReturnsFalse(t *testing.T) {
 	}
 }
 func Test_AddFish_IndexOutOfBounds_ReturnsFalse(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	if coll.AddFish(fish.NewFish("t", "t", nil), 999) {
 		t.Error("Fish cannot be added to index 999")
 	}
 }
 
 func Test_GetAllFish_WithOneFish_ReturnsFishSlice(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 0)
 	retVal := coll.GetAllFish()
 	if len(retVal) != 5 {
@@ -59,7 +66,7 @@ func Test_GetAllFish_WithOneFish_ReturnsFishSlice(t *testing.T) {
 	}
 }
 func Test_GetAllFish_WithTwoFish_ReturnsFishSlice(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	added1 := coll.AddFish(fish.NewFish("test1", "test-fish1", nil), 0)
 	added2 := coll.AddFish(fish.NewFish("test2", "test-fish2", nil), 4)
 	if !added1 || !added2 {
@@ -77,7 +84,7 @@ func Test_GetAllFish_WithTwoFish_ReturnsFishSlice(t *testing.T) {
 	}
 }
 func Test_GetAllFish_WithNoFish_ReturnsAllNil(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	retVal := coll.GetAllFish()
 	if len(retVal) != 5 {
 		t.Errorf("Slice returned was:%v length and should be 5", len(retVal))
@@ -89,30 +96,30 @@ func Test_GetAllFish_WithNoFish_ReturnsAllNil(t *testing.T) {
 	}
 }
 
-func Test_CanAddFish_WithNoFishAndAllIndexes_ReturnsTrue(t *testing.T) {
-	coll := NewCollection()
+func Test_IndexEmpty_WithNoFishAndAllIndexes_ReturnsTrue(t *testing.T) {
+	coll := setupCollection()
 	for i := 0; i < 5; i++ {
-		if !coll.CanAddFish(i) {
+		if !coll.IndexEmpty(i) {
 			t.Errorf("Cannot add fish to index:%v and it should be able to.", i)
 		}
 	}
 }
-func Test_CanAddFish_WithFiveFishAndAllIndexes_ReturnsFalse(t *testing.T) {
-	coll := NewCollection()
+func Test_IndexEmpty_WithFiveFishAndAllIndexes_ReturnsFalse(t *testing.T) {
+	coll := setupCollection()
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 0)
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 1)
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 2)
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 3)
 	coll.AddFish(fish.NewFish("test", "test-fish", nil), 4)
 	for i := 0; i < 5; i++ {
-		if coll.CanAddFish(i) {
+		if coll.IndexEmpty(i) {
 			t.Errorf("Can add fish to index:%v and it should be full already.", i)
 		}
 	}
 }
 
 func Test_MoveFish_SwapFishAndEmptySlot_ReturnsTrue(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	added := coll.AddFish(fish.NewFish("test1", "test-fish1", nil), 3)
 	if !added {
 		t.Error("Failed to add fish to collection")
@@ -138,7 +145,7 @@ func Test_MoveFish_SwapFishAndEmptySlot_ReturnsTrue(t *testing.T) {
 
 }
 func Test_MoveFish_SwapTwoFish_ReturnsTrue(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	added1 := coll.AddFish(fish.NewFish("eel", "he long", nil), 2)
 	added2 := coll.AddFish(fish.NewFish("goldfish", "he golden", nil), 4)
 	if !added1 || !added2 {
@@ -158,9 +165,70 @@ func Test_MoveFish_SwapTwoFish_ReturnsTrue(t *testing.T) {
 
 }
 func Test_MoveFish_WithNilSourceFish_ReturnsFalse(t *testing.T) {
-	coll := NewCollection()
+	coll := setupCollection()
 	success := coll.MoveFish(0, 2)
 	if success {
 		t.Error("source fish was empty and false should have been returned")
+	}
+}
+
+func Test_DisableChanges_Default_PreventsChanges(t *testing.T) {
+	coll := setupCollection()
+	ret := coll.AddFish(fish.NewFish("test", "test-fish", nil), 4)
+	if !ret {
+		t.Error("unable to add initial fish")
+	}
+	coll.DisableChanges()
+	ret = coll.AddFish(fish.NewFish("testfish2", "test-fish2", nil), 2)
+	if ret {
+		t.Error("Fish should not have been added to collection but it was.")
+	}
+}
+
+func Test_EnableChanges_Default_EnablesChanges(t *testing.T) {
+	coll := setupCollection()
+	coll.DisableChanges()
+	ret := coll.AddFish(fish.NewFish("test", "test-fish", nil), 4)
+	if ret {
+		t.Error("Fish should not have been added to collection but it was.")
+	}
+	coll.EnableChanges()
+	ret = coll.AddFish(fish.NewFish("test", "test-fish", nil), 4)
+	if !ret {
+		t.Error("unable to add fish and it should have been added")
+	}
+}
+
+func Test_StartSimulationEventHandler_WithEvent_DisablesChanges(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	coll := NewCollection(env)
+
+	if coll.preventChanges {
+		t.Error("changes should be enabled after constructor")
+	}
+	env.EventBus.Publish(environment.Event{
+		Type:      "StartSimulation",
+		Timestamp: time.Now(),
+	})
+
+	if !coll.preventChanges {
+		t.Error("changes should be disabled after StartSimulationEvent")
+	}
+}
+func Test_StopSimulationEventHandler_WithEvent_EnablesChanges(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	coll := NewCollection(env)
+	coll.DisableChanges()
+
+	if !coll.preventChanges {
+		t.Error("changes should be disabled after DisableChanges call")
+	}
+	env.EventBus.Publish(environment.Event{
+		Type:      "StopSimulation",
+		Timestamp: time.Now(),
+	})
+
+	if coll.preventChanges {
+		t.Error("changes should be enabled after StopSimulationEvent")
 	}
 }

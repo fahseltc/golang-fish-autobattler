@@ -7,6 +7,9 @@ import (
 
 // based on https://medium.com/@souravchoudhary0306/implementation-of-event-driven-architecture-in-go-golang-28d9a1c01f91
 
+// Events
+// StartSimulation
+// StopSimulation
 type Event struct {
 	Type      string
 	Timestamp time.Time

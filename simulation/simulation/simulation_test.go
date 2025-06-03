@@ -3,12 +3,13 @@ package simulation
 import (
 	"fishgame-sim/collection"
 	"fishgame-sim/environment"
-	"fishgame-sim/fish"
 	"fishgame-sim/player"
 	"testing"
 )
 
-func TestEventSubscriptions(t *testing.T) {
+// [UnitOfWork_StateUnderTest_ExpectedBehaviour]
+// https://osherove.com/blog/2005/4/3/naming-standards-for-unit-tests.html
+func Test_NewSimulation_Default_SubscribesToAllEvents(t *testing.T) {
 	env := environment.NewEnv(nil, nil)
 	NewSimulation(env, nil, nil)
 
@@ -22,24 +23,21 @@ func TestEventSubscriptions(t *testing.T) {
 	}
 }
 
-func TestSimpleBattle(t *testing.T) {
+func Test_StartSimulationEventHandler_WithEvent_DisablesCollectionChanges(t *testing.T) { // todo test inverse
 	env := environment.NewEnv(nil, nil)
-	player := &player.Player{
+	sim := NewSimulation(env, &player.Player{
 		Name: "player1",
-		Fish: collection.NewCollection(),
-	}
-	player.Fish.AddFish(fish.NewFish("Whale", "he big", fish.NewStats(20, 1, 5)), 0)
+		Fish: collection.NewCollection(env),
+	}, collection.NewCollection(env))
 
-	enemyItems := collection.NewCollection()
-	enemyItems.AddFish(fish.NewFish("Goldfish", "he little", fish.NewStats(20, 1, 5)), 0)
-	sim := NewSimulation(env, player, enemyItems)
-	sim.Enable()
-	sim.Update(1.0)
+	env.EventBus.Publish(environment.Event{
+		Type: "StartSimulation",
+	})
 
-	if sim.GetPlayerFish().FishSlotMap[0].Stats.CurrentLife != 15 {
-		t.Error("Player fish was not hurt for one tick duration")
+	if sim.Player_GetFish().IsChangeable() {
+		t.Error("Player collection should not be changeable")
 	}
-	if sim.GetEncounterFish().FishSlotMap[0].Stats.CurrentLife != 15 {
-		t.Error("Enemy fish was not hurt for one tick duration")
+	if sim.Encounter_GetFish().IsChangeable() {
+		t.Error("Encounter collection should not be changeable")
 	}
 }

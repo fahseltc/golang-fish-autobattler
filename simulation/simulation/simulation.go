@@ -25,7 +25,7 @@ type SimulationInterface interface {
 	Player_GetInventory() *inventory.Inventory
 	Player_GetAllStoredFish() []*fish.Fish
 	Player_StoreNewFish(it *fish.Fish)
-	Player_StoreExistingFish(id string) bool
+	Player_StoreExistingFish(id string) error
 	Player_GetStoredFish(id string)
 	// MovePlayerItem(*Slot, *Slot) slot object but thats in UI for now and we dont want that?
 }
@@ -46,8 +46,8 @@ func NewSimulation(env *environment.Env, player *player.Player, enemyFish *colle
 		enabled:   false,
 	}
 
-	ENV.EventBus.Subscribe("StartSimulation", sim.StartSimulationEventHandler)
-	ENV.EventBus.Subscribe("StopSimulation", sim.StopSimulationEventHandler)
+	ENV.EventBus.Subscribe("StartSimulation", sim.startSimulationEventHandler)
+	ENV.EventBus.Subscribe("StopSimulation", sim.stopSimulationEventHandler)
 
 	return sim
 }
@@ -63,9 +63,13 @@ func (sim *Simulation) Update(dt float64) {
 
 func (sim *Simulation) Enable() {
 	sim.enabled = true
+	sim.player.Fish.DisableChanges()
+	sim.enemyFish.DisableChanges()
 }
 func (sim *Simulation) Disable() {
 	sim.enabled = false
+	sim.player.Fish.EnableChanges()
+	sim.enemyFish.EnableChanges()
 }
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {
@@ -110,10 +114,10 @@ func (sim *Simulation) Player_GetStoredFish(id string) {
 }
 
 // Event Handlers
-func (sim *Simulation) StartSimulationEventHandler(event environment.Event) {
+func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 	sim.enabled = true
 }
 
-func (sim *Simulation) StopSimulationEventHandler(event environment.Event) {
+func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
 }

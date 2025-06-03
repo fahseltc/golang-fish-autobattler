@@ -1,29 +1,35 @@
 package collection
 
 import (
+	"fishgame-sim/environment"
 	"fishgame-sim/fish"
 	"math/rand/v2"
 )
 
 type Collection struct {
-	fishSlotMap map[int]*fish.Fish
+	fishSlotMap    map[int]*fish.Fish
+	preventChanges bool
 }
 
-func NewCollection() *Collection {
+func NewCollection(env *environment.Env) *Collection {
 	coll := &Collection{
-		fishSlotMap: make(map[int]*fish.Fish),
+		fishSlotMap:    make(map[int]*fish.Fish),
+		preventChanges: false,
 	}
 	coll.fishSlotMap[0] = nil
 	coll.fishSlotMap[1] = nil
 	coll.fishSlotMap[2] = nil
 	coll.fishSlotMap[3] = nil
 	coll.fishSlotMap[4] = nil
+
+	env.EventBus.Subscribe("StartSimulation", coll.startSimulationEventHandler)
+	env.EventBus.Subscribe("StopSimulation", coll.stopSimulationEventHandler)
 	return coll
 }
 
 func (coll *Collection) Update(dt float64, enemyColl *Collection) {
 	for _, fish := range coll.fishSlotMap {
-		if fish != nil {
+		if fish != nil && fish.IsAlive() {
 			target := enemyColl.GetRandomFish()
 			if target != nil {
 				fish.Update(dt, target)
@@ -54,7 +60,7 @@ func (coll *Collection) GetRandomFish() *fish.Fish {
 	return nonNilFish[rand.IntN(len(nonNilFish))]
 }
 
-func (coll *Collection) CanAddFish(index int) bool {
+func (coll *Collection) IndexEmpty(index int) bool {
 	if index > 4 || index < 0 {
 		return false
 	}
@@ -62,13 +68,19 @@ func (coll *Collection) CanAddFish(index int) bool {
 }
 
 func (coll *Collection) AddFish(fish *fish.Fish, index int) bool {
-	if !coll.CanAddFish(index) {
+	if coll.preventChanges {
+		return false
+	}
+	if !coll.IndexEmpty(index) {
 		return false
 	}
 	coll.fishSlotMap[index] = fish
 	return true
 }
 func (coll *Collection) RemoveFish(id string) bool {
+	if coll.preventChanges {
+		return false
+	}
 	for index, f := range coll.fishSlotMap {
 		if f != nil && f.Id.String() == id {
 			coll.fishSlotMap[index] = nil
@@ -78,6 +90,9 @@ func (coll *Collection) RemoveFish(id string) bool {
 	return false
 }
 func (coll *Collection) MoveFish(sourceIndex int, targetIndex int) bool {
+	if coll.preventChanges {
+		return false
+	}
 	if sourceIndex > 4 ||
 		sourceIndex < 0 ||
 		targetIndex > 4 ||
@@ -102,4 +117,22 @@ func (coll *Collection) MoveFish(sourceIndex int, targetIndex int) bool {
 
 		return true
 	}
+}
+func (coll *Collection) DisableChanges() {
+	coll.preventChanges = true
+}
+func (coll *Collection) EnableChanges() {
+	coll.preventChanges = false
+}
+func (coll *Collection) IsChangeable() bool {
+	return !coll.preventChanges
+}
+
+// Event handlers
+func (coll *Collection) startSimulationEventHandler(event environment.Event) {
+	coll.DisableChanges()
+}
+
+func (coll *Collection) stopSimulationEventHandler(event environment.Event) {
+	coll.EnableChanges()
 }
