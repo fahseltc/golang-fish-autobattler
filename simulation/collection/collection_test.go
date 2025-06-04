@@ -1,8 +1,8 @@
 package collection
 
 import (
-	"fishgame-sim/environment"
-	"fishgame-sim/fish"
+	"fishgame/shared/environment"
+	"fishgame/simulation/fish"
 	"testing"
 	"time"
 )

@@ -47,14 +47,8 @@ func NewStats(fishType Type, size Size, life int, duration int, damage int) *Sta
 		CurrentDuration: 0,
 		Damage:          damage,
 	}
-	switch fishType {
-	case Weapon:
-		stats.ActivateFunc = AttackingBehavior
-	case SizeBasedWeapon:
-		stats.ActivateFunc = LargerSizeAttackingBehavior
-	case VenomousBasedWeapon:
-		stats.ActivateFunc = VenomousBehavior
-	}
+
+	stats.ActivateFunc = fishType.ToBehaviorFunc()
 
 	return stats
 }

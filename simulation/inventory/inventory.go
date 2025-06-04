@@ -1,6 +1,6 @@
 package inventory
 
-import "fishgame-sim/fish"
+import "fishgame/simulation/fish"
 
 type Inventory struct {
 	fish map[string]*fish.Fish

@@ -1,8 +1,8 @@
-package btn
+package ui
 
 import (
-	"fishgame/shapes"
-	"fishgame/util"
+	"fishgame/ui/shapes"
+	"fishgame/ui/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -22,7 +22,7 @@ type Button struct {
 	pressedImg *ebiten.Image
 
 	OnClick func()
-	ToolTip TooltipInterface
+	//ToolTip TooltipInterface
 }
 
 //
@@ -41,9 +41,9 @@ func defaultBtnOpts() Button {
 	defaultWidth := float32(250.0)
 	defaultHeight := float32(100.0)
 	font := ENV.Fonts.Med
-	defaultImg := util.LoadImage(ENV, "assets/ui/btn/green_button.png")
+	defaultImg := util.LoadImage("assets/ui/btn/green_button.png")
 	defaultImg = util.ScaleImage(defaultImg, defaultWidth, defaultHeight)
-	pressed := util.LoadImage(ENV, "assets/ui/btn/green_button_pressed.png")
+	pressed := util.LoadImage("assets/ui/btn/green_button_pressed.png")
 	pressed = util.ScaleImage(pressed, defaultWidth, defaultHeight)
 	return Button{
 		rect: shapes.Rectangle{
@@ -67,9 +67,9 @@ func WithText(txt string) BtnOptFunc {
 func WithRect(rect shapes.Rectangle) BtnOptFunc {
 	return func(btn *Button) {
 		btn.rect = rect
-		defaultImg := util.LoadImage(ENV, "assets/ui/btn/green_button.png")
+		defaultImg := util.LoadImage("assets/ui/btn/green_button.png")
 		defaultImg = util.ScaleImage(defaultImg, rect.W, rect.H)
-		pressed := util.LoadImage(ENV, "assets/ui/btn/green_button_pressed.png")
+		pressed := util.LoadImage("assets/ui/btn/green_button_pressed.png")
 		pressed = util.ScaleImage(pressed, rect.W, rect.H)
 
 		btn.currentImg = defaultImg
@@ -82,12 +82,13 @@ func WithClickFunc(f func()) BtnOptFunc {
 		btn.OnClick = f
 	}
 }
-func WithToolTip(tt TooltipInterface) BtnOptFunc {
-	return func(btn *Button) {
-		btn.ToolTip = tt
-		btn.ToolTip.GetAlignment().Align(btn.rect, tt.GetRect())
-	}
-}
+
+//	func WithToolTip(tt TooltipInterface) BtnOptFunc {
+//		return func(btn *Button) {
+//			btn.ToolTip = tt
+//			btn.ToolTip.GetAlignment().Align(btn.rect, tt.GetRect())
+//		}
+//	}
 func WithCenteredPos() BtnOptFunc {
 	return func(btn *Button) {
 		centeredX := btn.rect.X - 0.5*btn.rect.W
@@ -102,9 +103,9 @@ func WithCenteredPos() BtnOptFunc {
 //
 
 func (btn *Button) Draw(screen *ebiten.Image) {
-	if btn.ToolTip != nil && btn.MouseCollides() {
-		btn.ToolTip.OnHover(screen)
-	}
+	// if btn.ToolTip != nil && btn.MouseCollides() {
+	// 	btn.ToolTip.OnHover(screen)
+	// }
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(btn.rect.X), float64(btn.rect.Y))

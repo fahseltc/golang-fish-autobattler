@@ -1,9 +1,9 @@
 package simulation
 
 import (
-	"fishgame-sim/collection"
-	"fishgame-sim/environment"
-	"fishgame-sim/player"
+	"fishgame/shared/environment"
+	"fishgame/simulation/collection"
+	"fishgame/simulation/player"
 	"testing"
 )
 

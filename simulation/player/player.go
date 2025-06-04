@@ -1,9 +1,9 @@
 package player
 
 import (
-	"fishgame-sim/collection"
-	"fishgame-sim/environment"
-	"fishgame-sim/inventory"
+	"fishgame/shared/environment"
+	"fishgame/simulation/collection"
+	"fishgame/simulation/inventory"
 )
 
 type Player struct {

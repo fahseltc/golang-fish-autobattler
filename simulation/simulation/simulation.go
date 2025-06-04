@@ -1,11 +1,11 @@
 package simulation
 
 import (
-	"fishgame-sim/collection"
-	"fishgame-sim/environment"
-	"fishgame-sim/fish"
-	"fishgame-sim/inventory"
-	"fishgame-sim/player"
+	"fishgame/shared/environment"
+	"fishgame/simulation/collection"
+	"fishgame/simulation/fish"
+	"fishgame/simulation/inventory"
+	"fishgame/simulation/player"
 	"fmt"
 	"time"
 )
@@ -41,6 +41,7 @@ type SimulationInterface interface {
 var ENV *environment.Env
 
 func NewSimulation(env *environment.Env, player *player.Player, enemyFish *collection.Collection) SimulationInterface {
+
 	ENV = env
 
 	sim := &Simulation{

@@ -37,3 +37,19 @@ func TypeFromString(s string) Type {
 		return Weapon
 	}
 }
+
+func (it Type) ToBehaviorFunc() func(*Fish, *Fish) bool {
+	switch it {
+	case Weapon:
+		return AttackingBehavior
+	case SizeBasedWeapon:
+		return LargerSizeAttackingBehavior
+	// case AdjacencyBasedWeapon:
+	// 	return AdjacencyBasedWeapon
+	// Reactive
+	case VenomousBasedWeapon:
+		return VenomousBehavior
+	default:
+		return AttackingBehavior
+	}
+}

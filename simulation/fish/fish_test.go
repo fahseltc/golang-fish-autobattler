@@ -1,7 +1,7 @@
 package fish
 
 import (
-	"fishgame-sim/environment"
+	"fishgame/shared/environment"
 	"testing"
 )
 

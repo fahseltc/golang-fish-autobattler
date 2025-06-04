@@ -1,7 +1,7 @@
 package fish
 
 import (
-	"fishgame-sim/environment"
+	"fishgame/shared/environment"
 	"time"
 )
 
@@ -9,7 +9,7 @@ import (
 // 	data map[string]any
 // }
 
-func sendFishAttackedEvent(source *Fish) {
+func sendFishAttackedEvent(source *Fish, dmg int) {
 	source.env.EventBus.Publish(environment.Event{
 		Type:      "FishAttackedEvent",
 		Timestamp: time.Now(),
@@ -23,8 +23,8 @@ func sendFishAttackedEvent(source *Fish) {
 
 func AttackingBehavior(source *Fish, target *Fish) bool {
 	if target.IsAlive() {
+		sendFishAttackedEvent(source, source.Stats.Damage)
 		target.TakeDamage(source.Stats.Damage)
-		sendFishAttackedEvent(source)
 	}
 
 	return target.IsAlive()
@@ -58,8 +58,8 @@ func VenomousBehavior(source *Fish, target *Fish) bool {
 	if target.IsAlive() {
 		// TODO: Should venom to stack, or for only one instance to be on a target?
 		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Stats.MaxDuration, 1, source.Stats.Damage)
+		sendFishAttackedEvent(source, source.Stats.Damage)
 		target.AddDebuff(dbf)
-		sendFishAttackedEvent(source)
 	}
 	return target.IsAlive()
 }
@@ -68,11 +68,11 @@ func LargerSizeAttackingBehavior(source *Fish, target *Fish) bool {
 	if target.IsAlive() {
 		//fmt.Printf("LargerSizeAttackingBehavior, source: %v, target: %v\n", source.Size, target.Size)
 		if source.Stats.Size > target.Stats.Size {
+			sendFishAttackedEvent(source, source.Stats.Damage*2)
 			target.TakeDamage(source.Stats.Damage * 2) // double damage to smaller fish
-			sendFishAttackedEvent(source)
 		} else {
+			sendFishAttackedEvent(source, source.Stats.Damage)
 			target.TakeDamage(source.Stats.Damage)
-			sendFishAttackedEvent(source)
 		}
 
 		// if !target.Alive {

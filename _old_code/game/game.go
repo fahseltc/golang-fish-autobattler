@@ -1,8 +1,8 @@
 package game
 
 import (
-	"fishgame/environment"
 	"fishgame/scene"
+	"fishgame/shared/environment"
 	"fishgame/ui"
 	"time"
 

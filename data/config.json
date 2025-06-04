@@ -1,8 +1,8 @@
 {
     "windowTitle": "Fish Game",
     "targetFPS": 30,
-    "screenWidth": 800,
-    "screenHeight": 600,
+    "screenWidth": 1420,
+    "screenHeight": 800,
     "spriteSizePx": 64,
     "spriteScale": 1.5
 }

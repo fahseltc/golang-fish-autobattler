@@ -1,7 +1,7 @@
 package fish
 
 import (
-	"fishgame-sim/environment"
+	"fishgame/shared/environment"
 	"fmt"
 	"time"
 
@@ -33,7 +33,7 @@ func (f *Fish) Update(dt float64, target *Fish) {
 	if f.Stats.CurrentDuration >= f.Stats.MaxDuration {
 		targetAlive := f.Stats.ActivateFunc(f, target)
 		if !targetAlive {
-			fmt.Printf("target fish died")
+			fmt.Printf("\n")
 		}
 		f.Stats.CurrentDuration -= f.Stats.MaxDuration
 	}
