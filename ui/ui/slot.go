@@ -2,79 +2,59 @@ package ui
 
 import (
 	"fishgame/ui/shapes"
+	"fishgame/ui/util"
+	"image/color"
 
 	"github.com/google/uuid"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// import (
-// 	"fishgame/item"
-// 	"fishgame/shapes"
-// 	"fishgame/simulation/fish"
-// 	"fishgame/util"
-// 	"image/color"
-
-// 	"github.com/hajimehoshi/ebiten/v2"
-// 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-// )
-
 type Slot struct {
-	index int
-	rect  shapes.Rectangle
-	id    *uuid.UUID
+	index   int
+	rect    shapes.Rectangle
+	itemId  *uuid.UUID
+	slotImg *ebiten.Image
 }
 
 func NewPlayerSlot(index int) *Slot {
-	screenWidth := ENV.Get("screenWidth").(int)
-	screenHeight := ENV.Get("screenHeight").(int)
-	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
-	spriteScale := ENV.Get("spriteScale").(float64)
-
-	slotX := int(float64(screenWidth) * 0.4)
-
-	slotYSpacingFromTop := float64(screenHeight) * float64(0.1)
-	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
+	yPadding := ENV.Config.Get("slotYpadding").(int)
+	xPos := float32(ENV.Config.Get("playerSlotColumnX").(int))
+	betweenSlotPadding := ENV.Config.Get("betweenSlotPadding").(int)
+	spriteSizePx := ENV.Config.Get("spriteSizePx").(int)
+	spriteScale := ENV.Config.Get("spriteScale").(float64)
+	slotImg := util.LoadImage("assets/slot.png")
+	scaled := util.ScaleImage(slotImg, float32(float64(spriteSizePx)*spriteScale), float32(float64(spriteSizePx)*spriteScale))
+	height := float64(spriteSizePx) * spriteScale
+	yPos := float32(index)*float32(int(height)+betweenSlotPadding) + float32(yPadding)
 
 	slot := Slot{
 		index: index,
 		rect: shapes.Rectangle{
-			X: float32(slotX),
-			Y: float32(slotY),
-			W: float32(spriteSizePx * spriteScale),
-			H: float32(spriteSizePx * spriteScale),
+			X: xPos,
+			Y: yPos,
+			W: float32(height), // square so its the same
+			H: float32(height),
 		},
+		slotImg: scaled,
 	}
 	return &slot
 }
 
-// func NewEncounterSlot(playerNum int, index int) *Slot {
-// 	screenWidth := ENV.Get("screenWidth").(int)
-// 	screenHeight := ENV.Get("screenHeight").(int)
-// 	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
-// 	spriteScale := ENV.Get("spriteScale").(float64)
-
-// 	slotX := int(float64(screenWidth) * 0.6)
-
-// 	slotYSpacingFromTop := float64(screenHeight) * float64(0.1)
-// 	slotY := int(slotYSpacingFromTop + (spriteSizePx*spriteScale)*float64(index))
-
-// 	slot := Slot{
-// 		index: index,
-// 		rect: shapes.Rectangle{
-// 			X: float32(slotX),
-// 			Y: float32(slotY),
-// 			W: float32(spriteSizePx * spriteScale),
-// 			H: float32(spriteSizePx * spriteScale),
-// 		},
-// 	}
-// 	return &slot
-// }
-
 func (slot *Slot) SetSprite(spr *Sprite) bool {
-	if slot.id == nil { // only replace the item if its already empty
-		slot.id = spr.Id
+	if slot.itemId == nil { // only replace the item if its already empty
+		slot.itemId = spr.Id
 		return true
 	}
 	return false
+}
+
+func (slot *Slot) Draw(screen *ebiten.Image) {
+	// opts := &ebiten.DrawImageOptions{}
+	// opts.GeoM.Translate(float64(slot.rect.X), float64(slot.rect.Y))
+	// screen.DrawImage(slot.slotImg, opts)
+
+	ebitenutil.DrawRect(screen, float64(slot.rect.X), float64(slot.rect.Y), float64(slot.rect.W), float64(slot.rect.H), color.RGBA{200, 200, 155, 255})
 }
 
 // func (slot *Slot) IsEmpty() bool {

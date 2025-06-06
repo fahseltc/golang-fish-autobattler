@@ -21,7 +21,9 @@ type UI struct {
 
 	sim simulation.SimulationInterface
 
-	sprites map[string]*Sprite
+	sprites     map[string]*Sprite
+	playerSlots map[int]*Slot
+	attackLines []*AttackLine
 
 	startSimBtn *Button
 	stopSimBtn  *Button
@@ -39,6 +41,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 		imageRegistry: images.NewRegistry(),
 		sim:           sim,
 		sprites:       make(map[string]*Sprite),
+		playerSlots:   make(map[int]*Slot),
 		enabled:       false,
 	}
 
@@ -59,44 +62,70 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 		WithCenteredPos(),
 	)
 
+	for i := 0; i <= 4; i++ {
+		ui.playerSlots[i] = NewPlayerSlot(i)
+	}
+
 	// StartSimulationEvent - no data associated
 	// StopSimulationEvent - no data associated
 	// FishAttackedEvent
 	// FishDiedEvent
 	// GameOverEvent
 	// EncounterDoneEvent
-	//ENV.EventBus.Subscribe("FishAttackedEvent", func(event environment.Event) {})
+	ENV.EventBus.Subscribe("FishAttackedEvent", ui.handleFishAttackedEvent)
 	//ENV.EventBus.Subscribe("FishDiedEvent", func(event environment.Event) {})
 	//ENV.EventBus.Subscribe("GameOverEvent", func(event environment.Event) {})
 	//ENV.EventBus.Subscribe("EncounterDoneEvent", func(event environment.Event) {})
 	ENV.EventBus.Subscribe("DisableUiEvent", ui.handleDisableUiEvent)
 	ENV.EventBus.Subscribe("EnableUiEvent", ui.HandleEnableUiEvent)
+
 	return ui
 }
 
-func (ui *UI) Update() {
+func (ui *UI) Update(dt float64) {
 	ui.startSimBtn.Update()
 	ui.stopSimBtn.Update()
 	if ui.enabled {
 		ui.updatePlayerFish()
 		ui.updateEncounterFish()
+		ui.updateSpritePositionsFromSim()
+
+		for i, line := range ui.attackLines {
+			if line.Duration == 0 {
+				line.enabled = false
+				ui.attackLines = append(ui.attackLines[:i], ui.attackLines[i+1:]...)
+			}
+			line.Update(dt)
+		}
+	}
+}
+func (ui *UI) updateSpritePositionsFromSim() {
+	if ui.draggingSprite == nil {
+		for uuid, sprite := range ui.sprites {
+			simFishIndex, simFish := ui.sim.Player_GetFish().ById(uuid)
+			if simFish == nil {
+				simFishIndex, simFish = ui.sim.Encounter_GetFish().ById(uuid)
+			}
+			if simFish != nil {
+				sprite.SetPosition(simFishIndex)
+			}
+		}
 	}
 }
 
 func (ui *UI) updatePlayerFish() {
-	//var draggingIndex int
-
 	for index, fish := range ui.sim.Player_GetFish().GetAllFish() {
 		if fish != nil {
 			id := fish.Id
-			if fish.IsDead() {
+			if fish.IsDead() { // the sim fish is dead, remove its sprite
 				delete(ui.sprites, id.String())
-			} else if ui.sprites[id.String()] == nil {
+			} else if ui.sprites[id.String()] == nil { // the sim fish is new and needs a sprite made
 				sprite := NewPlayerFishSprite(ui.imageRegistry, fish, index)
 				ui.sprites[id.String()] = sprite
-			} else if ui.sprites[id.String()] != nil {
-				// the fish shouldnt be removed and is already added
+			} else if ui.sprites[id.String()] != nil { // the sim fish is already added to the list of sprites
 				sprite := ui.sprites[id.String()]
+
+				// Handle Clicks
 				if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !ui.sim.IsEnabled() {
 					mx, my := ebiten.CursorPosition()
 					if sprite.Rect.Collides(float32(mx), float32(my)) {
@@ -104,24 +133,47 @@ func (ui *UI) updatePlayerFish() {
 						sprite.Dragging = true
 						sprite.SavePositionBeforeDrag()
 						ui.draggingSprite = sprite
-
-						//draggingIndex = index
 					}
 				}
 			}
 		}
 	}
+
+	// Handle mouse pressed
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && ui.draggingSprite != nil {
 		mx, my := ebiten.CursorPosition()
 		ui.draggingSprite.MoveCentered(mx, my)
 	}
 
+	// Handle mouse released
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && ui.draggingSprite != nil {
-		//mx, my := ebiten.CursorPosition()
+		mx, my := ebiten.CursorPosition()
+		for _, slot := range ui.playerSlots {
+			if slot.rect.Collides(float32(mx), float32(my)) {
+				//fmt.Printf("released into slot: %v\n", slot.index)
+				// if ui.draggingSprite.Rect.Collides(float32(mx), float32(my)) {
+				// 	fmt.Printf("it collides with itself, do nothing\n")
+				// }
+
+				ui.draggingSprite.SetPosition(slot.index)
+				idx, draggingFish := ui.sim.Player_GetFish().ById(ui.draggingSprite.Id.String())
+				//fmt.Printf("idx:%v fishID: %v\n", idx, draggingFish.Id.String())
+				targetSlot := slot.index
+				if draggingFish != nil {
+					ui.sim.Player_GetFish().MoveFish(idx, targetSlot)
+					// if the slot had a fish, we need to move its sprite
+				}
+
+				ui.draggingSprite.Dragging = false
+				ui.draggingSprite = nil
+				return
+			}
+		}
 		// if mx,my are on top of slots or inventory, place the item there
 		// otherwise, put it bakc where it came from
 		fmt.Println("released")
 		ui.draggingSprite.ResetToPositionBeforeDrag()
+		ui.draggingSprite.Dragging = false
 		ui.draggingSprite = nil
 	}
 
@@ -143,18 +195,20 @@ func (ui *UI) updateEncounterFish() {
 
 func (ui *UI) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0, 0, 255, 255})
+	for _, slot := range ui.playerSlots {
+		slot.Draw(screen)
+	}
 	ui.startSimBtn.Draw(screen)
 	ui.stopSimBtn.Draw(screen)
 	if ui.enabled {
 		for _, sprite := range ui.sprites {
 			sprite.Draw(screen)
 		}
+		for _, line := range ui.attackLines {
+			line.Draw(screen)
+		}
 	}
 }
-
-// func (ui *UI) SetSimulation(sim simulation.SimulationInterface) {
-// 	ui.sim = sim
-// }
 
 // event handlers
 func (ui *UI) HandleEnableUiEvent(event environment.Event) {
@@ -163,4 +217,31 @@ func (ui *UI) HandleEnableUiEvent(event environment.Event) {
 
 func (ui *UI) handleDisableUiEvent(event environment.Event) {
 	ui.enabled = false
+}
+func (ui *UI) handleFishAttackedEvent(event environment.Event) {
+	attackedEvent := event.Data.(environment.FishAttackedEvent)
+	// attackedEvent.Type // todo - add type to line effect
+	sourceIndex, sourceFish := ui.sim.GetFishByID(attackedEvent.SourceId.String())
+	targetIndex, _ := ui.sim.GetFishByID(attackedEvent.SourceId.String())
+	sourceX, sourceY := ui.slotIndexToScreenPos(sourceIndex, true)  // TODO - need ower to tell whether its left or right side.
+	targetX, targetY := ui.slotIndexToScreenPos(targetIndex, false) // TODO - need ower to tell whether its left or right side.
+
+	al := NewAttackLine(sourceX, sourceY, targetX, targetY, float32(sourceFish.Stats.MaxDuration))
+	ui.attackLines = append(ui.attackLines, al)
+}
+
+func (ui *UI) slotIndexToScreenPos(index int, leftSide bool) (int, int) {
+	var xPos float32
+	if leftSide {
+		xPos = float32(ENV.Config.Get("playerSlotColumnX").(int))
+	} else {
+		xPos = float32(ENV.Config.Get("encounterSlotColumnX").(int))
+	}
+	yPadding := ENV.Config.Get("slotYpadding").(int)
+	betweenSlotPadding := ENV.Config.Get("betweenSlotPadding").(int)
+	spriteSizePx := ENV.Config.Get("spriteSizePx").(int)
+	spriteScale := ENV.Config.Get("spriteScale").(float64)
+	height := float64(spriteSizePx) * spriteScale
+	yPos := float32(index)*float32(int(height)+betweenSlotPadding) + float32(yPadding)
+	return int(xPos), int(yPos)
 }

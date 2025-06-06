@@ -26,9 +26,11 @@ type Event struct {
 }
 
 type FishAttackedEvent struct {
-	Id     uuid.UUID
-	Type   string
-	Damage int
+	SourceId uuid.UUID
+	Owner    string
+	TargetId uuid.UUID
+	Type     string
+	Damage   int
 }
 type FishDiedEvent struct {
 	Id     uuid.UUID

@@ -30,6 +30,7 @@ type SimulationInterface interface {
 	Player_StoreExistingFish(id string) error
 	Player_GetStoredFish(id string)
 	// MovePlayerItem(*Slot, *Slot) slot object but thats in UI for now and we dont want that?
+	GetFishByID(id string) (int, *fish.Fish)
 	IsGameOver() bool
 	IsDone() bool
 }
@@ -125,17 +126,6 @@ func (sim *Simulation) Player_StoreExistingFish(id string) error {
 func (sim *Simulation) Player_GetStoredFish(id string) {
 	sim.player.Inventory.Get(id)
 }
-
-// Event Handlers
-func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
-	sim.enabled = true
-	sim.Player_GetFish().DisableChanges()
-}
-
-func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
-	sim.enabled = false
-	sim.Player_GetFish().EnableChanges()
-}
 func (sim *Simulation) IsGameOver() bool {
 	gameOver := sim.Player_GetFish().AllFishDead()
 	if gameOver {
@@ -159,4 +149,22 @@ func (sim *Simulation) IsDone() bool {
 		})
 	}
 	return encounterDone
+}
+func (sim *Simulation) GetFishByID(id string) (int, *fish.Fish) {
+	index, fish := sim.Player_GetFish().ById(id)
+	if fish == nil {
+		index, fish = sim.Encounter_GetFish().ById(id)
+	}
+	return index, fish
+}
+
+// Event Handlers
+func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
+	sim.enabled = true
+	sim.Player_GetFish().DisableChanges()
+}
+
+func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
+	sim.enabled = false
+	sim.Player_GetFish().EnableChanges()
 }

@@ -74,6 +74,14 @@ func (coll *Collection) AddFish(fish *fish.Fish, index int) bool {
 	coll.fishSlotMap[index] = fish
 	return true
 }
+func (coll *Collection) ById(fishId string) (int, *fish.Fish) {
+	for index, fish := range coll.fishSlotMap {
+		if fish != nil && fish.Id.String() == fishId {
+			return index, fish
+		}
+	}
+	return 99, nil
+}
 func (coll *Collection) RemoveFish(id string) bool {
 	if coll.preventChanges {
 		return false
@@ -86,6 +94,22 @@ func (coll *Collection) RemoveFish(id string) bool {
 	}
 	return false
 }
+func (coll *Collection) MoveFishById(fishId string, targetIndex int) bool {
+	if coll.preventChanges {
+		return false
+	}
+	sourceIndex, fish := coll.ById(fishId)
+	if fish == nil {
+		return false
+	}
+	if sourceIndex == targetIndex {
+		return false
+	}
+	coll.fishSlotMap[sourceIndex] = nil
+	coll.fishSlotMap[targetIndex] = fish
+	return true
+}
+
 func (coll *Collection) MoveFish(sourceIndex int, targetIndex int) bool {
 	if coll.preventChanges {
 		return false

@@ -31,16 +31,16 @@ func NewPlayScene(sm *Manager) *Play {
 	player := player.NewPlayer(ENV, "player1")
 	player.Fish = collection.NewCollection(ENV)
 	player.Fish.AddFish(fish.NewFish(ENV, "goldfish", "testfish1", fish.NewWeaponStats(20, 1, 5)), 0)
-	player.Fish.AddFish(fish.NewFish(ENV, "fish2", "testfish2", fish.NewWeaponStats(30, 1, 5)), 1)
-	player.Fish.AddFish(fish.NewFish(ENV, "fish3", "testfish3", fish.NewWeaponStats(10, 2, 10)), 2)
-	player.Fish.AddFish(fish.NewFish(ENV, "fish4", "testfish4", fish.NewWeaponStats(10, 2, 10)), 3)
-	player.Fish.AddFish(fish.NewFish(ENV, "fish5", "testfish5", fish.NewWeaponStats(10, 2, 10)), 4)
+	player.Fish.AddFish(fish.NewFish(ENV, "cod", "testfish2", fish.NewWeaponStats(30, 1, 5)), 1)
+	//player.Fish.AddFish(fish.NewFish(ENV, "eel", "testfish3", fish.NewWeaponStats(10, 2, 10)), 2)
+	player.Fish.AddFish(fish.NewFish(ENV, "whale", "testfish4", fish.NewWeaponStats(10, 2, 10)), 3)
+	player.Fish.AddFish(fish.NewFish(ENV, "minnow", "testfish5", fish.NewWeaponStats(10, 2, 10)), 4)
 
 	encounterFish := collection.NewCollection(ENV)
 
-	encounterFish.AddFish(fish.NewFish(ENV, "fish6", "testfish6", fish.NewWeaponStats(35, 3, 20)), 1)
-	encounterFish.AddFish(fish.NewFish(ENV, "fish7", "testfish7", fish.NewWeaponStats(35, 3, 20)), 2)
-	encounterFish.AddFish(fish.NewFish(ENV, "fish8", "testfish8", fish.NewWeaponStats(35, 3, 20)), 4)
+	encounterFish.AddFish(fish.NewFish(ENV, "octopus", "testfish6", fish.NewWeaponStats(35, 3, 20)), 1)
+	encounterFish.AddFish(fish.NewFish(ENV, "puffer", "testfish7", fish.NewWeaponStats(35, 3, 20)), 2)
+	encounterFish.AddFish(fish.NewFish(ENV, "sunfish", "testfish8", fish.NewWeaponStats(35, 3, 20)), 4)
 
 	sim := simulation.NewSimulation(ENV, player, encounterFish)
 	//s.EncounterManager = encounter.NewManager(s.Env, s.Player1, s.Ui)
@@ -62,7 +62,7 @@ func NewPlayScene(sm *Manager) *Play {
 
 func (s *Play) Update(dt float64) {
 	s.Simulation.Update(dt)
-	s.Ui.Update()
+	s.Ui.Update(dt)
 	//s.EncounterManager.Current.Update(dt, s.Player1)
 	//s.Ui.Update(dt)
 	// switch s.CurrentState {
