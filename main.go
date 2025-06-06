@@ -22,6 +22,7 @@ func main() {
 	ebiten.SetWindowTitle(config.Get("windowTitle").(string))
 	ebiten.SetWindowSize(config.Get("screenWidth").(int), config.Get("screenHeight").(int))
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	//ebiten.SetWindowScale()
 	ebiten.SetTPS(config.Get("targetFPS").(int))
 
 	err := ebiten.RunGame(game)

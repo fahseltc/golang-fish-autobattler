@@ -40,7 +40,8 @@ func NewButton(opts ...BtnOptFunc) *Button {
 func defaultBtnOpts() Button {
 	defaultWidth := float32(250.0)
 	defaultHeight := float32(100.0)
-	font := ENV.Fonts.Med
+	//font := ENV.Fonts.Med
+	font, _ := util.LoadFont(20)
 	defaultImg := util.LoadImage("assets/ui/btn/green_button.png")
 	defaultImg = util.ScaleImage(defaultImg, defaultWidth, defaultHeight)
 	pressed := util.LoadImage("assets/ui/btn/green_button_pressed.png")

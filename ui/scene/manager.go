@@ -1,63 +1,63 @@
 package scene
 
-// import (
-// 	"fishgame/environment"
-// 	"fmt"
+import (
+	"fishgame/shared/environment"
+	"fmt"
 
-// 	"github.com/hajimehoshi/ebiten/v2"
-// )
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
-// type Manager struct {
-// 	Env     *environment.Env
-// 	Scenes  map[string]Scene
-// 	Current Scene
-// }
+var ENV *environment.Env
 
-// func NewSceneManager(Env *environment.Env) *Manager {
-// 	manager := &Manager{
-// 		Env: Env,
-// 	}
-// 	manager.Init()
-// 	return manager
-// }
+type Manager struct {
+	Scenes  map[string]Scene
+	Current Scene
+}
 
-// func (sm *Manager) Init() {
-// 	sm.Scenes = make(map[string]Scene)
+func NewSceneManager(Env *environment.Env) *Manager {
+	ENV = Env
+	manager := &Manager{}
+	manager.Scenes = make(map[string]Scene)
+	//	manager.Scenes["Play"] = nil
+	//	manager.Scenes["GameOver"] = nil
 
-// 	menuScene := NewMenuScene(sm)
-// 	sm.Scenes[menuScene.GetName()] = menuScene
+	return manager
+}
 
-// 	gameOverScene := NewGameOverScene(sm.Env, sm)
-// 	sm.Scenes[gameOverScene.GetName()] = gameOverScene
+func (sm *Manager) SwitchTo(scene string, destroyOld bool) {
+	newScene := sm.Scenes[scene]
+	if destroyOld && sm.Current != nil {
+		sm.Current.Destroy()
+	}
+	if scene == "Play" {
+		playScene := NewPlayScene(sm)
+		sm.Scenes[playScene.GetName()] = playScene
+		newScene = playScene
+	}
+	if scene == "Menu" {
+		menuScene := NewMenuScene(sm)
+		sm.Scenes[menuScene.GetName()] = menuScene
+		newScene = menuScene
+	}
+	if scene == "GameOver" {
+		gameOverScene := NewGameOverScene(ENV, sm)
+		sm.Scenes[gameOverScene.GetName()] = gameOverScene
+		newScene = gameOverScene
+	}
+	sm.Current = newScene
+}
 
-// 	sm.Current = menuScene
-// }
+func (sm *Manager) Update(dt float64) error {
+	if sm.Current != nil {
+		sm.Current.Update(dt)
+		return nil
+	}
+	return fmt.Errorf("scenemanager has no current scene to update")
+}
 
-// func (sm *Manager) SwitchTo(scene string, destroyOld bool) {
-// 	newScene := sm.Scenes[scene]
-// 	if destroyOld && sm.Current != nil {
-// 		sm.Current.Destroy()
-// 	}
-// 	if scene == "Play" {
-// 		playScene := &Play{Env: sm.Env}
-// 		playScene.Init(sm)
-// 		sm.Scenes[playScene.GetName()] = playScene
-// 		newScene = playScene
-// 	}
-// 	sm.Current = newScene
-// }
-
-// func (sm *Manager) Update(dt float64) error {
-// 	if sm.Current != nil {
-// 		sm.Current.Update(dt)
-// 		return nil
-// 	}
-// 	return fmt.Errorf("scenemanager has no current scene to update")
-// }
-
-// func (sm *Manager) Draw(screen *ebiten.Image) {
-// 	// todo: handle transitions between scenes
-// 	if sm.Current != nil {
-// 		sm.Current.Draw(screen)
-// 	}
-// }
+func (sm *Manager) Draw(screen *ebiten.Image) {
+	// todo: handle transitions between scenes
+	if sm.Current != nil {
+		sm.Current.Draw(screen)
+	}
+}

@@ -2,7 +2,6 @@ package fish
 
 import (
 	"fishgame/shared/environment"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,10 +30,7 @@ func NewFish(env *environment.Env, name string, desc string, stats *Stats) *Fish
 func (f *Fish) Update(dt float64, target *Fish) {
 	f.Stats.CurrentDuration += dt
 	if f.Stats.CurrentDuration >= f.Stats.MaxDuration {
-		targetAlive := f.Stats.ActivateFunc(f, target)
-		if !targetAlive {
-			fmt.Printf("\n")
-		}
+		f.Stats.ActivateFunc(f, target)
 		f.Stats.CurrentDuration -= f.Stats.MaxDuration
 	}
 	f.updateDebuffs(dt)

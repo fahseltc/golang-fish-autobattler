@@ -1,8 +1,15 @@
 {
     "windowTitle": "Fish Game",
     "targetFPS": 30,
+    "internalResolutionW": 800,
+    "internalResolutionH": 600,
     "screenWidth": 1420,
-    "screenHeight": 800,
+    "screenHeight": 900,
     "spriteSizePx": 64,
-    "spriteScale": 1.5
+    "spriteScale": 1.5,
+    "slotYpadding": 35,
+    "slotYspacing": 12,
+    "betweenSlotPadding": 10,
+    "playerSlotColumnX": 400,
+    "encounterSlotColumnX": 650
 }

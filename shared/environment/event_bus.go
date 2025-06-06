@@ -16,6 +16,8 @@ import (
 // FishDiedEvent
 // GameOverEvent
 // EncounterDoneEvent
+// EnableUiEvent
+// DisableUiEvent
 
 type Event struct {
 	Type      string
@@ -44,6 +46,7 @@ func NewEventBus() *EventBus {
 }
 
 func (eb *EventBus) Subscribe(eventType string, handler func(event Event)) {
+	fmt.Printf("EventBus: Subscribe to: %v\n", eventType)
 	eb.subscribers[eventType] = append(eb.subscribers[eventType], handler)
 }
 

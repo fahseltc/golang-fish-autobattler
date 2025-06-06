@@ -39,7 +39,7 @@ func NewItemDebuff(fish *Fish, dbt DebuffType, dur float64, tickRate float64, da
 		target:            fish,
 		damage:            dam,
 	}
-	fmt.Printf("creat debuff, remainingDur: %v, tickRate: %v\n", debuff.RemainingDuration, debuff.TickRate)
+	fmt.Printf("create debuff, remainingDur: %v, tickRate: %v\n", debuff.RemainingDuration, debuff.TickRate)
 	return debuff
 }
 

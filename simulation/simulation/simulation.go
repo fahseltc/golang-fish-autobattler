@@ -21,6 +21,7 @@ type SimulationInterface interface {
 	Update(float64)
 	Enable()
 	Disable()
+	IsEnabled() bool
 	Player_GetFish() *collection.Collection
 	Encounter_GetFish() *collection.Collection
 	Player_GetInventory() *inventory.Inventory
@@ -49,6 +50,7 @@ func NewSimulation(env *environment.Env, player *player.Player, enemyFish *colle
 		enemyFish: enemyFish,
 		enabled:   false,
 	}
+	fmt.Printf("SIM Constructor--ENV UUID:%v \n", env.UUID.String())
 
 	ENV.EventBus.Subscribe("StartSimulationEvent", sim.startSimulationEventHandler)
 	ENV.EventBus.Subscribe("StopSimulationEvent", sim.stopSimulationEventHandler)
@@ -78,6 +80,9 @@ func (sim *Simulation) Disable() {
 	sim.enabled = false
 	sim.player.Fish.EnableChanges()
 	sim.enemyFish.EnableChanges()
+}
+func (sim *Simulation) IsEnabled() bool {
+	return sim.enabled
 }
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {
@@ -124,10 +129,12 @@ func (sim *Simulation) Player_GetStoredFish(id string) {
 // Event Handlers
 func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 	sim.enabled = true
+	sim.Player_GetFish().DisableChanges()
 }
 
 func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
+	sim.Player_GetFish().EnableChanges()
 }
 func (sim *Simulation) IsGameOver() bool {
 	gameOver := sim.Player_GetFish().AllFishDead()

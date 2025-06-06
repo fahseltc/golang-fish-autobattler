@@ -1,6 +1,6 @@
 package ui
 
-import "fishgame/shapes"
+import "fishgame/ui/shapes"
 
 type Alignment int
 

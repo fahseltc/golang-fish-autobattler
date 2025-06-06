@@ -21,9 +21,6 @@ func NewCollection(env *environment.Env) *Collection {
 	coll.fishSlotMap[2] = nil
 	coll.fishSlotMap[3] = nil
 	coll.fishSlotMap[4] = nil
-
-	env.EventBus.Subscribe("StartSimulationEvent", coll.startSimulationEventHandler)
-	env.EventBus.Subscribe("StopSimulationEvent", coll.stopSimulationEventHandler)
 	return coll
 }
 
@@ -134,13 +131,4 @@ func (coll *Collection) AllFishDead() bool {
 		}
 	}
 	return true
-}
-
-// Event handlers
-func (coll *Collection) startSimulationEventHandler(event environment.Event) {
-	coll.DisableChanges()
-}
-
-func (coll *Collection) stopSimulationEventHandler(event environment.Event) {
-	coll.EnableChanges()
 }
