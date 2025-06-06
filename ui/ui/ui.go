@@ -222,7 +222,7 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 	attackedEvent := event.Data.(environment.FishAttackedEvent)
 	// attackedEvent.Type // todo - add type to line effect
 	sourceIndex, sourceFish := ui.sim.GetFishByID(attackedEvent.SourceId.String())
-	targetIndex, _ := ui.sim.GetFishByID(attackedEvent.SourceId.String())
+	targetIndex, _ := ui.sim.GetFishByID(attackedEvent.TargetId.String())
 	sourceX, sourceY := ui.slotIndexToScreenPos(sourceIndex, true)  // TODO - need ower to tell whether its left or right side.
 	targetX, targetY := ui.slotIndexToScreenPos(targetIndex, false) // TODO - need ower to tell whether its left or right side.
 
