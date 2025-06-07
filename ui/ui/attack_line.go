@@ -18,8 +18,8 @@ type AttackLine struct {
 }
 
 func NewAttackLine(sourceX, sourceY, targetX, targetY int, duration float32) *AttackLine {
-	spriteSizePx := float64(ENV.Get("spriteSizePx").(int))
-	spriteScale := ENV.Get("spriteScale").(float64)
+	spriteSizePx := float64(ENV.Get("sprite.sizeInPx").(int))
+	spriteScale := ENV.Get("sprite.scale").(float64)
 	if sourceX > targetX {
 		// If the source is on the right side, adjust the targetX to end at the right edge of the sprite
 		targetX += int(spriteSizePx * spriteScale)
@@ -34,8 +34,8 @@ func NewAttackLine(sourceX, sourceY, targetX, targetY int, duration float32) *At
 		SourceY:     sourceY + int(spriteSizePx*spriteScale)/2,
 		TargetX:     targetX,
 		TargetY:     targetY + int(spriteSizePx*spriteScale)/2,
-		Duration:    duration,
-		MaxDuration: duration,
+		Duration:    duration / 2,
+		MaxDuration: duration / 2,
 	}
 }
 

@@ -52,5 +52,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 // If you don't have to adjust the screen size with the outside size, just return a fixed size.
 func (g *Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, screenHeight int) {
-	return ENV.Config.Get("internalResolutionW").(int), ENV.Config.Get("internalResolutionH").(int)
+	return ENV.Config.Get("resolution.int.w").(int), ENV.Config.Get("resolution.int.h").(int)
 }

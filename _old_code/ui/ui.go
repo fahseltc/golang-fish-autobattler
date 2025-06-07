@@ -40,8 +40,8 @@ type UI struct {
 func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 	ENV = env
 	// set package consts
-	spriteScale = ENV.Get("spriteScale").(float64)
-	spriteSizePx = ENV.Get("spriteSizePx").(int)
+	spriteScale = ENV.Get("sprite.scale").(float64)
+	spriteSizePx = ENV.Get("sprite.sizeInPx").(int)
 
 	font := ENV.Fonts.Med
 	smallFont := ENV.Fonts.Small

@@ -33,24 +33,33 @@ func NewConfig() *Config {
 	for decoder.More() {
 		decoder.Decode(&data)
 	}
-
-	for key, val := range data {
-		switch val := val.(type) {
-		case json.Number:
-			if n, err := val.Int64(); err == nil {
-				config.Add(key, int(n))
-				break
-			} else if f, err := val.Float64(); err == nil {
-				config.Add(key, f)
-			} else {
-				config.Add(key, val)
+	var process func(prefix string, m map[string]interface{})
+	process = func(prefix string, m map[string]interface{}) {
+		for key, val := range m {
+			fullKey := key
+			if prefix != "" {
+				fullKey = prefix + "." + key
 			}
-		case string:
-			config.Add(key, val)
-		default:
-			log.Fatalf("Unknown JSON type in config, key: %v, val:%v, type:%v", key, val, reflect.TypeOf(val))
+			switch v := val.(type) {
+			case map[string]interface{}:
+				process(fullKey, v)
+			case json.Number:
+				if n, err := v.Int64(); err == nil {
+					config.Add(fullKey, int(n))
+				} else if f, err := v.Float64(); err == nil {
+					config.Add(fullKey, f)
+				} else {
+					config.Add(fullKey, v)
+				}
+			case string:
+				config.Add(fullKey, v)
+			default:
+				log.Fatalf("Unknown JSON type in config, key: %v, val:%v, type:%v", fullKey, v, reflect.TypeOf(v))
+			}
 		}
 	}
+
+	process("", data)
 
 	return config
 }

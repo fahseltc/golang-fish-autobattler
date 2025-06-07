@@ -155,6 +155,10 @@ func (sim *Simulation) GetFishByID(id string) (int, *fish.Fish) {
 	if fish == nil {
 		index, fish = sim.Encounter_GetFish().ById(id)
 	}
+	if fish == nil {
+		index = 999
+		fish = sim.Player_GetInventory().Get((id))
+	}
 	return index, fish
 }
 

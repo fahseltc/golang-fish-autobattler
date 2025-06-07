@@ -18,11 +18,11 @@ type Slot struct {
 }
 
 func NewPlayerSlot(index int) *Slot {
-	yPadding := ENV.Config.Get("slotYpadding").(int)
-	xPos := float32(ENV.Config.Get("playerSlotColumnX").(int))
-	betweenSlotPadding := ENV.Config.Get("betweenSlotPadding").(int)
-	spriteSizePx := ENV.Config.Get("spriteSizePx").(int)
-	spriteScale := ENV.Config.Get("spriteScale").(float64)
+	yPadding := ENV.Config.Get("slot.topPad").(int)
+	xPos := float32(ENV.Config.Get("slot.playerColX").(int))
+	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
+	spriteSizePx := ENV.Config.Get("sprite.sizeInPx").(int)
+	spriteScale := ENV.Config.Get("sprite.scale").(float64)
 	slotImg := util.LoadImage("assets/slot.png")
 	scaled := util.ScaleImage(slotImg, float32(float64(spriteSizePx)*spriteScale), float32(float64(spriteSizePx)*spriteScale))
 	height := float64(spriteSizePx) * spriteScale
