@@ -1,0 +1,9 @@
+1. First graphics
+2. First title screen
+3. First game over screen shown
+4. First time showing initial fish choice screen
+5. Inventory sprite & fish food icon
+6. Initial scene tooltips added
+7. Nice Tooltips
+8. First view of the new ui/sim seperation.
+9. New drag and drop system working in ui/sim seperation model. Dropping into and out of inventory supported.
