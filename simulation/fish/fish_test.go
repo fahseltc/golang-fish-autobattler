@@ -71,7 +71,10 @@ func TestEvent_Activate_WithTarget_SendsFishAttackedEvent(t *testing.T) {
 	if event.Data.(environment.FishAttackedEvent).Damage != 5 {
 		t.Error("Fish attacking should have 5 damage")
 	}
-	if event.Data.(environment.FishAttackedEvent).Id != fish.Id {
+	if event.Data.(environment.FishAttackedEvent).SourceId != fish.Id {
+		t.Error("Fish attacking event should have same ID as fish that attacked")
+	}
+	if event.Data.(environment.FishAttackedEvent).TargetId != target.Id {
 		t.Error("Fish attacking event should have same ID as fish that attacked")
 	}
 	if event.Data.(environment.FishAttackedEvent).Type != Weapon.String() {
