@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: Go Build & Test
 
 on:
   push:
@@ -26,22 +26,3 @@ jobs:
 
       - name: Test
         run: go test -v ./...
-
-      - name: WASM
-        shell: pwsh
-        run: |
-          $Env:GOOS = 'js'
-          $Env:GOARCH = 'wasm'
-          go build -o fishgame.wasm fishgame
-          Remove-Item Env:GOOS
-          Remove-Item Env:GOARCH
-          $goroot = go env GOROOT
-          cp $goroot\lib\wasm\wasm_exec.js .
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-without-markdown
-          path: |
-            fishgame.wasm
-            wasm_exec.js

@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy To GH Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -31,13 +31,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: WASM build
+        shell: pwsh
+        run: |
+          $Env:GOOS = 'js'
+          $Env:GOARCH = 'wasm'
+          go build -o html/fishgame.wasm fishgame
+          Remove-Item Env:GOOS
+          Remove-Item Env:GOARCH
+          $goroot = go env GOROOT
+          cp $goroot\lib\wasm\wasm_exec.js html/
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-without-markdown
+          path: |
+            html/*
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
-          path: '.'
+          path: "html/"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
