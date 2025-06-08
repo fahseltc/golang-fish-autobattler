@@ -41,6 +41,8 @@ jobs:
           Remove-Item Env:GOOS
           Remove-Item Env:GOARCH
           cp fishgame.wasm html/
+          cp data html
+          cp data/config.json html/data/config.json
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4

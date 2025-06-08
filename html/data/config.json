@@ -1,0 +1,32 @@
+{
+    "windowTitle": "Fish Game",
+    "targetFPS": 30,
+    "debugDraw": false,
+    "sprite": {
+        "sizeInPx": 64,
+        "scale": 1.5
+    },
+    "slot": {
+        "topPad": 35,
+        "betweenPad": 10,
+        "playerColX": 400,
+        "encounterColX": 650
+    },
+    "resolution": {
+        "ext": {
+            "w": 1420,
+            "h": 900
+        },
+        "int": {
+            "w": 800,
+            "h": 600
+        }
+    },
+    "tooltip": {
+        "pad": 10,
+        "fish": {
+            "w": 200,
+            "h": 150
+        }
+    }
+}
