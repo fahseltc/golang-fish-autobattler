@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: ["master"]
 
+# see https://www.glfw.org/docs/latest/compile.html
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,7 +22,7 @@ jobs:
           go-version: "1.24"
 
       - name: Install deps
-        run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev libxcursor-dev libgl1-mesa-dev xorg-dev libxi-dev libxext-dev libglfw3-dev
+        run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev libxcursor-dev libgl1-mesa-dev xorg-dev libxi-dev libxext-dev libglfw3-dev libwayland-dev libxkbcommon-dev xorg-dev
       - name: Build
         run: go build -v ./...
 
