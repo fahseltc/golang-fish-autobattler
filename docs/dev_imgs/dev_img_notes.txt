@@ -7,3 +7,4 @@
 7. Nice Tooltips
 8. First view of the new ui/sim seperation.
 9. New drag and drop system working in ui/sim seperation model. Dropping into and out of inventory supported.
+10. new tooltips
