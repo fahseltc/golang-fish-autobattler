@@ -12,7 +12,7 @@ on:
 # see https://www.glfw.org/docs/latest/compile.html
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -21,8 +21,10 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Install deps
-        run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev libxcursor-dev libgl1-mesa-dev xorg-dev libxi-dev libxext-dev libglfw3-dev libwayland-dev libxkbcommon-dev xorg-dev
+      # - name: Install deps
+      #   run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev libxcursor-dev libgl1-mesa-dev xorg-dev libxi-dev libxext-dev libglfw3-dev
+      - name: Build
+        run: go build -v ./...
 
       - name: Test
         run: go test -v ./...
