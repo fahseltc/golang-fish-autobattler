@@ -35,3 +35,13 @@ jobs:
           go build -o fishgame.wasm fishgame
           Remove-Item Env:GOOS
           Remove-Item Env:GOARCH
+          $goroot = go env GOROOT
+          cp $goroot\lib\wasm\wasm_exec.js .
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-without-markdown
+          path: |
+            fishgame.wasm
+            wasm_exec.js
