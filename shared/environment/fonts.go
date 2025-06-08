@@ -2,37 +2,42 @@ package environment
 
 import (
 	"bytes"
-	"fmt"
-	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"golang.org/x/image/font/gofont/goregular"
 )
 
 type Fonts struct {
-	Small text.Face
-	Med   text.Face
-	Large text.Face
+	XSmall text.Face
+	Small  text.Face
+	Med    text.Face
+	Large  text.Face
 }
+
+var fontPath = "assets/fonts/PressStart2P-Regular.ttf"
 
 func NewFontsCollection() *Fonts {
 	fonts := &Fonts{}
-	s, _ := loadFont(12)
+	xs, _ := loadTTFFont(fontPath, 8)
+	fonts.XSmall = xs
+	s, _ := loadTTFFont(fontPath, 12)
 	fonts.Small = s
-	m, _ := loadFont(20)
+	m, _ := loadTTFFont(fontPath, 20)
 	fonts.Med = m
-	l, _ := loadFont(30)
+	l, _ := loadTTFFont(fontPath, 30)
 	fonts.Large = l
 	return fonts
 }
 
-func loadFont(size float64) (text.Face, error) {
-	s, err := text.NewGoTextFaceSource(bytes.NewReader(goregular.TTF))
+func loadTTFFont(path string, size float64) (text.Face, error) {
+	fontBytes, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
-		return nil, fmt.Errorf("Error loading font: %w", err)
+		return nil, err
 	}
-
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(fontBytes))
+	if err != nil {
+		return nil, err
+	}
 	return &text.GoTextFace{
 		Source: s,
 		Size:   size,

@@ -16,11 +16,14 @@ type Sprite struct {
 	Rect     myshapes.Rectangle
 	Img      *ebiten.Image
 	Dragging bool
+	toolTip  TooltipInterface
 
 	defaultXpos int
 
 	previousX int
 	previousY int
+
+	healthBar *ProgressBar
 }
 
 func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
@@ -46,11 +49,15 @@ func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
 }
 
 func NewPlayerFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
-	return newFishSprite(imageRegistry, fish, slotIndex, true)
+	playerSprite := newFishSprite(imageRegistry, fish, slotIndex, true)
+	playerSprite.toolTip = NewFishToolTip(ENV, playerSprite.Rect, LeftAlignment, fish)
+	return playerSprite
 }
 
 func NewEncounterFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
-	return newFishSprite(imageRegistry, fish, slotIndex, false)
+	encounterSprite := newFishSprite(imageRegistry, fish, slotIndex, false)
+	encounterSprite.toolTip = NewFishToolTip(ENV, encounterSprite.Rect, LeftAlignment, fish)
+	return encounterSprite
 }
 
 func newFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int, leftSide bool) *Sprite {
@@ -88,18 +95,38 @@ func newFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex in
 		Img:         scaled,
 		Dragging:    false,
 		defaultXpos: int(xPos),
+		//healthBar: *NewCountDownProgressBar()
 	}
 	return sprite
 }
 
 func (spr *Sprite) Draw(screen *ebiten.Image) {
-
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(spr.Rect.X), float64(spr.Rect.Y))
 	screen.DrawImage(spr.Img, opts)
 
+	//DrawLifeBar(screen, spr.)
+
 	// Draw a plain rectangle with the dimensions of spr.Rect
 	//ebitenutil.DrawRect(screen, float64(spr.Rect.X), float64(spr.Rect.Y), float64(spr.Rect.W), float64(spr.Rect.H), color.RGBA{155, 155, 155, 155})
+}
+
+// func DrawLifeBar(screen *ebiten.Image, healthRatio float64, x, y float64) {
+// 	healthLength := float64((float64(spriteSizePx) * spriteScale) * healthRatio)
+// 	ebitenutil.DrawRect(screen, x, y+4, healthLength, 6, color.RGBA{0, 255, 0, 255})
+// }
+
+// func DrawProgressBar(screen *ebiten.Image, progressRatio float64, x, y float64) {
+// 	progressLength := float64((float64(spriteSizePx) * spriteScale) * progressRatio)
+// 	ebitenutil.DrawRect(screen, x, y+(float64(spriteSizePx)*spriteScale)-8, progressLength, 4, color.White)
+// }
+
+func (spr *Sprite) DrawToolTip(screen *ebiten.Image) {
+	mx, my := ebiten.CursorPosition()
+	if spr.toolTip != nil && !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && spr.Rect.Collides(float32(mx), float32(my)) {
+		spr.toolTip.ReAlign(spr)
+		spr.toolTip.OnHover(screen)
+	}
 }
 
 // Todo: some funny fish flopping/rotation animation while dragging?

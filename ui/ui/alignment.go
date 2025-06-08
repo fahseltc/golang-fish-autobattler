@@ -13,7 +13,7 @@ const (
 )
 
 func (alignment Alignment) Align(source shapes.Rectangle, toBeAligned *shapes.Rectangle) {
-	padding := float32(10)
+	padding := float32(ENV.Config.Get("tooltip.pad").(int))
 	switch alignment {
 	case CenterAlignment:
 		toBeAligned.X = source.X + (source.W-toBeAligned.W)/2
@@ -21,13 +21,13 @@ func (alignment Alignment) Align(source shapes.Rectangle, toBeAligned *shapes.Re
 	case TopAlignment:
 		toBeAligned.X = source.X + (source.W-toBeAligned.W)/2
 		toBeAligned.Y = source.Y
-	case BottomAlignment: // works with initialChoice TT
-		toBeAligned.X = source.X - toBeAligned.W/2
-		toBeAligned.Y = source.Y + source.H/2 + padding
-	case LeftAlignment: // works with in-game TT
-		toBeAligned.X = source.X - toBeAligned.W - padding    // left TT is not centered
-		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2 // left TT is not centered
-	case RightAlignment: // SOON works with in-game TT
+	case BottomAlignment: // WORKS
+		toBeAligned.X = source.X + (source.W-toBeAligned.W)/2
+		toBeAligned.Y = source.Y + source.H + padding
+	case LeftAlignment: // WORKS
+		toBeAligned.X = source.X - toBeAligned.W - padding
+		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2
+	case RightAlignment:
 		toBeAligned.X = source.X + source.W + padding         // right TT is not centered
 		toBeAligned.Y = source.Y + (source.H-toBeAligned.H)/2 // right TT is not centered
 	}

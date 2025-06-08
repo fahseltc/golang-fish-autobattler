@@ -31,6 +31,8 @@ type SimulationInterface interface {
 	Player_GetStoredFish(id string)
 	// MovePlayerItem(*Slot, *Slot) slot object but thats in UI for now and we dont want that?
 	GetFishByID(id string) (int, *fish.Fish)
+	IsPlayerFish(id string) bool
+	IsEncounterFish(id string) bool
 	IsGameOver() bool
 	IsDone() bool
 }
@@ -160,6 +162,14 @@ func (sim *Simulation) GetFishByID(id string) (int, *fish.Fish) {
 		fish = sim.Player_GetInventory().Get((id))
 	}
 	return index, fish
+}
+func (sim *Simulation) IsPlayerFish(id string) bool {
+	_, fish := sim.Player_GetFish().ById(id)
+	return fish != nil
+}
+func (sim *Simulation) IsEncounterFish(id string) bool {
+	_, fish := sim.Encounter_GetFish().ById(id)
+	return fish != nil
 }
 
 // Event Handlers

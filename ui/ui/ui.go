@@ -21,10 +21,11 @@ type UI struct {
 
 	sim simulation.SimulationInterface
 
-	sprites     map[string]*Sprite
-	playerSlots map[int]*Slot
-	inventory   *Sprite
-	attackLines []*AttackLine
+	sprites        map[string]*Sprite
+	playerSlots    map[int]*Slot
+	encounterSlots map[int]*Slot
+	inventory      *Sprite
+	attackLines    []*AttackLine
 
 	startSimBtn *Button
 	stopSimBtn  *Button
@@ -44,6 +45,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 		sim:                  sim,
 		sprites:              make(map[string]*Sprite),
 		playerSlots:          make(map[int]*Slot),
+		encounterSlots:       make(map[int]*Slot),
 		enabled:              false,
 		draggedFromInventory: false,
 	}
@@ -67,6 +69,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 
 	for i := 0; i <= 4; i++ {
 		ui.playerSlots[i] = NewPlayerSlot(i)
+		ui.encounterSlots[i] = NewEncounterSlot(i)
 	}
 
 	ui.inventory = NewInventorySprite(ui.imageRegistry)
@@ -173,6 +176,7 @@ func (ui *UI) updatePlayerFish() {
 				if draggingFish != nil {
 					if ui.draggedFromInventory {
 						ui.sim.Player_GetFish().AddFish(draggingFish, targetSlot)
+						ui.draggingSprite.toolTip.ChangeAlignment(LeftAlignment)
 						ui.draggedFromInventory = false
 					} else {
 						ui.sim.Player_GetFish().MoveFish(idx, targetSlot)
@@ -188,6 +192,7 @@ func (ui *UI) updatePlayerFish() {
 		if ui.inventory.Rect.Collides(float32(mx), float32(my)) {
 			ui.sim.Player_StoreExistingFish(ui.draggingSprite.Id.String())
 			ui.draggingSprite.Dragging = false
+			ui.draggingSprite.toolTip.ChangeAlignment(BottomAlignment)
 			ui.draggingSprite = nil
 		} else {
 			ui.draggingSprite.ResetToPositionBeforeDrag()
@@ -213,11 +218,18 @@ func (ui *UI) updateEncounterFish() {
 			}
 		}
 	}
+
+	// for _, slot := range ui.encounterSlots {
+
+	// }
 }
 
 func (ui *UI) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0, 0, 255, 255})
 	for _, slot := range ui.playerSlots {
+		slot.Draw(screen)
+	}
+	for _, slot := range ui.encounterSlots {
 		slot.Draw(screen)
 	}
 	ui.startSimBtn.Draw(screen)
@@ -229,6 +241,9 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		}
 		for _, line := range ui.attackLines {
 			line.Draw(screen)
+		}
+		for _, sprite := range ui.sprites {
+			sprite.DrawToolTip(screen)
 		}
 
 	}
@@ -247,8 +262,14 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 	// attackedEvent.Type // todo - add type to line effect
 	sourceIndex, sourceFish := ui.sim.GetFishByID(attackedEvent.SourceId.String())
 	targetIndex, _ := ui.sim.GetFishByID(attackedEvent.TargetId.String())
-	sourceX, sourceY := ui.slotIndexToScreenPos(sourceIndex, true)  // TODO - need ower to tell whether its left or right side.
-	targetX, targetY := ui.slotIndexToScreenPos(targetIndex, false) // TODO - need ower to tell whether its left or right side.
+
+	// determine if the SourceID is a player fish or an encounter fish
+	isSourcePlayerOwned := ui.sim.IsPlayerFish(attackedEvent.SourceId.String())
+	sourceX, sourceY := ui.slotIndexToScreenPos(sourceIndex, isSourcePlayerOwned)
+
+	// determine if the TargetID is a player fish or an encounter fish
+	isTargetPlayerOwned := ui.sim.IsPlayerFish(attackedEvent.TargetId.String())
+	targetX, targetY := ui.slotIndexToScreenPos(targetIndex, isTargetPlayerOwned)
 
 	al := NewAttackLine(sourceX, sourceY, targetX, targetY, float32(sourceFish.Stats.MaxDuration))
 	ui.attackLines = append(ui.attackLines, al)

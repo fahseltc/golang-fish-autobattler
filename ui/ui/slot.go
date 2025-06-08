@@ -3,11 +3,9 @@ package ui
 import (
 	"fishgame/ui/shapes"
 	"fishgame/ui/util"
-	"image/color"
 
 	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Slot struct {
@@ -17,9 +15,8 @@ type Slot struct {
 	slotImg *ebiten.Image
 }
 
-func NewPlayerSlot(index int) *Slot {
+func newSlot(index int, xPos float32) *Slot {
 	yPadding := ENV.Config.Get("slot.topPad").(int)
-	xPos := float32(ENV.Config.Get("slot.playerColX").(int))
 	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
 	spriteSizePx := ENV.Config.Get("sprite.sizeInPx").(int)
 	spriteScale := ENV.Config.Get("sprite.scale").(float64)
@@ -41,6 +38,16 @@ func NewPlayerSlot(index int) *Slot {
 	return &slot
 }
 
+func NewPlayerSlot(index int) *Slot {
+	playerXPos := float32(ENV.Config.Get("slot.playerColX").(int))
+	return newSlot(index, playerXPos)
+}
+
+func NewEncounterSlot(index int) *Slot {
+	encounterXPos := float32(ENV.Config.Get("slot.encounterColX").(int))
+	return newSlot(index, encounterXPos)
+}
+
 func (slot *Slot) SetSprite(spr *Sprite) bool {
 	if slot.itemId == nil { // only replace the item if its already empty
 		slot.itemId = spr.Id
@@ -50,11 +57,11 @@ func (slot *Slot) SetSprite(spr *Sprite) bool {
 }
 
 func (slot *Slot) Draw(screen *ebiten.Image) {
-	// opts := &ebiten.DrawImageOptions{}
-	// opts.GeoM.Translate(float64(slot.rect.X), float64(slot.rect.Y))
-	// screen.DrawImage(slot.slotImg, opts)
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Translate(float64(slot.rect.X), float64(slot.rect.Y))
+	screen.DrawImage(slot.slotImg, opts)
 
-	ebitenutil.DrawRect(screen, float64(slot.rect.X), float64(slot.rect.Y), float64(slot.rect.W), float64(slot.rect.H), color.RGBA{200, 200, 155, 255})
+	//ebitenutil.DrawRect(screen, float64(slot.rect.X), float64(slot.rect.Y), float64(slot.rect.W), float64(slot.rect.H), color.RGBA{200, 200, 155, 255})
 }
 
 // func (slot *Slot) IsEmpty() bool {

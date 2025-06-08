@@ -30,7 +30,7 @@ func NewPlayScene(sm *Manager) *Play {
 
 	player := player.NewPlayer(ENV, "player1")
 	player.Fish = collection.NewCollection(ENV)
-	player.Fish.AddFish(fish.NewFish(ENV, "goldfish", "testfish1", fish.NewWeaponStats(20, 1, 5)), 0)
+	player.Fish.AddFish(fish.NewFish(ENV, "goldfish", "He's very golden and smoll and doesn't do much!", fish.NewWeaponStats(20, 1, 5)), 0)
 	player.Fish.AddFish(fish.NewFish(ENV, "cod", "testfish2", fish.NewWeaponStats(30, 1, 5)), 1)
 	//player.Fish.AddFish(fish.NewFish(ENV, "eel", "testfish3", fish.NewWeaponStats(10, 2, 10)), 2)
 	player.Fish.AddFish(fish.NewFish(ENV, "whale", "testfish4", fish.NewWeaponStats(10, 2, 10)), 3)
