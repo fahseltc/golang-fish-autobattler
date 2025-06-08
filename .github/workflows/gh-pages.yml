@@ -40,6 +40,7 @@ jobs:
           go build -o fishgame.wasm fishgame
           Remove-Item Env:GOOS
           Remove-Item Env:GOARCH
+          which go
           cp $goroot\lib\wasm\wasm_exec.js html/
           cp fishgame.wasm html/
 
