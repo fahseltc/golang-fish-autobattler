@@ -176,9 +176,11 @@ func (sim *Simulation) IsEncounterFish(id string) bool {
 func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 	sim.enabled = true
 	sim.Player_GetFish().DisableChanges()
+	sim.Encounter_GetFish().DisableChanges()
 }
 
 func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
 	sim.Player_GetFish().EnableChanges()
+	sim.Encounter_GetFish().DisableChanges()
 }

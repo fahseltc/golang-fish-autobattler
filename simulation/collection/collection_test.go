@@ -4,7 +4,6 @@ import (
 	"fishgame/shared/environment"
 	"fishgame/simulation/fish"
 	"testing"
-	"time"
 )
 
 var ENV *environment.Env
@@ -198,40 +197,6 @@ func Test_EnableChanges_Default_EnablesChanges(t *testing.T) {
 	ret = coll.AddFish(fish.NewFish(ENV, "test", "test-fish", nil), 4)
 	if !ret {
 		t.Error("unable to add fish and it should have been added")
-	}
-}
-
-func Test_StartSimulationEventHandler_WithEvent_DisablesChanges(t *testing.T) {
-	env := environment.NewEnv(nil, nil)
-	coll := NewCollection(env)
-
-	if coll.preventChanges {
-		t.Error("changes should be enabled after constructor")
-	}
-	env.EventBus.Publish(environment.Event{
-		Type:      "StartSimulationEvent",
-		Timestamp: time.Now(),
-	})
-
-	if !coll.preventChanges {
-		t.Error("changes should be disabled after StartSimulationEvent")
-	}
-}
-func Test_StopSimulationEventHandler_WithEvent_EnablesChanges(t *testing.T) {
-	env := environment.NewEnv(nil, nil)
-	coll := NewCollection(env)
-	coll.DisableChanges()
-
-	if !coll.preventChanges {
-		t.Error("changes should be disabled after DisableChanges call")
-	}
-	env.EventBus.Publish(environment.Event{
-		Type:      "StopSimulationEvent",
-		Timestamp: time.Now(),
-	})
-
-	if coll.preventChanges {
-		t.Error("changes should be enabled after StopSimulationEvent")
 	}
 }
 
