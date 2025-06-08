@@ -20,8 +20,8 @@ jobs:
         with:
           go-version: "1.24"
 
-      - name: Install install libx11-dev & libxrandr-dev & libglx-dev
-        run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev
+      - name: Install install libx11-dev & libxrandr-dev & libglx-dev & libgl-dev
+        run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev
 
       - name: Build
         run: go build -v ./...
