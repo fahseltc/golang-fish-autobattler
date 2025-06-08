@@ -41,7 +41,7 @@ jobs:
           Remove-Item Env:GOOS
           Remove-Item Env:GOARCH
           which go
-          cp $goroot\lib\wasm\wasm_exec.js html/
+          cp /usr/bin/go/lib/wasm/wasm_exec.js html/
           cp fishgame.wasm html/
 
       - name: Archive artifacts
