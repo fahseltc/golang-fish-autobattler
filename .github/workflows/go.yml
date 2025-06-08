@@ -21,10 +21,17 @@ jobs:
         with:
           go-version: "1.24"
 
-      # - name: Install deps
-      #   run: sudo apt install -y libx11-dev libxrandr-dev libglx-dev libgl-dev libxcursor-dev libgl1-mesa-dev xorg-dev libxi-dev libxext-dev libglfw3-dev
       - name: Build
         run: go build -v ./...
 
       - name: Test
         run: go test -v ./...
+
+      - name: WASM
+        shell: pwsh
+        run: |
+          $Env:GOOS = 'js'
+          $Env:GOARCH = 'wasm'
+          go build -o fishgame.wasm fishgame
+          Remove-Item Env:GOOS
+          Remove-Item Env:GOARCH

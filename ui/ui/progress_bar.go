@@ -10,43 +10,23 @@ import (
 )
 
 type ProgressBar struct {
-	maxVal     int
-	currentVal int
-	rect       shapes.Rectangle
-	countUp    bool
-	stats      *fish.Stats
+	rect    *shapes.Rectangle
+	stats   *fish.Stats
+	offsetY float32
 }
 
-func NewCountDownProgressBar(max int, rect shapes.Rectangle, stats *fish.Stats) *ProgressBar {
+func NewProgressBar(rect *shapes.Rectangle, stats *fish.Stats) *ProgressBar {
+	spriteSizePx := float64(ENV.Get("sprite.sizeInPx").(int))
+	spriteScale := ENV.Get("sprite.scale").(float64)
+	offset := float32((spriteScale * spriteSizePx)) - 10
 	return &ProgressBar{
-		maxVal:     max,
-		currentVal: max,
-		rect:       rect,
-		countUp:    false,
-		stats:      stats,
-	}
-}
-
-func NewCountUpProgressBar(max int, rect shapes.Rectangle) *ProgressBar {
-	return &ProgressBar{
-		maxVal:     max,
-		currentVal: 0,
-		rect:       rect,
-		countUp:    true,
+		rect:    rect,
+		stats:   stats,
+		offsetY: offset,
 	}
 }
 
 func (pb *ProgressBar) Draw(screen *ebiten.Image) {
-	var ratio float64
-
-	if pb.countUp {
-		ratio = float64(pb.currentVal) / float64(pb.maxVal)
-	} else {
-		ratio = 1 - float64(pb.currentVal)/float64(pb.maxVal)
-	}
-	healthLength := float64(pb.rect.W) * ratio
-	ebitenutil.DrawRect(screen, float64(pb.rect.X), float64(pb.rect.X), healthLength, 6, color.RGBA{0, 255, 0, 255})
+	ratio := float32(pb.stats.CurrentDuration) / float32(pb.stats.MaxDuration)
+	ebitenutil.DrawRect(screen, float64(pb.rect.X), float64(pb.rect.Y+pb.offsetY), float64(ratio*pb.rect.W), 6, color.RGBA{122, 122, 122, 255})
 }
-
-// healthLength := float64((float64(spriteSizePx) * spriteScale) * healthRatio)
-// 	ebitenutil.DrawRect(screen, x, y+4, healthLength, 6, color.RGBA{0, 255, 0, 255})

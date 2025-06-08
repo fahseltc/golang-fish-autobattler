@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fishgame/ui/shapes"
-	"fmt"
 	"image/color"
 	"strings"
 
@@ -53,7 +52,6 @@ func (ta *TextArea) splitTextOntoLines() {
 		} else {
 			currentLine = testLine
 		}
-		fmt.Printf("totalHeight:%v", totalHeight)
 
 	}
 	if currentLine != "" {

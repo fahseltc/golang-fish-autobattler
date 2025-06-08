@@ -6,9 +6,11 @@ import (
 	myshapes "fishgame/ui/shapes"
 	"fishgame/ui/util"
 	"fmt"
+	"image/color"
 
 	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Sprite struct {
@@ -23,15 +25,16 @@ type Sprite struct {
 	previousX int
 	previousY int
 
-	healthBar *ProgressBar
+	healthBar   *HealthBar
+	progressBar *ProgressBar
 }
 
 func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
-	w := 400
+	w := 340
 	h := 520
 	rect := myshapes.Rectangle{
-		X: 0,
-		Y: 50,
+		X: 30,
+		Y: 35,
 		W: float32(w),
 		H: float32(h),
 	}
@@ -51,12 +54,16 @@ func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
 func NewPlayerFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
 	playerSprite := newFishSprite(imageRegistry, fish, slotIndex, true)
 	playerSprite.toolTip = NewFishToolTip(ENV, playerSprite.Rect, LeftAlignment, fish)
+	playerSprite.healthBar = NewHealthProgressBar(&playerSprite.Rect, fish.Stats)
+	playerSprite.progressBar = NewProgressBar(&playerSprite.Rect, fish.Stats)
 	return playerSprite
 }
 
 func NewEncounterFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
 	encounterSprite := newFishSprite(imageRegistry, fish, slotIndex, false)
 	encounterSprite.toolTip = NewFishToolTip(ENV, encounterSprite.Rect, LeftAlignment, fish)
+	encounterSprite.healthBar = NewHealthProgressBar(&encounterSprite.Rect, fish.Stats)
+	encounterSprite.progressBar = NewProgressBar(&encounterSprite.Rect, fish.Stats)
 	return encounterSprite
 }
 
@@ -104,11 +111,16 @@ func (spr *Sprite) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(float64(spr.Rect.X), float64(spr.Rect.Y))
 	screen.DrawImage(spr.Img, opts)
+	if spr.healthBar != nil {
+		spr.healthBar.Draw(screen)
+	}
+	if spr.progressBar != nil {
+		spr.progressBar.Draw(screen)
+	}
 
-	//DrawLifeBar(screen, spr.)
-
-	// Draw a plain rectangle with the dimensions of spr.Rect
-	//ebitenutil.DrawRect(screen, float64(spr.Rect.X), float64(spr.Rect.Y), float64(spr.Rect.W), float64(spr.Rect.H), color.RGBA{155, 155, 155, 155})
+	if ENV.Config.Get("debugDraw").(bool) {
+		ebitenutil.DrawRect(screen, float64(spr.Rect.X), float64(spr.Rect.Y), float64(spr.Rect.W), float64(spr.Rect.H), color.RGBA{155, 155, 155, 155})
+	}
 }
 
 // func DrawLifeBar(screen *ebiten.Image, healthRatio float64, x, y float64) {

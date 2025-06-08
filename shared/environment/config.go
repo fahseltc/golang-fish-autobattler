@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"reflect"
 	"sync"
 )
 
@@ -54,7 +53,8 @@ func NewConfig() *Config {
 			case string:
 				config.Add(fullKey, v)
 			default:
-				log.Fatalf("Unknown JSON type in config, key: %v, val:%v, type:%v", fullKey, v, reflect.TypeOf(v))
+				config.Add(fullKey, v)
+				//log.Fatalf("Unknown JSON type in config, key: %v, val:%v, type:%v", fullKey, v, reflect.TypeOf(v))
 			}
 		}
 	}

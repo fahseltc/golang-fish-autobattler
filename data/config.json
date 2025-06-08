@@ -1,6 +1,7 @@
 {
     "windowTitle": "Fish Game",
     "targetFPS": 30,
+    "debugDraw": false,
     "sprite": {
         "sizeInPx": 64,
         "scale": 1.5

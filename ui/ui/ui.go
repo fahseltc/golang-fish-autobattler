@@ -235,6 +235,7 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 	ui.startSimBtn.Draw(screen)
 	ui.stopSimBtn.Draw(screen)
 	ui.inventory.Draw(screen)
+
 	if ui.enabled {
 		for _, sprite := range ui.sprites {
 			sprite.Draw(screen)

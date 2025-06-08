@@ -34,8 +34,8 @@ func NewAttackLine(sourceX, sourceY, targetX, targetY int, duration float32) *At
 		SourceY:     sourceY + int(spriteSizePx*spriteScale)/2,
 		TargetX:     targetX,
 		TargetY:     targetY + int(spriteSizePx*spriteScale)/2,
-		Duration:    duration / 2,
-		MaxDuration: duration / 2,
+		Duration:    duration / 4,
+		MaxDuration: duration / 4,
 	}
 }
 
