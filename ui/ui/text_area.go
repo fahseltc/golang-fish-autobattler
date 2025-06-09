@@ -62,7 +62,6 @@ func (ta *TextArea) splitTextOntoLines() {
 func (ta *TextArea) Draw(screen *ebiten.Image, ttrect shapes.Rectangle) {
 	ta.rect.X = ttrect.X + 78
 	ta.rect.Y = ttrect.Y + 30
-	ebitenutil.DrawRect(screen, float64(ta.rect.X), float64(ta.rect.Y), float64(ta.rect.W), float64(ta.rect.H), color.RGBA{200, 200, 155, 255})
 	font := ENV.Fonts.XSmall
 	_, th := text.Measure(ta.text, font, 2)
 	th += 2
@@ -74,5 +73,9 @@ func (ta *TextArea) Draw(screen *ebiten.Image, ttrect shapes.Rectangle) {
 		opts.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 		text.Draw(screen, line, font, opts)
 		y += th
+	}
+
+	if ENV.Config.Get("debugDraw").(bool) {
+		ebitenutil.DrawRect(screen, float64(ta.rect.X), float64(ta.rect.Y), float64(ta.rect.W), float64(ta.rect.H), color.RGBA{200, 200, 155, 255})
 	}
 }

@@ -49,6 +49,8 @@ func NewPlayScene(sm *Manager) *Play {
 		Type: "EnableUiEvent",
 	})
 
+	ENV.EventBus.Unsubscribe("EnableUiEvent")
+
 	playScene := &Play{
 		SceneManager: sm,
 		Ui:           ui,
@@ -56,6 +58,7 @@ func NewPlayScene(sm *Manager) *Play {
 		Simulation:   sim,
 		CurrentState: EncounterState,
 	}
+	ENV.EventBus.Subscribe("GameOverEvent", playScene.handleGameOverEvent)
 	return playScene
 }
 
@@ -152,4 +155,8 @@ func (s *Play) Destroy() {
 
 func (s *Play) GetName() string {
 	return "Play"
+}
+
+func (s *Play) handleGameOverEvent(event environment.Event) {
+	s.SceneManager.SwitchTo("GameOver", true)
 }

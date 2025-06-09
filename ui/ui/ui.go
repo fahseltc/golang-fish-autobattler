@@ -261,6 +261,9 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 	sourceIndex, sourceFish := ui.sim.GetFishByID(attackedEvent.SourceId.String())
 	targetIndex, _ := ui.sim.GetFishByID(attackedEvent.TargetId.String())
 
+	if targetIndex == 999 || sourceFish == nil {
+		return
+	}
 	// determine if the SourceID is a player fish or an encounter fish
 	isSourcePlayerOwned := ui.sim.IsPlayerFish(attackedEvent.SourceId.String())
 	sourceX, sourceY := ui.slotIndexToScreenPos(sourceIndex, isSourcePlayerOwned)
@@ -268,7 +271,6 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 	// determine if the TargetID is a player fish or an encounter fish
 	isTargetPlayerOwned := ui.sim.IsPlayerFish(attackedEvent.TargetId.String())
 	targetX, targetY := ui.slotIndexToScreenPos(targetIndex, isTargetPlayerOwned)
-
 	al := NewAttackLine(sourceX, sourceY, targetX, targetY, float32(sourceFish.Stats.MaxDuration))
 	ui.attackLines = append(ui.attackLines, al)
 }
