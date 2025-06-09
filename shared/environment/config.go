@@ -1,9 +1,10 @@
 package environment
 
 import (
+	"bytes"
 	"encoding/json"
+	"fishgame/data"
 	"log"
-	"os"
 	"sync"
 )
 
@@ -16,13 +17,12 @@ func NewConfig() *Config {
 	config := &Config{
 		values: make(map[string]any),
 	}
-	jsonFile, err := os.Open("data/config.json")
-	if err != nil {
-		log.Fatal("unable to open config file")
-	}
-	defer jsonFile.Close()
-
-	decoder := json.NewDecoder(jsonFile)
+	jsonFile := data.ConfigFile
+	var err error
+	decoder := json.NewDecoder(
+		// Use a bytes.Reader to treat embeddedConfig as an io.Reader
+		bytes.NewReader(jsonFile),
+	)
 	decoder.UseNumber()
 	if err != nil {
 		log.Fatal("unable to decode config file")
