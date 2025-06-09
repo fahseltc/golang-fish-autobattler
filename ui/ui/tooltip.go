@@ -39,8 +39,8 @@ func NewFishToolTip(env *environment.Env, rect shapes.Rectangle, alignment Align
 	ttW := float32(env.Config.Get("tooltip.fish.w").(int))
 	ttH := float32(env.Config.Get("tooltip.fish.h").(int))
 	ttRect := &shapes.Rectangle{X: rect.X, Y: rect.Y, W: ttW, H: ttH}
-	scaledBg := util.ScaleImage(util.LoadImage("assets/ui/tooltip/grey_panel.png"), ttW, ttH)
-	//hpIcon := util.ScaleImage(util.LoadImage("assets/ui/tooltip/shield.png"), 50, 50)
+	scaledBg := util.ScaleImage(util.LoadImage("ui/tooltip/grey_panel.png"), ttW, ttH)
+	//hpIcon := util.ScaleImage(util.LoadImage("ui/tooltip/shield.png"), 50, 50)
 	alignment.Align(rect, ttRect)
 	tt := &FishToolTip{
 		tooltip: &Tooltip{
@@ -50,8 +50,8 @@ func NewFishToolTip(env *environment.Env, rect shapes.Rectangle, alignment Align
 			alignment: alignment,
 		},
 		fish:        fish,
-		hpIcon:      util.LoadImage("assets/ui/tooltip/shield.png"),
-		damagePanel: util.LoadImage("assets/ui/tooltip/damage_panel_plain.png"),
+		hpIcon:      util.LoadImage("ui/tooltip/shield.png"),
+		damagePanel: util.LoadImage("ui/tooltip/damage_panel_plain.png"),
 		textArea:    NewTextArea(fish.Description, shapes.Rectangle{X: ttRect.X + 78, Y: ttRect.Y + 30, W: 110, H: 110}),
 	}
 	return tt
@@ -153,10 +153,10 @@ func (tt *FishToolTip) ChangeAlignment(alignment Alignment) {
 // 				W: w,
 // 				H: h,
 // 			},
-// 			bg: util.LoadImage("assets/ui/tooltip/grey_panel.png"),
+// 			bg: util.LoadImage("ui/tooltip/grey_panel.png"),
 // 		},
-// 		hpIcon:     util.LoadImage("assets/ui/tooltip/shield.png"),
-// 		damageIcon: util.LoadImage("assets/ui/tooltip/damage_panel.png"),
+// 		hpIcon:     util.LoadImage("ui/tooltip/shield.png"),
+// 		damageIcon: util.LoadImage("ui/tooltip/damage_panel.png"),
 // 		alignment:  alignment,
 // 		font:       font,
 // 		item:       item,

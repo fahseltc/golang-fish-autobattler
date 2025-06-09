@@ -43,7 +43,7 @@ func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
 
 	g := &GameOver{
 		env:          env,
-		bg:           util.LoadImage("assets/bg/game_over.png"),
+		bg:           util.LoadImage("bg/game_over.png"),
 		SceneManager: sm,
 		restartBtn:   restartBtn,
 		menuBtn:      menuBtn,

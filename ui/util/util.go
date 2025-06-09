@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fishgame/assets"
 	"fmt"
 	"image/color"
 	"log"
@@ -13,15 +14,18 @@ import (
 )
 
 func LoadImage(filePath string) *ebiten.Image {
-	img, _, err := ebitenutil.NewImageFromFile(filePath)
+	img, _, err := ebitenutil.NewImageFromFileSystem(assets.Files, filePath)
 	if err != nil {
 		return nil
+	}
+	if img == nil {
+		img, _, _ = ebitenutil.NewImageFromFileSystem(assets.Files, "TEXTURE_MISSING.png")
 	}
 	return img
 }
 
 func ScaleImage(input *ebiten.Image, newWidth float32, newHeight float32) *ebiten.Image {
-	imgW, imgH := input.Size()
+	imgW, imgH := input.Bounds().Dx(), input.Bounds().Dy()
 	//example: input image is 300,200 and we want to draw it at 200,100 size
 	wScale := newWidth / float32(imgW)
 	hScale := newHeight / float32(imgH)

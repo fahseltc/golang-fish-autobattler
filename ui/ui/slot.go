@@ -20,7 +20,7 @@ func newSlot(index int, xPos float32) *Slot {
 	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
 	spriteSizePx := ENV.Config.Get("sprite.sizeInPx").(int)
 	spriteScale := ENV.Config.Get("sprite.scale").(float64)
-	slotImg := util.LoadImage("assets/slot.png")
+	slotImg := util.LoadImage("slot.png")
 	scaled := util.ScaleImage(slotImg, float32(float64(spriteSizePx)*spriteScale), float32(float64(spriteSizePx)*spriteScale))
 	height := float64(spriteSizePx) * spriteScale
 	yPos := float32(index)*float32(int(height)+betweenSlotPadding) + float32(yPadding)
@@ -91,7 +91,7 @@ func (slot *Slot) Draw(screen *ebiten.Image) {
 // 				W: float32(slot.rect.W + 100),
 // 				H: float32(slot.rect.H + 100),
 // 			},
-// 			bg: util.LoadImage(nil, "assets/ui/tooltip/grey_panel.png"),
+// 			bg: util.LoadImage(nil, "ui/tooltip/grey_panel.png"),
 // 		}
 // 		if playerNum == 1 {
 // 			LeftAlignment.Align(slot.rect, &tt.rect)

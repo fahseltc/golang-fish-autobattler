@@ -3,7 +3,6 @@ package ui
 import (
 	"fishgame/shared/environment"
 	"fishgame/simulation/simulation"
-	images "fishgame/ui/images"
 	"fishgame/ui/shapes"
 	"fmt"
 	"image/color"
@@ -16,8 +15,7 @@ import (
 var ENV *environment.Env
 
 type UI struct {
-	Env           *environment.Env
-	imageRegistry *images.Registry
+	Env *environment.Env
 
 	sim simulation.SimulationInterface
 
@@ -41,7 +39,6 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 
 	ui := &UI{
 		Env:                  env,
-		imageRegistry:        images.NewRegistry(),
 		sim:                  sim,
 		sprites:              make(map[string]*Sprite),
 		playerSlots:          make(map[int]*Slot),
@@ -72,7 +69,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 		ui.encounterSlots[i] = NewEncounterSlot(i)
 	}
 
-	ui.inventory = NewInventorySprite(ui.imageRegistry)
+	ui.inventory = NewInventorySprite()
 
 	// StartSimulationEvent - no data associated
 	// StopSimulationEvent - no data associated
@@ -124,7 +121,7 @@ func (ui *UI) updatePlayerFish() {
 			if fish.IsDead() { // the sim fish is dead, remove its sprite
 				delete(ui.sprites, id.String())
 			} else if ui.sprites[id.String()] == nil { // the sim fish is new and needs a sprite made
-				sprite := NewPlayerFishSprite(ui.imageRegistry, fish, index)
+				sprite := NewPlayerFishSprite(fish, index)
 				ui.sprites[id.String()] = sprite
 			} else if ui.sprites[id.String()] != nil { // the sim fish is already added to the list of sprites
 				sprite := ui.sprites[id.String()]
@@ -213,7 +210,7 @@ func (ui *UI) updateEncounterFish() {
 			if fish.IsDead() {
 				delete(ui.sprites, id.String())
 			} else if ui.sprites[id.String()] == nil {
-				sprite := NewEncounterFishSprite(ui.imageRegistry, fish, index)
+				sprite := NewEncounterFishSprite(fish, index)
 				ui.sprites[id.String()] = sprite
 			}
 		}

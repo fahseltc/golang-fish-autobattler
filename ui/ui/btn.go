@@ -42,9 +42,9 @@ func defaultBtnOpts() Button {
 	defaultHeight := float32(100.0)
 	//font := ENV.Fonts.Med
 	font, _ := util.LoadFont(20)
-	defaultImg := util.LoadImage("assets/ui/btn/green_button.png")
+	defaultImg := util.LoadImage("ui/btn/green_button.png")
 	defaultImg = util.ScaleImage(defaultImg, defaultWidth, defaultHeight)
-	pressed := util.LoadImage("assets/ui/btn/green_button_pressed.png")
+	pressed := util.LoadImage("ui/btn/green_button_pressed.png")
 	pressed = util.ScaleImage(pressed, defaultWidth, defaultHeight)
 	return Button{
 		rect: shapes.Rectangle{
@@ -68,9 +68,9 @@ func WithText(txt string) BtnOptFunc {
 func WithRect(rect shapes.Rectangle) BtnOptFunc {
 	return func(btn *Button) {
 		btn.rect = rect
-		defaultImg := util.LoadImage("assets/ui/btn/green_button.png")
+		defaultImg := util.LoadImage("ui/btn/green_button.png")
 		defaultImg = util.ScaleImage(defaultImg, rect.W, rect.H)
-		pressed := util.LoadImage("assets/ui/btn/green_button_pressed.png")
+		pressed := util.LoadImage("ui/btn/green_button_pressed.png")
 		pressed = util.ScaleImage(pressed, rect.W, rect.H)
 
 		btn.currentImg = defaultImg

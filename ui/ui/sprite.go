@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fishgame/simulation/fish"
-	images "fishgame/ui/images"
 	myshapes "fishgame/ui/shapes"
 	"fishgame/ui/util"
 	"fmt"
@@ -29,7 +28,7 @@ type Sprite struct {
 	progressBar *ProgressBar
 }
 
-func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
+func NewInventorySprite() *Sprite {
 	w := 340
 	h := 520
 	rect := myshapes.Rectangle{
@@ -39,9 +38,9 @@ func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
 		H: float32(h),
 	}
 
-	img := imageRegistry.Images["pond.png"]
+	img := util.LoadImage("pond.png")
 	if img == nil {
-		img = imageRegistry.Images["TEXTURE_MISSING.png"]
+		img = util.LoadImage("TEXTURE_MISSING.png")
 	}
 	scaled := util.ScaleImage(img, float32(w), float32(h))
 
@@ -51,27 +50,27 @@ func NewInventorySprite(imageRegistry *images.Registry) *Sprite {
 	}
 }
 
-func NewPlayerFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
-	playerSprite := newFishSprite(imageRegistry, fish, slotIndex, true)
+func NewPlayerFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
+	playerSprite := newFishSprite(fish, slotIndex, true)
 	playerSprite.toolTip = NewFishToolTip(ENV, playerSprite.Rect, LeftAlignment, fish)
 	playerSprite.healthBar = NewHealthProgressBar(&playerSprite.Rect, fish.Stats)
 	playerSprite.progressBar = NewProgressBar(&playerSprite.Rect, fish.Stats)
 	return playerSprite
 }
 
-func NewEncounterFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int) *Sprite {
-	encounterSprite := newFishSprite(imageRegistry, fish, slotIndex, false)
+func NewEncounterFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
+	encounterSprite := newFishSprite(fish, slotIndex, false)
 	encounterSprite.toolTip = NewFishToolTip(ENV, encounterSprite.Rect, LeftAlignment, fish)
 	encounterSprite.healthBar = NewHealthProgressBar(&encounterSprite.Rect, fish.Stats)
 	encounterSprite.progressBar = NewProgressBar(&encounterSprite.Rect, fish.Stats)
 	return encounterSprite
 }
 
-func newFishSprite(imageRegistry *images.Registry, fish *fish.Fish, slotIndex int, leftSide bool) *Sprite {
+func newFishSprite(fish *fish.Fish, slotIndex int, leftSide bool) *Sprite {
 	spriteScale := ENV.Config.Get("sprite.scale").(float64)
-	img := imageRegistry.Images[fmt.Sprintf("fish/%v.png", fish.Name)]
+	img := util.LoadImage(fmt.Sprintf("fish/%v.png", fish.Name))
 	if img == nil {
-		img = imageRegistry.Images["TEXTURE_MISSING.png"]
+		img = util.LoadImage("TEXTURE_MISSING.png")
 	}
 	w, h := img.Size()
 	scaled := ebiten.NewImage(int(float64(w)*spriteScale), int(float64(h)*spriteScale))

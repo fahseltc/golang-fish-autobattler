@@ -2,7 +2,8 @@ package environment
 
 import (
 	"bytes"
-	"os"
+	"fishgame/assets"
+	"io"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
@@ -14,7 +15,7 @@ type Fonts struct {
 	Large  text.Face
 }
 
-var fontPath = "assets/fonts/PressStart2P-Regular.ttf"
+var fontPath = "fonts/PressStart2P-Regular.ttf"
 
 func NewFontsCollection() *Fonts {
 	fonts := &Fonts{}
@@ -30,10 +31,15 @@ func NewFontsCollection() *Fonts {
 }
 
 func loadTTFFont(path string, size float64) (text.Face, error) {
-	fontBytes, err := os.ReadFile(path)
+	fontFile, err := assets.Files.Open(path)
 	if err != nil {
 		return nil, err
 	}
+	fontBytes, err := io.ReadAll(fontFile)
+	if err != nil {
+		return nil, err
+	}
+
 	s, err := text.NewGoTextFaceSource(bytes.NewReader(fontBytes))
 	if err != nil {
 		return nil, err

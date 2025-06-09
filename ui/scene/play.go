@@ -13,9 +13,8 @@ import (
 
 type Play struct {
 	SceneManager *Manager
-	//ItemsRegistry *item.Registry
-	Ui     *ui.UI
-	Player *player.Player
+	Ui           *ui.UI
+	Player       *player.Player
 	//EncounterManager *encounter.Manager
 
 	Simulation simulation.SimulationInterface
