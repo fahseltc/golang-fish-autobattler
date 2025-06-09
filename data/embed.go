@@ -1,6 +1,8 @@
 package data
 
-import _ "embed"
+import (
+	"embed"
+)
 
-//go:embed config.json
-var ConfigFile []byte
+//go:embed *
+var Files embed.FS
