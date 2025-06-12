@@ -1,4 +1,4 @@
-package ui
+package elements
 
 import (
 	"fishgame/ui/shapes"

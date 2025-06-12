@@ -111,8 +111,8 @@ func (tt *FishToolTip) OnHover(screen *ebiten.Image) {
 	// Draw DPS label
 	util.DrawCenteredText(screen, font, "DPS", dmgPanelX+32, dmgPanelY+58, txtColor)
 	// Draw dps text
-	dps := tt.fish.Stats.Damage / int(tt.fish.Stats.MaxDuration)
-	dpsTxt := fmt.Sprintf("%v", dps)
+	dps := float32(tt.fish.Stats.Damage) / float32(tt.fish.Stats.MaxDuration)
+	dpsTxt := fmt.Sprintf("%.2f", dps)
 	util.DrawCenteredText(screen, font, dpsTxt, dmgPanelX+32, dmgPanelY+68, txtColor)
 
 	// draw textArea

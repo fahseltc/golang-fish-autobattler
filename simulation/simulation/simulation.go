@@ -11,8 +11,9 @@ import (
 )
 
 type Simulation struct {
-	player    *player.Player
-	enemyFish *collection.Collection
+	player       *player.Player
+	enemyFish    *collection.Collection
+	fishRegistry *fish.FishStatsRegistry
 
 	enabled bool
 }
@@ -22,19 +23,22 @@ type SimulationInterface interface {
 	Enable()
 	Disable()
 	IsEnabled() bool
+	IsInitialized() bool
 	Player_GetFish() *collection.Collection
-	Encounter_GetFish() *collection.Collection
 	Player_GetInventory() *inventory.Inventory
 	Player_GetAllStoredFish() []*fish.Fish
 	Player_StoreNewFish(it *fish.Fish)
 	Player_StoreExistingFish(id string) error
 	Player_GetStoredFish(id string)
+	Encounter_GetFish() *collection.Collection
+	Encounter_SetFish(*collection.Collection)
 	// MovePlayerItem(*Slot, *Slot) slot object but thats in UI for now and we dont want that?
 	GetFishByID(id string) (int, *fish.Fish)
 	IsPlayerFish(id string) bool
 	IsEncounterFish(id string) bool
 	IsGameOver() bool
 	IsDone() bool
+	GetFishRegistry() *fish.FishStatsRegistry
 }
 
 // this should have all of the game logic in it and nothing external
@@ -44,14 +48,14 @@ type SimulationInterface interface {
 
 var ENV *environment.Env
 
-func NewSimulation(env *environment.Env, player *player.Player, enemyFish *collection.Collection) SimulationInterface {
+func NewSimulation(env *environment.Env, player *player.Player) SimulationInterface {
 
 	ENV = env
 
 	sim := &Simulation{
-		player:    player,
-		enemyFish: enemyFish,
-		enabled:   false,
+		player:       player,
+		fishRegistry: fish.NewFishStatsRegistry(ENV),
+		enabled:      false,
 	}
 	fmt.Printf("SIM Constructor--ENV UUID:%v \n", env.UUID.String())
 
@@ -62,8 +66,7 @@ func NewSimulation(env *environment.Env, player *player.Player, enemyFish *colle
 }
 
 func (sim *Simulation) Update(dt float64) {
-	//sim.encounter.Update(dt, sim.player)
-	if sim.enabled {
+	if sim.enabled && sim.IsInitialized() {
 		// calc DT?
 		sim.player.Fish.Update(dt, sim.Encounter_GetFish())
 		sim.enemyFish.Update(dt, sim.Player_GetFish())
@@ -87,12 +90,17 @@ func (sim *Simulation) Disable() {
 func (sim *Simulation) IsEnabled() bool {
 	return sim.enabled
 }
+func (sim *Simulation) IsInitialized() bool {
+	for _, fish := range sim.enemyFish.GetAllFish() {
+		if fish != nil {
+			return true
+		}
+	}
+	return false
+}
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {
 	return sim.player.Fish
-}
-func (sim *Simulation) Encounter_GetFish() *collection.Collection {
-	return sim.enemyFish
 }
 
 func (sim *Simulation) Player_GetInventory() *inventory.Inventory {
@@ -113,21 +121,28 @@ func (sim *Simulation) Player_StoreExistingFish(id string) error {
 				if success {
 					fishToMove = fish
 				} else {
-					return fmt.Errorf("Unable to remove fish with ID:%v from player collection", id)
+					return fmt.Errorf("unable to remove fish with ID:%v from player collection", id)
 				}
 			}
 		}
 	}
 	if fishToMove == nil {
-		return fmt.Errorf("No fish found with ID:%v", id)
+		return fmt.Errorf("no fish found with ID:%v", id)
 	}
 	sim.Player_StoreNewFish(fishToMove)
 	return nil // success
 }
-
 func (sim *Simulation) Player_GetStoredFish(id string) {
 	sim.player.Inventory.Get(id)
 }
+
+func (sim *Simulation) Encounter_GetFish() *collection.Collection {
+	return sim.enemyFish
+}
+func (sim *Simulation) Encounter_SetFish(encounterFish *collection.Collection) {
+	sim.enemyFish = encounterFish
+}
+
 func (sim *Simulation) IsGameOver() bool {
 	gameOver := sim.Player_GetFish().AllFishDead()
 	if gameOver {
@@ -171,16 +186,21 @@ func (sim *Simulation) IsEncounterFish(id string) bool {
 	_, fish := sim.Encounter_GetFish().ById(id)
 	return fish != nil
 }
+func (sim *Simulation) GetFishRegistry() *fish.FishStatsRegistry {
+	return sim.fishRegistry
+}
 
 // Event Handlers
 func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
-	sim.enabled = true
-	sim.Player_GetFish().DisableChanges()
-	sim.Encounter_GetFish().DisableChanges()
+	if !sim.Encounter_GetFish().AllFishDead() { // prevent simulation from starting when all the enemies are dead!
+		sim.enabled = true
+		sim.Player_GetFish().DisableChanges()
+		sim.Encounter_GetFish().DisableChanges()
+	}
 }
 
 func (sim *Simulation) stopSimulationEventHandler(event environment.Event) {
 	sim.enabled = false
 	sim.Player_GetFish().EnableChanges()
-	sim.Encounter_GetFish().DisableChanges()
+	sim.Encounter_GetFish().EnableChanges()
 }

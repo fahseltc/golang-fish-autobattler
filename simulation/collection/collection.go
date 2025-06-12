@@ -25,20 +25,32 @@ func NewCollection(env *environment.Env) *Collection {
 }
 
 func (coll *Collection) Update(dt float64, enemyColl *Collection) {
-	for _, fish := range coll.fishSlotMap {
+	for index, fish := range coll.fishSlotMap {
 		if fish != nil && fish.IsAlive() {
 			target := enemyColl.GetRandomFish()
 			if target != nil {
-				fish.Update(dt, target)
+				//fish.Update(dt, target)
+				fish.Stats.CurrentDuration += dt
+				if fish.Stats.CurrentDuration >= fish.Stats.MaxDuration {
+					fish.Stats.ActivateFunc(fish, target, index, coll.GetAllFish()) // we could also pass the enemyCollection in here later if needed.
+					fish.Stats.CurrentDuration -= fish.Stats.MaxDuration
+				}
+				fish.UpdateDebuffs(dt)
 			}
 		}
 	}
 }
 
 func (coll *Collection) GetAllFish() []*fish.Fish {
+	if coll == nil {
+		return nil
+	}
 	arr := make([]*fish.Fish, 5)
 	for i := 0; i < 5; i++ {
-		arr[i] = coll.fishSlotMap[i]
+		fish := coll.fishSlotMap[i]
+		if fish != nil {
+			arr[i] = coll.fishSlotMap[i]
+		}
 	}
 	return arr
 }
@@ -140,10 +152,14 @@ func (coll *Collection) MoveFish(sourceIndex int, targetIndex int) bool {
 	}
 }
 func (coll *Collection) DisableChanges() {
-	coll.preventChanges = true
+	if coll != nil {
+		coll.preventChanges = true
+	}
 }
 func (coll *Collection) EnableChanges() {
-	coll.preventChanges = false
+	if coll != nil {
+		coll.preventChanges = false
+	}
 }
 func (coll *Collection) IsChangeable() bool {
 	return !coll.preventChanges

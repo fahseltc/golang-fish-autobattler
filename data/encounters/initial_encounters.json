@@ -52,7 +52,17 @@
                     "font_size": 20
                 }
             ],
-            "rewards": []
+            "rewards": [
+                {
+                    "fish": [
+                        "Salmon",
+                        "Salmon"
+                    ]
+                },
+                {
+                    "fish": {}
+                }
+            ]
         }
     ]
 }

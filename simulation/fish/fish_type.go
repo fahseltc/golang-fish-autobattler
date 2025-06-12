@@ -8,6 +8,7 @@ const (
 	AdjacencyBasedWeapon
 	Reactive
 	VenomousBasedWeapon
+	SoloBasedWeapon
 )
 
 var itemNames = map[Type]string{
@@ -16,6 +17,7 @@ var itemNames = map[Type]string{
 	AdjacencyBasedWeapon: "adjacencyBasedWeapon",
 	Reactive:             "reactive",
 	VenomousBasedWeapon:  "venomousBasedWeapon",
+	SoloBasedWeapon:      "soloBasedWeapon",
 }
 
 var itemTypes = map[string]Type{
@@ -24,6 +26,7 @@ var itemTypes = map[string]Type{
 	"adjacencyBasedWeapon": AdjacencyBasedWeapon,
 	"reactive":             Reactive,
 	"venomousBasedWeapon":  VenomousBasedWeapon,
+	"soloBasedWeapon":      SoloBasedWeapon,
 }
 
 func (it Type) String() string {
@@ -38,7 +41,7 @@ func TypeFromString(s string) Type {
 	}
 }
 
-func (it Type) ToBehaviorFunc() func(*Fish, *Fish) bool {
+func (it Type) ToBehaviorFunc() func(*Fish, *Fish, int, []*Fish) bool {
 	switch it {
 	case Weapon:
 		return AttackingBehavior
@@ -49,6 +52,8 @@ func (it Type) ToBehaviorFunc() func(*Fish, *Fish) bool {
 	// Reactive
 	case VenomousBasedWeapon:
 		return VenomousBehavior
+	case SoloBasedWeapon:
+		return SoloAttackingBehavior
 	default:
 		return AttackingBehavior
 	}

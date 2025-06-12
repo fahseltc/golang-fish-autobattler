@@ -1,32 +1,45 @@
 package ui
 
 import (
+	"fishgame/encounter"
 	"fishgame/shared/environment"
+	"fishgame/simulation/fish"
 	"fishgame/simulation/simulation"
+	"fishgame/ui/dialogs"
+	"fishgame/ui/elements"
 	"fishgame/ui/shapes"
 	"fmt"
 	"image/color"
+	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+type DialogInterface interface {
+	Draw(screen *ebiten.Image)
+	Update()
+	IsCompleted() bool
+}
+
 var ENV *environment.Env
 
 type UI struct {
 	Env *environment.Env
 
-	sim simulation.SimulationInterface
+	sim          simulation.SimulationInterface
+	encounterMgr *encounter.Manager
 
 	sprites        map[string]*Sprite
 	playerSlots    map[int]*Slot
 	encounterSlots map[int]*Slot
 	inventory      *Sprite
 	attackLines    []*AttackLine
+	dialogs        []DialogInterface
 
-	startSimBtn *Button
-	stopSimBtn  *Button
+	startSimBtn *elements.Button
+	stopSimBtn  *elements.Button
 
 	enabled bool
 
@@ -34,34 +47,35 @@ type UI struct {
 	draggedFromInventory bool
 }
 
-func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
+func NewUI(env *environment.Env, sim simulation.SimulationInterface, encounterMgr *encounter.Manager) *UI {
 	ENV = env
 
 	ui := &UI{
 		Env:                  env,
 		sim:                  sim,
+		encounterMgr:         encounterMgr,
 		sprites:              make(map[string]*Sprite),
 		playerSlots:          make(map[int]*Slot),
 		encounterSlots:       make(map[int]*Slot),
-		enabled:              false,
+		enabled:              true,
 		draggedFromInventory: false,
 	}
 
-	ui.startSimBtn = NewButton(
-		WithRect(shapes.Rectangle{X: 570, Y: 270, W: 75, H: 50}),
-		WithText("Start"),
-		WithClickFunc(func() {
+	ui.startSimBtn = elements.NewButton(
+		elements.WithRect(shapes.Rectangle{X: 570, Y: 270, W: 75, H: 50}),
+		elements.WithText("Start"),
+		elements.WithClickFunc(func() {
 			env.EventBus.Publish(environment.Event{Type: "StartSimulationEvent", Timestamp: time.Now()})
 		}),
-		WithCenteredPos(),
+		elements.WithCenteredPos(),
 	)
-	ui.stopSimBtn = NewButton(
-		WithRect(shapes.Rectangle{X: 570, Y: 330, W: 75, H: 50}),
-		WithText("Stop"),
-		WithClickFunc(func() {
+	ui.stopSimBtn = elements.NewButton(
+		elements.WithRect(shapes.Rectangle{X: 570, Y: 330, W: 75, H: 50}),
+		elements.WithText("Stop"),
+		elements.WithClickFunc(func() {
 			env.EventBus.Publish(environment.Event{Type: "StopSimulationEvent", Timestamp: time.Now()})
 		}),
-		WithCenteredPos(),
+		elements.WithCenteredPos(),
 	)
 
 	for i := 0; i <= 4; i++ {
@@ -82,7 +96,8 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface) *UI {
 	//ENV.EventBus.Subscribe("GameOverEvent", func(event environment.Event) {})
 	//ENV.EventBus.Subscribe("EncounterDoneEvent", func(event environment.Event) {})
 	ENV.EventBus.Subscribe("DisableUiEvent", ui.handleDisableUiEvent)
-	ENV.EventBus.Subscribe("EnableUiEvent", ui.HandleEnableUiEvent)
+	ENV.EventBus.Subscribe("EnableUiEvent", ui.handleEnableUiEvent)
+	ENV.EventBus.Subscribe("EncounterStartedEvent", ui.handleEncounterStartedEvent)
 
 	return ui
 }
@@ -97,6 +112,22 @@ func (ui *UI) Update(dt float64) {
 
 		for _, line := range ui.attackLines {
 			line.Update(dt)
+		}
+
+		for i, dialog := range ui.dialogs {
+			if dialog.IsCompleted() {
+				ui.dialogs = append(ui.dialogs[:i], ui.dialogs[i+1:]...)
+				if len(ui.dialogs) == 0 {
+					ENV.EventBus.Publish(environment.Event{
+						Type: "EncounterStartedEvent",
+						Data: environment.EncounterStartedEvent{
+							EncounterType: "battle",
+						},
+					})
+				}
+			} else {
+				dialog.Update()
+			}
 		}
 	}
 }
@@ -114,17 +145,35 @@ func (ui *UI) updateSpritePositionsFromSim() {
 	}
 }
 
+func (ui *UI) deleteOrAddOrFindFish(fish *fish.Fish, index int) *Sprite {
+	if fish.IsDead() { // the sim fish is dead, remove its sprite
+		delete(ui.sprites, fish.Id.String())
+		return nil
+	} else if ui.sprites[fish.Id.String()] == nil { // the sim fish is new and needs a sprite made
+		var sprite *Sprite
+		if index == 999 { // fish in inventory
+			sprite = NewInventoryFishSprite(fish)
+		} else {
+			sprite = NewPlayerFishSprite(fish, index)
+		}
+		ui.sprites[fish.Id.String()] = sprite
+		return sprite
+	} else if ui.sprites[fish.Id.String()] != nil { // the sim fish is already added to the list of sprites
+		return ui.sprites[fish.Id.String()]
+	} else { // the fish is already dead
+		return nil
+	}
+}
+
 func (ui *UI) updatePlayerFish() {
-	for index, fish := range ui.sim.Player_GetFish().GetAllFish() {
-		if fish != nil {
-			id := fish.Id
-			if fish.IsDead() { // the sim fish is dead, remove its sprite
-				delete(ui.sprites, id.String())
-			} else if ui.sprites[id.String()] == nil { // the sim fish is new and needs a sprite made
-				sprite := NewPlayerFishSprite(fish, index)
-				ui.sprites[id.String()] = sprite
-			} else if ui.sprites[id.String()] != nil { // the sim fish is already added to the list of sprites
-				sprite := ui.sprites[id.String()]
+	if ui.sim.IsInitialized() {
+		// Handle fish in slots
+		for index, fish := range ui.sim.Player_GetFish().GetAllFish() {
+			if fish != nil {
+				sprite := ui.deleteOrAddOrFindFish(fish, index)
+				if sprite == nil {
+					continue
+				}
 
 				// Handle Clicks
 				if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !ui.sim.IsEnabled() {
@@ -138,18 +187,23 @@ func (ui *UI) updatePlayerFish() {
 				}
 			}
 		}
-	}
-	for _, fish := range ui.sim.Player_GetInventory().GetAll() {
-		if fish != nil {
-			sprite := ui.sprites[fish.Id.String()]
-			if sprite != nil && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !ui.sim.IsEnabled() {
-				mx, my := ebiten.CursorPosition()
-				if sprite.Rect.Collides(float32(mx), float32(my)) {
-					fmt.Println("click collides w/ inventory fish")
-					ui.draggedFromInventory = true
-					sprite.Dragging = true
-					sprite.SavePositionBeforeDrag()
-					ui.draggingSprite = sprite
+		// Handle fish in inventory
+		for _, fish := range ui.sim.Player_GetInventory().GetAll() {
+			if fish != nil {
+				sprite := ui.deleteOrAddOrFindFish(fish, 999)
+				if sprite == nil {
+					continue
+				}
+				// create sprite for fish in inventory
+				if sprite != nil && inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !ui.sim.IsEnabled() {
+					mx, my := ebiten.CursorPosition()
+					if sprite.Rect.Collides(float32(mx), float32(my)) {
+						fmt.Println("click collides w/ inventory fish")
+						ui.draggedFromInventory = true
+						sprite.Dragging = true
+						sprite.SavePositionBeforeDrag()
+						ui.draggingSprite = sprite
+					}
 				}
 			}
 		}
@@ -243,15 +297,31 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		for _, sprite := range ui.sprites {
 			sprite.DrawToolTip(screen)
 		}
-
+		for _, dialog := range ui.dialogs {
+			dialog.Draw(screen)
+		}
 	}
+}
+func (ui *UI) slotIndexToScreenPos(index int, leftSide bool) (int, int) {
+	var xPos float32
+	if leftSide {
+		xPos = float32(ENV.Config.Get("slot.playerColX").(int))
+	} else {
+		xPos = float32(ENV.Config.Get("slot.encounterColX").(int))
+	}
+	yPadding := ENV.Config.Get("slot.topPad").(int)
+	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
+	spriteSizePx := ENV.Config.Get("sprite.sizeInPx").(int)
+	spriteScale := ENV.Config.Get("sprite.scale").(float64)
+	height := float64(spriteSizePx) * spriteScale
+	yPos := float32(index)*float32(int(height)+betweenSlotPadding) + float32(yPadding)
+	return int(xPos), int(yPos)
 }
 
 // event handlers
-func (ui *UI) HandleEnableUiEvent(event environment.Event) {
+func (ui *UI) handleEnableUiEvent(event environment.Event) {
 	ui.enabled = true
 }
-
 func (ui *UI) handleDisableUiEvent(event environment.Event) {
 	ui.enabled = false
 }
@@ -275,18 +345,27 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 	ui.attackLines = append(ui.attackLines, al)
 }
 
-func (ui *UI) slotIndexToScreenPos(index int, leftSide bool) (int, int) {
-	var xPos float32
-	if leftSide {
-		xPos = float32(ENV.Config.Get("slot.playerColX").(int))
-	} else {
-		xPos = float32(ENV.Config.Get("slot.encounterColX").(int))
+// Just do one-off things that need to happen when the encounter starts
+func (ui *UI) handleEncounterStartedEvent(event environment.Event) {
+	encType := encounter.TypeFromString(event.Data.(environment.EncounterStartedEvent).EncounterType)
+	switch encType {
+	case encounter.EncounterTypeInitial:
+		enc, err := ui.encounterMgr.GetCurrent()
+		if err != nil {
+			log.Fatalf("unable to get current encounter")
+		}
+		rewards := enc.GetRewards()
+		if len(rewards) > 0 {
+			dlg := dialogs.NewInitialDialog(rewards, ui.sim)
+			ui.dialogs = append(ui.dialogs, dlg)
+		}
+	case encounter.EncounterTypeBattle: // set up next battle
+		enc, err := ui.encounterMgr.GetNext()
+		if err != nil {
+			log.Fatalf("unable to get next encounter")
+		}
+		ui.sim.Encounter_SetFish(enc.GetCollection())
+
 	}
-	yPadding := ENV.Config.Get("slot.topPad").(int)
-	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
-	spriteSizePx := ENV.Config.Get("sprite.sizeInPx").(int)
-	spriteScale := ENV.Config.Get("sprite.scale").(float64)
-	height := float64(spriteSizePx) * spriteScale
-	yPos := float32(index)*float32(int(height)+betweenSlotPadding) + float32(yPadding)
-	return int(xPos), int(yPos)
+
 }

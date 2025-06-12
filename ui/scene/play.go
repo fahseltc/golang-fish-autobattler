@@ -1,21 +1,23 @@
 package scene
 
 import (
+	"fishgame/encounter"
 	"fishgame/shared/environment"
 	"fishgame/simulation/collection"
 	"fishgame/simulation/fish"
 	"fishgame/simulation/player"
 	"fishgame/simulation/simulation"
 	"fishgame/ui/ui"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Play struct {
-	SceneManager *Manager
-	Ui           *ui.UI
-	Player       *player.Player
-	//EncounterManager *encounter.Manager
+	SceneManager     *Manager
+	EncounterManager *encounter.Manager
+	Ui               *ui.UI
+	Player           *player.Player
 
 	Simulation simulation.SimulationInterface
 
@@ -23,46 +25,77 @@ type Play struct {
 }
 
 func NewPlayScene(sm *Manager) *Play {
-
-	//itemReg, _ := loader.GetFishRegistry(s.Env)
-	//s.ItemsRegistry = itemReg.Reg
+	statsReg := fish.NewFishStatsRegistry(ENV)
+	encMgr := encounter.NewEncounterManager(ENV, statsReg)
+	_, err := encMgr.GetCurrent()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	player := player.NewPlayer(ENV, "player1")
 	player.Fish = collection.NewCollection(ENV)
-	player.Fish.AddFish(fish.NewFish(ENV, "goldfish", "He's very golden and smoll and doesn't do much!", fish.NewWeaponStats(20, 1, 5)), 0)
-	player.Fish.AddFish(fish.NewFish(ENV, "cod", "testfish2", fish.NewWeaponStats(30, 1, 5)), 1)
-	//player.Fish.AddFish(fish.NewFish(ENV, "eel", "testfish3", fish.NewWeaponStats(10, 2, 10)), 2)
-	player.Fish.AddFish(fish.NewFish(ENV, "whale", "testfish4", fish.NewWeaponStats(10, 2, 10)), 3)
-	player.Fish.AddFish(fish.NewFish(ENV, "minnow", "testfish5", fish.NewWeaponStats(10, 2, 10)), 4)
 
-	encounterFish := collection.NewCollection(ENV)
+	// TODO check for errors on return
+	fish, _ := statsReg.GetFish("Goldfish")
+	player.Fish.AddFish(fish, 0)
+	fish, _ = statsReg.GetFish("Shark")
+	player.Fish.AddFish(fish, 1)
+	fish, _ = statsReg.GetFish("Eel")
+	player.Fish.AddFish(fish, 3)
+	fish, _ = statsReg.GetFish("Minnow")
+	player.Fish.AddFish(fish, 4)
 
-	encounterFish.AddFish(fish.NewFish(ENV, "octopus", "testfish6", fish.NewWeaponStats(35, 3, 20)), 1)
-	encounterFish.AddFish(fish.NewFish(ENV, "puffer", "testfish7", fish.NewWeaponStats(35, 3, 20)), 2)
-	encounterFish.AddFish(fish.NewFish(ENV, "sunfish", "testfish8", fish.NewWeaponStats(35, 3, 20)), 4)
+	// encounterFish := collection.NewCollection(ENV)
 
-	sim := simulation.NewSimulation(ENV, player, encounterFish)
-	//s.EncounterManager = encounter.NewManager(s.Env, s.Player1, s.Ui)
-	ui := ui.NewUI(ENV, sim)
+	// fish, _ = statsReg.GetFish("Lionfish")
+	// encounterFish.AddFish(fish, 1)
+	// fish, _ = statsReg.GetFish("Puffer")
+	// encounterFish.AddFish(fish, 2)
+	// fish, _ = statsReg.GetFish("Goldfish")
+	// encounterFish.AddFish(fish, 4)
+
+	sim := simulation.NewSimulation(ENV, player)
+	// Dont need to set fish for initial encounter, but we will later
+	//enc, _ := encMgr.GetCurrent()
+	//sim.Encounter_SetFish(enc.GetCollection())
+
+	ui := ui.NewUI(ENV, sim, encMgr)
+
+	// ENV.EventBus.Publish(environment.Event{
+	// 	Type: "EnableUiEvent",
+	// })
 
 	ENV.EventBus.Publish(environment.Event{
-		Type: "EnableUiEvent",
+		Type: "EncounterStartedEvent",
+		Data: environment.EncounterStartedEvent{
+			EncounterType: "initial",
+		},
 	})
 
-	ENV.EventBus.Unsubscribe("EnableUiEvent")
+	//ENV.EventBus.Unsubscribe("EnableUiEvent")
 
 	playScene := &Play{
-		SceneManager: sm,
-		Ui:           ui,
-		Player:       player,
-		Simulation:   sim,
-		CurrentState: EncounterState,
+		SceneManager:     sm,
+		EncounterManager: encMgr,
+		Ui:               ui,
+		Player:           player,
+		Simulation:       sim,
+		CurrentState:     EncounterState,
 	}
 	ENV.EventBus.Subscribe("GameOverEvent", playScene.handleGameOverEvent)
 	return playScene
 }
 
 func (s *Play) Update(dt float64) {
+	// enc, _ := s.EncounterManager.GetCurrent()
+	// switch enc.GetType() {
+	// case encounter.EncounterTypeInitial:
+
+	// case encounter.EncounterTypeBattle:
+	// case encounter.EncounterTypeChoice:
+	// case encounter.EncounterTypeShop:
+	// case encounter.EncounterTypeUnknown:
+	// }
 	s.Simulation.Update(dt)
 	s.Ui.Update(dt)
 	//s.EncounterManager.Current.Update(dt, s.Player1)

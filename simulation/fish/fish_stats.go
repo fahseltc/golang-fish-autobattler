@@ -13,7 +13,7 @@ type Stats struct {
 
 	Damage int
 
-	ActivateFunc func(source *Fish, target *Fish) bool
+	ActivateFunc func(source *Fish, target *Fish, index int, ownCollection []*Fish) bool
 }
 
 type FishSize int
@@ -37,7 +37,7 @@ func NewWeaponStats(life int, duration int, damage int) *Stats {
 	}
 }
 
-func NewStats(fishType Type, size Size, life int, duration int, damage int) *Stats {
+func NewStats(fishType Type, size Size, life int, duration float64, damage int) *Stats {
 	stats := &Stats{
 		Type:            fishType,
 		Size:            size,

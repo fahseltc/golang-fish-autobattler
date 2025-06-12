@@ -6,6 +6,9 @@ import (
 	"fishgame/ui/util"
 	"fmt"
 	"image/color"
+	"math/rand"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -29,20 +32,18 @@ type Sprite struct {
 }
 
 func NewInventorySprite() *Sprite {
-	w := 340
-	h := 520
 	rect := myshapes.Rectangle{
-		X: 30,
-		Y: 35,
-		W: float32(w),
-		H: float32(h),
+		X: float32(ENV.Config.Get("inventory.x").(int)),
+		Y: float32(ENV.Config.Get("inventory.y").(int)),
+		W: float32(ENV.Config.Get("inventory.w").(int)),
+		H: float32(ENV.Config.Get("inventory.h").(int)),
 	}
 
 	img := util.LoadImage("pond.png")
 	if img == nil {
 		img = util.LoadImage("TEXTURE_MISSING.png")
 	}
-	scaled := util.ScaleImage(img, float32(w), float32(h))
+	scaled := util.ScaleImage(img, rect.W, rect.H)
 
 	return &Sprite{
 		Img:  scaled,
@@ -66,9 +67,23 @@ func NewEncounterFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
 	return encounterSprite
 }
 
+func NewInventoryFishSprite(fish *fish.Fish) *Sprite {
+	sprite := newFishSprite(fish, 1, true)
+
+	// set the sprite to a position inside the inventory
+	xPos, yPos := GetRandomInventoryPosition()
+	sprite.Rect.X = float32(xPos)
+	sprite.Rect.Y = float32(yPos)
+
+	sprite.toolTip = NewFishToolTip(ENV, sprite.Rect, LeftAlignment, fish)
+	sprite.healthBar = NewHealthProgressBar(&sprite.Rect, fish.Stats)
+	sprite.progressBar = NewProgressBar(&sprite.Rect, fish.Stats)
+	return sprite
+}
+
 func newFishSprite(fish *fish.Fish, slotIndex int, leftSide bool) *Sprite {
 	spriteScale := ENV.Config.Get("sprite.scale").(float64)
-	img := util.LoadImage(fmt.Sprintf("fish/%v.png", fish.Name))
+	img := util.LoadImage(fmt.Sprintf("fish/%v.png", strings.ToLower(fish.Name)))
 	if img == nil {
 		img = util.LoadImage("TEXTURE_MISSING.png")
 	}
@@ -162,4 +177,28 @@ func (spr *Sprite) SavePositionBeforeDrag() {
 func (spr *Sprite) ResetToPositionBeforeDrag() {
 	spr.Rect.X = float32(spr.previousX)
 	spr.Rect.Y = float32(spr.previousY)
+}
+
+func GetRandomInventoryPosition() (x, y int) {
+	padding := 30 // pixels of padding from the edge
+	rect := myshapes.Rectangle{
+		X: float32(ENV.Config.Get("inventory.x").(int)),
+		Y: float32(ENV.Config.Get("inventory.y").(int)),
+		W: float32(ENV.Config.Get("inventory.w").(int)),
+		H: float32(ENV.Config.Get("inventory.h").(int)),
+	}
+	rand.Seed(time.Now().UnixNano())
+	minX := int(rect.X) + padding
+	maxX := int(rect.X+rect.W) - padding
+	minY := int(rect.Y) + padding
+	maxY := int(rect.Y+rect.H) - padding
+	if maxX <= minX {
+		maxX = minX + 1
+	}
+	if maxY <= minY {
+		maxY = minY + 1
+	}
+	x = rand.Intn(maxX-minX) + minX
+	y = rand.Intn(maxY-minY) + minY
+	return
 }

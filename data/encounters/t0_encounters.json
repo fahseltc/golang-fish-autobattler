@@ -1,0 +1,30 @@
+{
+    "encounters": [
+        {
+            "title": "Choose your starting fish!",
+            "encounter_type": "initial",
+            "enemies": [],
+            "rewards": [
+                {
+                    "fish": [
+                        "Salmon",
+                        "Salmon"
+                    ],
+                    "currency": 23
+                },
+                {
+                    "fish": [
+                        "Shark"
+                    ],
+                    "currency": 0
+                },
+                {
+                    "fish": [
+                        "Lionfish"
+                    ],
+                    "currency": 543
+                }
+            ]
+        }
+    ]
+}

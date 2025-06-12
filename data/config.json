@@ -12,6 +12,12 @@
         "playerColX": 400,
         "encounterColX": 650
     },
+    "inventory": {
+        "x": 30,
+        "y": 35,
+        "w": 340,
+        "h": 520
+    },
     "resolution": {
         "ext": {
             "w": 1420,

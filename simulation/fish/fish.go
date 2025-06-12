@@ -27,16 +27,7 @@ func NewFish(env *environment.Env, name string, desc string, stats *Stats) *Fish
 	return f
 }
 
-func (f *Fish) Update(dt float64, target *Fish) {
-	f.Stats.CurrentDuration += dt
-	if f.Stats.CurrentDuration >= f.Stats.MaxDuration {
-		f.Stats.ActivateFunc(f, target)
-		f.Stats.CurrentDuration -= f.Stats.MaxDuration
-	}
-	f.updateDebuffs(dt)
-}
-
-func (f *Fish) updateDebuffs(dt float64) {
+func (f *Fish) UpdateDebuffs(dt float64) {
 	for index, dbf := range f.Debuffs {
 		if !dbf.IsDone() {
 			dbf.Update(dt)

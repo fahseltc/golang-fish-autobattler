@@ -9,7 +9,7 @@ import (
 // 	data map[string]any
 // }
 
-func sendFishAttackedEvent(source *Fish, target *Fish) {
+func sendFishAttackedEvent(source *Fish, target *Fish, dmg int) {
 	source.env.EventBus.Publish(environment.Event{
 		Type:      "FishAttackedEvent",
 		Timestamp: time.Now(),
@@ -22,9 +22,9 @@ func sendFishAttackedEvent(source *Fish, target *Fish) {
 	})
 }
 
-func AttackingBehavior(source *Fish, target *Fish) bool {
+func AttackingBehavior(source *Fish, target *Fish, index int, sourceCollection []*Fish) bool {
 	if target.IsAlive() {
-		sendFishAttackedEvent(source, target)
+		sendFishAttackedEvent(source, target, source.Stats.Damage)
 		target.TakeDamage(source.Stats.Damage)
 	}
 
@@ -55,24 +55,24 @@ func AttackingBehavior(source *Fish, target *Fish) bool {
 // 	return target.Alive
 // }
 
-func VenomousBehavior(source *Fish, target *Fish) bool {
+func VenomousBehavior(source *Fish, target *Fish, index int, sourceCollection []*Fish) bool {
 	if target.IsAlive() {
-		// TODO: Should venom to stack, or for only one instance to be on a target?
-		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Stats.MaxDuration, 1, source.Stats.Damage)
-		sendFishAttackedEvent(source, target)
+		// TODO: Should venom  stack, or for only one instance to be on a target?
+		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Stats.MaxDuration*2, 1, source.Stats.Damage)
+		sendFishAttackedEvent(source, target, source.Stats.Damage)
 		target.AddDebuff(dbf)
 	}
 	return target.IsAlive()
 }
 
-func LargerSizeAttackingBehavior(source *Fish, target *Fish) bool {
+func LargerSizeAttackingBehavior(source *Fish, target *Fish, index int, sourceCollection []*Fish) bool {
 	if target.IsAlive() {
 		//fmt.Printf("LargerSizeAttackingBehavior, source: %v, target: %v\n", source.Size, target.Size)
 		if source.Stats.Size > target.Stats.Size {
-			sendFishAttackedEvent(source, target)
+			sendFishAttackedEvent(source, target, source.Stats.Damage*2)
 			target.TakeDamage(source.Stats.Damage * 2) // double damage to smaller fish
 		} else {
-			sendFishAttackedEvent(source, target)
+			sendFishAttackedEvent(source, target, source.Stats.Damage)
 			target.TakeDamage(source.Stats.Damage)
 		}
 
@@ -85,6 +85,31 @@ func LargerSizeAttackingBehavior(source *Fish, target *Fish) bool {
 		// 			"target", target.ToSlogGroup()...,
 		// 		))
 		// }
+	}
+	return target.IsAlive()
+}
+
+func SoloAttackingBehavior(source *Fish, target *Fish, index int, sourceCollection []*Fish) bool {
+	if target.IsAlive() {
+		aboveFish := true
+		belowFish := true
+		if index == 0 {
+			aboveFish = false
+		} else {
+			aboveFish = (sourceCollection[index-1] != nil)
+		}
+		if index == 4 {
+			belowFish = false
+		} else {
+			belowFish = (sourceCollection[index+1] != nil)
+		}
+		if !belowFish && !aboveFish { // fish has no neighbors
+			sendFishAttackedEvent(source, target, source.Stats.Damage*2)
+			target.TakeDamage(source.Stats.Damage * 2)
+		} else { // fish has at least one neighbor
+			sendFishAttackedEvent(source, target, source.Stats.Damage)
+			target.TakeDamage(source.Stats.Damage)
+		}
 	}
 	return target.IsAlive()
 }

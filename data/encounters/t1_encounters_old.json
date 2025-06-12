@@ -1,0 +1,44 @@
+{
+    "encounters": [
+        {
+            "title": "T1 Battle #1",
+            "encounter_type": "battle",
+            "enemies": [
+                {}
+            ]
+            "items": [
+                "Eel"
+            ],
+            "buttons": [],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "Whale"
+                }
+            ]
+        },
+        {
+            "title": "T1 Battle #2",
+            "encounter_type": "battle",
+            "items": [
+                "Whale"
+            ],
+            "buttons": [],
+            "rewards": [
+                {
+                    "type": "currency",
+                    "currency": 999
+                }
+            ]
+        },
+        {
+            "title": "T1 Battle #3",
+            "encounter_type": "battle",
+            "items": [
+                "Minnow"
+            ],
+            "buttons": [],
+            "rewards": []
+        }
+    ]
+}

@@ -15,6 +15,7 @@ import (
 // FishAttackedEvent
 // FishDiedEvent
 // GameOverEvent
+// EncounterStartedEvent
 // EncounterDoneEvent
 // EnableUiEvent
 // DisableUiEvent
@@ -35,6 +36,10 @@ type FishAttackedEvent struct {
 type FishDiedEvent struct {
 	Id     uuid.UUID
 	Killer uuid.UUID
+}
+
+type EncounterStartedEvent struct {
+	EncounterType string
 }
 
 type EventBus struct {
