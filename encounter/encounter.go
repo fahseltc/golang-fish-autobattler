@@ -54,3 +54,6 @@ func (enc Encounter) IsStarted() bool {
 func (enc Encounter) IsGameOver() bool {
 	return false
 }
+func (enc Encounter) GetTitle() string {
+	return enc.Title
+}

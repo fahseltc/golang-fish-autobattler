@@ -29,9 +29,8 @@ func NewFish(env *environment.Env, name string, desc string, stats *Stats) *Fish
 
 func (f *Fish) UpdateDebuffs(dt float64) {
 	for index, dbf := range f.Debuffs {
-		if !dbf.IsDone() {
-			dbf.Update(dt)
-		} else { // remove it from the list of debuffs - its done
+		dbf.Update(dt)
+		if dbf.IsDone() {
 			f.Debuffs = append(f.Debuffs[:index], f.Debuffs[index+1:]...)
 		}
 	}
@@ -59,7 +58,6 @@ func (f *Fish) IsDead() bool {
 }
 
 // Event senders
-
 func sendFishDiedEvent(deadFish *Fish) {
 	deadFish.env.EventBus.Publish(environment.Event{
 		Type:      "FishDiedEvent",

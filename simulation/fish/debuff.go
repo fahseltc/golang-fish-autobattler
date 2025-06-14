@@ -1,9 +1,5 @@
 package fish
 
-import (
-	"fmt"
-)
-
 // this will handle DOT effects for now, but other things are possible.
 
 type DebuffType int
@@ -39,7 +35,7 @@ func NewItemDebuff(fish *Fish, dbt DebuffType, dur float64, tickRate float64, da
 		target:            fish,
 		damage:            dam,
 	}
-	fmt.Printf("create debuff, remainingDur: %v, tickRate: %v\n", debuff.RemainingDuration, debuff.TickRate)
+	fish.env.Logger.Info("debuff", "created", debuff.Type, "maxDuration", debuff.MaxDuration, "damage", debuff.damage)
 	return debuff
 }
 

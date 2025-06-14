@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-// type BehaviorProps struct {
-// 	data map[string]any
-// }
-
 func sendFishAttackedEvent(source *Fish, target *Fish, dmg int) {
 	source.env.EventBus.Publish(environment.Event{
 		Type:      "FishAttackedEvent",
@@ -17,7 +13,7 @@ func sendFishAttackedEvent(source *Fish, target *Fish, dmg int) {
 			SourceId: source.Id,
 			TargetId: target.Id,
 			Type:     source.Stats.Type.String(),
-			Damage:   source.Stats.Damage,
+			Damage:   dmg,
 		},
 	})
 }
@@ -31,33 +27,8 @@ func AttackingBehavior(source *Fish, target *Fish, index int, sourceCollection [
 	return target.IsAlive()
 }
 
-// // In a reactingBehavior, the source fish has already hit the target fish and this method handles the damage done back to source
-// func ReactingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
-// 	// print into and args
-// 	//Env.Logger.Info("ItemReacted", "source", source.Name, "target", target.Name, "damage", source.Damage)
-// 	//fmt.Printf("SourceItem: '%v' deals '%v' Damage to Target: '%s'\n", source.Name, source.Damage, target.Name)
-// 	if target.Alive {
-// 		// the source will take damage from the target
-// 		if source.Type == Reactive {
-// 			source.TakeDamage(target.Damage, false)
-// 			if !source.Alive {
-// 				Env.Logger.Info("ItemDied",
-// 					slog.Group(
-// 						"source", source.ToSlogGroup()...,
-// 					),
-// 					slog.Group(
-// 						"target", target.ToSlogGroup()...,
-// 					))
-// 			}
-// 		}
-// 	}
-
-// 	return target.Alive
-// }
-
 func VenomousBehavior(source *Fish, target *Fish, index int, sourceCollection []*Fish) bool {
 	if target.IsAlive() {
-		// TODO: Should venom  stack, or for only one instance to be on a target?
 		dbf := NewItemDebuff(target, DebuffTypeVenom, source.Stats.MaxDuration*2, 1, source.Stats.Damage)
 		sendFishAttackedEvent(source, target, source.Stats.Damage)
 		target.AddDebuff(dbf)
@@ -113,6 +84,30 @@ func SoloAttackingBehavior(source *Fish, target *Fish, index int, sourceCollecti
 	}
 	return target.IsAlive()
 }
+
+// // In a reactingBehavior, the source fish has already hit the target fish and this method handles the damage done back to source
+// func ReactingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
+// 	// print into and args
+// 	//Env.Logger.Info("ItemReacted", "source", source.Name, "target", target.Name, "damage", source.Damage)
+// 	//fmt.Printf("SourceItem: '%v' deals '%v' Damage to Target: '%s'\n", source.Name, source.Damage, target.Name)
+// 	if target.Alive {
+// 		// the source will take damage from the target
+// 		if source.Type == Reactive {
+// 			source.TakeDamage(target.Damage, false)
+// 			if !source.Alive {
+// 				Env.Logger.Info("ItemDied",
+// 					slog.Group(
+// 						"source", source.ToSlogGroup()...,
+// 					),
+// 					slog.Group(
+// 						"target", target.ToSlogGroup()...,
+// 					))
+// 			}
+// 		}
+// 	}
+
+// 	return target.Alive
+// }
 
 // func AdjacentAttackingBehavior(source *Item, target *Item, props *BehaviorProps) bool {
 // 	if target.Alive {

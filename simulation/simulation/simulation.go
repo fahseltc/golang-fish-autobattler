@@ -57,7 +57,6 @@ func NewSimulation(env *environment.Env, player *player.Player) SimulationInterf
 		fishRegistry: fish.NewFishStatsRegistry(ENV),
 		enabled:      false,
 	}
-	fmt.Printf("SIM Constructor--ENV UUID:%v \n", env.UUID.String())
 
 	ENV.EventBus.Subscribe("StartSimulationEvent", sim.startSimulationEventHandler)
 	ENV.EventBus.Subscribe("StopSimulationEvent", sim.stopSimulationEventHandler)
@@ -91,12 +90,19 @@ func (sim *Simulation) IsEnabled() bool {
 	return sim.enabled
 }
 func (sim *Simulation) IsInitialized() bool {
+	enemyFishPresent := false
 	for _, fish := range sim.enemyFish.GetAllFish() {
 		if fish != nil {
-			return true
+			enemyFishPresent = true
 		}
 	}
-	return false
+	playerFishPresent := false
+	for _, fish := range sim.player.Fish.GetAllFish() {
+		if fish != nil {
+			playerFishPresent = true
+		}
+	}
+	return playerFishPresent && enemyFishPresent
 }
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {
@@ -192,10 +198,13 @@ func (sim *Simulation) GetFishRegistry() *fish.FishStatsRegistry {
 
 // Event Handlers
 func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
-	if !sim.Encounter_GetFish().AllFishDead() { // prevent simulation from starting when all the enemies are dead!
+	encounterFish := sim.Encounter_GetFish()
+	if encounterFish != nil && !encounterFish.AllFishDead() { // prevent simulation from starting when all the enemies are dead!
 		sim.enabled = true
 		sim.Player_GetFish().DisableChanges()
 		sim.Encounter_GetFish().DisableChanges()
+	} else {
+		ENV.Logger.Warn("simulation failed to start, all encounter fish are dead")
 	}
 }
 

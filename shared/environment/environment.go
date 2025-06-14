@@ -15,17 +15,21 @@ type Env struct {
 	*Fonts
 }
 
+var ENV *Env
+
 func NewEnv(logger *slog.Logger, config *Config) *Env {
 	eventBus := NewEventBus()
 	if logger == nil {
 		handler := slog.NewJSONHandler(os.Stdout, nil)
 		logger = slog.New(handler)
 	}
-	return &Env{
+	env := &Env{
 		UUID:     uuid.New(),
 		Logger:   *logger,
 		Config:   config,
 		EventBus: eventBus,
 		Fonts:    NewFontsCollection(),
 	}
+	ENV = env
+	return env
 }

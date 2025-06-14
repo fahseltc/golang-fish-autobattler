@@ -19,6 +19,7 @@ type EncounterInterface interface {
 	IsGameOver() bool
 
 	GetRewards() []*Reward
+	GetTitle() string
 	// AddReward(*reward.Reward)
 	// SetRewards([]*reward.Reward)
 }
@@ -55,6 +56,8 @@ func NewEncounterManager(env *environment.Env, registry *fish.FishStatsRegistry)
 		e := NewEncounter(enc, registry)
 		em.encounters[1] = append(em.encounters[1], e)
 	}
+
+	ENV.EventBus.Subscribe("GameOverEvent", em.handleGameOverEvent)
 	return em
 }
 
@@ -91,4 +94,9 @@ func (em *Manager) GetCurrent() (EncounterInterface, error) {
 	} else {
 		return nil, fmt.Errorf("unable to find encounter with tier:%v", em.currentTierIndex)
 	}
+}
+
+func (em *Manager) handleGameOverEvent(event environment.Event) {
+	em.currentEncounterIndex = 0
+	em.currentTierIndex = 0
 }

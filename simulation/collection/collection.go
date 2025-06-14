@@ -29,14 +29,13 @@ func (coll *Collection) Update(dt float64, enemyColl *Collection) {
 		if fish != nil && fish.IsAlive() {
 			target := enemyColl.GetRandomFish()
 			if target != nil {
-				//fish.Update(dt, target)
 				fish.Stats.CurrentDuration += dt
 				if fish.Stats.CurrentDuration >= fish.Stats.MaxDuration {
-					fish.Stats.ActivateFunc(fish, target, index, coll.GetAllFish()) // we could also pass the enemyCollection in here later if needed.
+					fish.Stats.ActivateFunc(fish, target, index, coll.GetAllFish())
 					fish.Stats.CurrentDuration -= fish.Stats.MaxDuration
 				}
-				fish.UpdateDebuffs(dt)
 			}
+			fish.UpdateDebuffs(dt) // debuffs dont depend on target being non-nil
 		}
 	}
 }
@@ -172,3 +171,14 @@ func (coll *Collection) AllFishDead() bool {
 	}
 	return true
 }
+
+// func (coll *Collection) UpdateFishStats() {
+// 	for _, fish := range coll.fishSlotMap {
+// 		if fish.Stats.Type.String() == "AdjacencyBasedWeapon" { // todo why cant this type be found?
+// 			// check adjacency and update stats object
+// 			//fish.Stats.Damage
+// 		} else if fish.Stats.Type.String() == "SizeBasedWeapon" {
+// 		} else if fish.Stats.Type.String() == "soloBasedWeapon" {
+// 		}
+// 	}
+// }

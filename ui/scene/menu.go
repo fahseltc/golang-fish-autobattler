@@ -2,8 +2,9 @@ package scene
 
 import (
 	"fishgame/shared/environment"
-	"fishgame/ui/elements"
+
 	"fishgame/ui/shapes"
+	"fishgame/ui/ui"
 	"fishgame/ui/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,7 +14,7 @@ type Menu struct {
 	env          *environment.Env
 	SceneManager *Manager
 	bg           *ebiten.Image
-	startBtn     *elements.Button
+	startBtn     *ui.Button
 }
 
 func NewMenuScene(sm *Manager) *Menu {
@@ -23,13 +24,13 @@ func NewMenuScene(sm *Manager) *Menu {
 		bg:           util.LoadImage("bg/menu.png"),
 	}
 
-	menu.startBtn = elements.NewButton(
-		elements.WithRect(shapes.Rectangle{X: 400, Y: 450, W: 250, H: 100}),
-		elements.WithText("StartGame"),
-		elements.WithClickFunc(func() {
+	menu.startBtn = ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 400, Y: 450, W: 250, H: 100}),
+		ui.WithText("Start Game"),
+		ui.WithClickFunc(func() {
 			sm.SwitchTo("Play", false)
 		}),
-		elements.WithCenteredPos(),
+		ui.WithCenteredPos(),
 	)
 
 	return menu

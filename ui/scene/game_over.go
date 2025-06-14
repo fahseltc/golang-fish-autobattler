@@ -2,8 +2,9 @@ package scene
 
 import (
 	"fishgame/shared/environment"
-	"fishgame/ui/elements"
+
 	"fishgame/ui/shapes"
+	"fishgame/ui/ui"
 	"fishgame/ui/util"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -18,27 +19,27 @@ type GameOver struct {
 	env          *environment.Env
 	bg           *ebiten.Image
 	SceneManager *Manager
-	restartBtn   *elements.Button
-	menuBtn      *elements.Button
+	restartBtn   *ui.Button
+	menuBtn      *ui.Button
 }
 
 func NewGameOverScene(env *environment.Env, sm *Manager) *GameOver {
-	restartBtn := elements.NewButton(
-		elements.WithRect(shapes.Rectangle{X: 200, Y: 450, W: 150, H: 150}),
-		elements.WithText("Restart"),
-		elements.WithClickFunc(func() {
+	restartBtn := ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 200, Y: 450, W: 150, H: 150}),
+		ui.WithText("Restart"),
+		ui.WithClickFunc(func() {
 			sm.SwitchTo("Play", false)
 		}),
-		elements.WithCenteredPos(),
+		ui.WithCenteredPos(),
 	)
 
-	menuBtn := elements.NewButton(
-		elements.WithRect(shapes.Rectangle{X: 600, Y: 450, W: 150, H: 150}),
-		elements.WithText("Menu"),
-		elements.WithClickFunc(func() {
+	menuBtn := ui.NewButton(
+		ui.WithRect(shapes.Rectangle{X: 600, Y: 450, W: 150, H: 150}),
+		ui.WithText("Menu"),
+		ui.WithClickFunc(func() {
 			sm.SwitchTo("Menu", false)
 		}),
-		elements.WithCenteredPos(),
+		ui.WithCenteredPos(),
 	)
 
 	g := &GameOver{

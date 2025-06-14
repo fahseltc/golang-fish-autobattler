@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fishgame/simulation/fish"
-	myshapes "fishgame/ui/shapes"
+	"fishgame/ui/shapes"
 	"fishgame/ui/util"
 	"fmt"
 	"image/color"
@@ -17,7 +17,7 @@ import (
 
 type Sprite struct {
 	Id       *uuid.UUID
-	Rect     myshapes.Rectangle
+	Rect     shapes.Rectangle
 	Img      *ebiten.Image
 	Dragging bool
 	toolTip  TooltipInterface
@@ -32,7 +32,7 @@ type Sprite struct {
 }
 
 func NewInventorySprite() *Sprite {
-	rect := myshapes.Rectangle{
+	rect := shapes.Rectangle{
 		X: float32(ENV.Config.Get("inventory.x").(int)),
 		Y: float32(ENV.Config.Get("inventory.y").(int)),
 		W: float32(ENV.Config.Get("inventory.w").(int)),
@@ -53,7 +53,7 @@ func NewInventorySprite() *Sprite {
 
 func NewPlayerFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
 	playerSprite := newFishSprite(fish, slotIndex, true)
-	playerSprite.toolTip = NewFishToolTip(ENV, playerSprite.Rect, LeftAlignment, fish)
+	playerSprite.toolTip = NewFishToolTip(ENV, playerSprite.Rect, shapes.LeftAlignment, fish)
 	playerSprite.healthBar = NewHealthProgressBar(&playerSprite.Rect, fish.Stats)
 	playerSprite.progressBar = NewProgressBar(&playerSprite.Rect, fish.Stats)
 	return playerSprite
@@ -61,7 +61,7 @@ func NewPlayerFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
 
 func NewEncounterFishSprite(fish *fish.Fish, slotIndex int) *Sprite {
 	encounterSprite := newFishSprite(fish, slotIndex, false)
-	encounterSprite.toolTip = NewFishToolTip(ENV, encounterSprite.Rect, LeftAlignment, fish)
+	encounterSprite.toolTip = NewFishToolTip(ENV, encounterSprite.Rect, shapes.LeftAlignment, fish)
 	encounterSprite.healthBar = NewHealthProgressBar(&encounterSprite.Rect, fish.Stats)
 	encounterSprite.progressBar = NewProgressBar(&encounterSprite.Rect, fish.Stats)
 	return encounterSprite
@@ -75,7 +75,7 @@ func NewInventoryFishSprite(fish *fish.Fish) *Sprite {
 	sprite.Rect.X = float32(xPos)
 	sprite.Rect.Y = float32(yPos)
 
-	sprite.toolTip = NewFishToolTip(ENV, sprite.Rect, LeftAlignment, fish)
+	sprite.toolTip = NewFishToolTip(ENV, sprite.Rect, shapes.LeftAlignment, fish)
 	sprite.healthBar = NewHealthProgressBar(&sprite.Rect, fish.Stats)
 	sprite.progressBar = NewProgressBar(&sprite.Rect, fish.Stats)
 	return sprite
@@ -108,7 +108,7 @@ func newFishSprite(fish *fish.Fish, slotIndex int, leftSide bool) *Sprite {
 	}
 	betweenSlotPadding := ENV.Config.Get("slot.betweenPad").(int)
 	w, h = scaled.Size()
-	rect := myshapes.Rectangle{X: xPos, Y: (float32(slotIndex) * (float32(h + betweenSlotPadding))) + float32(yPadding), W: float32(w), H: float32(h)}
+	rect := shapes.Rectangle{X: xPos, Y: (float32(slotIndex) * (float32(h + betweenSlotPadding))) + float32(yPadding), W: float32(w), H: float32(h)}
 
 	sprite := &Sprite{
 		Id:          &fish.Id,
@@ -180,8 +180,8 @@ func (spr *Sprite) ResetToPositionBeforeDrag() {
 }
 
 func GetRandomInventoryPosition() (x, y int) {
-	padding := 30 // pixels of padding from the edge
-	rect := myshapes.Rectangle{
+	padding := 200 // pixels of padding from the edge
+	rect := shapes.Rectangle{
 		X: float32(ENV.Config.Get("inventory.x").(int)),
 		Y: float32(ENV.Config.Get("inventory.y").(int)),
 		W: float32(ENV.Config.Get("inventory.w").(int)),

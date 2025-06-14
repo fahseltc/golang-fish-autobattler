@@ -1,4 +1,4 @@
-package elements
+package ui
 
 import (
 	"fishgame/ui/shapes"
@@ -22,7 +22,7 @@ type Button struct {
 	pressedImg *ebiten.Image
 
 	OnClick func()
-	//ToolTip TooltipInterface
+	ToolTip TooltipInterface
 }
 
 //
@@ -40,8 +40,6 @@ func NewButton(opts ...BtnOptFunc) *Button {
 func defaultBtnOpts() Button {
 	defaultWidth := float32(250.0)
 	defaultHeight := float32(100.0)
-	//font := ENV.Fonts.Med
-	font, _ := util.LoadFont(20)
 	defaultImg := util.LoadImage("ui/btn/green_button.png")
 	defaultImg = util.ScaleImage(defaultImg, defaultWidth, defaultHeight)
 	pressed := util.LoadImage("ui/btn/green_button_pressed.png")
@@ -53,7 +51,7 @@ func defaultBtnOpts() Button {
 			W: 250,
 			H: 100,
 		},
-		font:       font,
+		font:       ENV.Fonts.Small,
 		text:       "DefaultText",
 		currentImg: defaultImg,
 		defaultImg: defaultImg,
@@ -84,12 +82,12 @@ func WithClickFunc(f func()) BtnOptFunc {
 	}
 }
 
-//	func WithToolTip(tt TooltipInterface) BtnOptFunc {
-//		return func(btn *Button) {
-//			btn.ToolTip = tt
-//			btn.ToolTip.GetAlignment().Align(btn.rect, tt.GetRect())
-//		}
-//	}
+func WithToolTip(tt TooltipInterface) BtnOptFunc {
+	return func(btn *Button) {
+		btn.ToolTip = tt
+		btn.ToolTip.GetAlignment().Align(btn.rect, tt.GetRect())
+	}
+}
 func WithCenteredPos() BtnOptFunc {
 	return func(btn *Button) {
 		centeredX := btn.rect.X - 0.5*btn.rect.W
@@ -104,9 +102,9 @@ func WithCenteredPos() BtnOptFunc {
 //
 
 func (btn *Button) Draw(screen *ebiten.Image) {
-	// if btn.ToolTip != nil && btn.MouseCollides() {
-	// 	btn.ToolTip.OnHover(screen)
-	// }
+	if btn.ToolTip != nil && btn.MouseCollides() {
+		btn.ToolTip.OnHover(screen)
+	}
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(btn.rect.X), float64(btn.rect.Y))

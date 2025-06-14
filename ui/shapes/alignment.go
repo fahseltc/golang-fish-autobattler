@@ -1,6 +1,4 @@
-package ui
-
-import "fishgame/ui/shapes"
+package shapes
 
 type Alignment int
 
@@ -12,8 +10,9 @@ const (
 	RightAlignment
 )
 
-func (alignment Alignment) Align(source shapes.Rectangle, toBeAligned *shapes.Rectangle) {
-	padding := float32(ENV.Config.Get("tooltip.pad").(int))
+func (alignment Alignment) Align(source Rectangle, toBeAligned *Rectangle) {
+	//padding := float32(ENV.Config.Get("tooltip.pad").(int))
+	padding := float32(10) // TODO get ENV
 	switch alignment {
 	case CenterAlignment:
 		toBeAligned.X = source.X + (source.W-toBeAligned.W)/2

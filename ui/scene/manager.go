@@ -2,6 +2,7 @@ package scene
 
 import (
 	"fishgame/shared/environment"
+	"fishgame/ui/ui"
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,9 +18,11 @@ type Manager struct {
 func NewSceneManager(Env *environment.Env) *Manager {
 	ENV = Env
 	manager := &Manager{}
+	ui.InitEnv(ENV)
 	manager.Scenes = make(map[string]Scene)
 	//	manager.Scenes["Play"] = nil
 	//	manager.Scenes["GameOver"] = nil
+	ENV.EventBus.Subscribe("GameOverEvent", manager.handleGameOverEvent)
 
 	return manager
 }
@@ -60,4 +63,10 @@ func (sm *Manager) Draw(screen *ebiten.Image) {
 	if sm.Current != nil {
 		sm.Current.Draw(screen)
 	}
+}
+
+// Event handlers
+
+func (sm *Manager) handleGameOverEvent(event environment.Event) {
+
 }

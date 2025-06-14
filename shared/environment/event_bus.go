@@ -1,7 +1,7 @@
 package environment
 
 import (
-	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +15,7 @@ import (
 // FishAttackedEvent
 // FishDiedEvent
 // GameOverEvent
-// EncounterStartedEvent
+// NextEncounterEvent
 // EncounterDoneEvent
 // EnableUiEvent
 // DisableUiEvent
@@ -38,7 +38,7 @@ type FishDiedEvent struct {
 	Killer uuid.UUID
 }
 
-type EncounterStartedEvent struct {
+type NextEncounterEvent struct {
 	EncounterType string
 }
 
@@ -53,7 +53,12 @@ func NewEventBus() *EventBus {
 }
 
 func (eb *EventBus) Subscribe(eventType string, handler func(event Event)) {
-	fmt.Printf("EventBus: Subscribe to: %v\n", eventType)
+	pc, _, _, ok := runtime.Caller(1)
+	caller := ""
+	if ok {
+		caller = runtime.FuncForPC(pc).Name()
+	}
+	ENV.Logger.Info("eventbus", "subscribe", eventType, "caller", caller)
 	eb.subscribers[eventType] = append(eb.subscribers[eventType], handler)
 }
 
@@ -65,16 +70,15 @@ func (eb *EventBus) Unsubscribe(eventType string) {
 	if _, exists := eb.subscribers[eventType]; exists {
 		delete(eb.subscribers, eventType)
 	} else {
-		fmt.Printf("EventBus: No subscribers found for event type: %s\n", eventType)
+		ENV.Logger.Error("eventbus", "error", "No subscribers found", "eventType", eventType)
 	}
 }
 
 // Publish sends an event to all subscribers of a given event type
 func (eb *EventBus) Publish(event Event) {
-	fmt.Printf("EventBus: Event Published: %v handlers: %v\n", event, len(eb.subscribers[event.Type]))
+	ENV.Logger.Info("eventbus", "publish", event.Type, "handlersCount", len(eb.subscribers[event.Type]))
 	handlers := eb.subscribers[event.Type]
 	for _, handler := range handlers {
-		fmt.Printf("EventBus: Calling handler for event type: %s, length: %v\n", event.Type, len(handlers))
 		handler(event)
 	}
 }

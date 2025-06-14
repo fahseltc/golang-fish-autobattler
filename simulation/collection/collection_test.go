@@ -221,3 +221,30 @@ func Test_AllFishDead_WithAllAliveFish_ReturnsFalse(t *testing.T) {
 		t.Error("all fish should be alive!")
 	}
 }
+
+func Test_ById_WithValidString_ReturnsFishAndIndex(t *testing.T) {
+	coll := setupCollection()
+	fish := fish.NewFish(ENV, "asdfgh", "test-fish", fish.NewWeaponStats(1, 1, 1))
+	coll.AddFish(fish, 2)
+
+	foundIndex, foundFish := coll.ById(fish.Id.String())
+	if foundFish.Name != "asdfgh" {
+		t.Error("found fish should have same name")
+	}
+	if foundIndex != 2 {
+		t.Error("found fish should have same index")
+	}
+}
+func Test_ById_WithInvalidString_ReturnsNilAnd99(t *testing.T) {
+	coll := setupCollection()
+	fish := fish.NewFish(ENV, "zxcvbn", "test-fish", fish.NewWeaponStats(1, 1, 1))
+	coll.AddFish(fish, 2)
+
+	foundIndex, foundFish := coll.ById("test-fish")
+	if foundFish != nil {
+		t.Error("fish should not have been found from invalid ID")
+	}
+	if foundIndex != 99 {
+		t.Error("fish index should be 999 for invalid")
+	}
+}

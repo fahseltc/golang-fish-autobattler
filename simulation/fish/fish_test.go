@@ -64,7 +64,7 @@ func TestEvent_Activate_WithTarget_SendsFishAttackedEvent(t *testing.T) {
 	ENV.EventBus.Subscribe("FishAttackedEvent", func(eventIncoming environment.Event) {
 		event = &eventIncoming
 	})
-	fish.Stats.ActivateFunc(fish, target)
+	fish.Stats.ActivateFunc(fish, target, 0, nil)
 	if event == nil {
 		t.Error("Fish attacking should send a FishAttackedEvent")
 	}

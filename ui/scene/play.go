@@ -66,8 +66,8 @@ func NewPlayScene(sm *Manager) *Play {
 	// })
 
 	ENV.EventBus.Publish(environment.Event{
-		Type: "EncounterStartedEvent",
-		Data: environment.EncounterStartedEvent{
+		Type: "NextEncounterEvent",
+		Data: environment.NextEncounterEvent{
 			EncounterType: "initial",
 		},
 	})
