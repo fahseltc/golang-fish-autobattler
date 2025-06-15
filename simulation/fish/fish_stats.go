@@ -1,6 +1,9 @@
 package fish
 
+import "github.com/google/uuid"
+
 type Stats struct {
+	uuid uuid.UUID
 	Type Type
 	Size Size
 
@@ -23,8 +26,9 @@ const (
 	Medium FishSize = iota
 )
 
-func NewWeaponStats(life int, duration int, damage int) *Stats {
-	return &Stats{
+func NewWeaponStats(life int, duration int, damage int) Stats {
+	return Stats{
+		uuid:            uuid.New(),
 		Type:            Weapon,
 		Size:            SizeMedium,
 		MaxLife:         life,
@@ -37,8 +41,9 @@ func NewWeaponStats(life int, duration int, damage int) *Stats {
 	}
 }
 
-func NewStats(fishType Type, size Size, life int, duration float64, damage int) *Stats {
-	stats := &Stats{
+func NewStats(fishType Type, size Size, life int, duration float64, damage int) Stats {
+	stats := Stats{
+		uuid:            uuid.New(),
 		Type:            fishType,
 		Size:            size,
 		MaxLife:         life,

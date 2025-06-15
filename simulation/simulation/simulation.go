@@ -54,6 +54,7 @@ func NewSimulation(env *environment.Env, player *player.Player) SimulationInterf
 
 	sim := &Simulation{
 		player:       player,
+		enemyFish:    collection.NewCollection(ENV),
 		fishRegistry: fish.NewFishStatsRegistry(ENV),
 		enabled:      false,
 	}
@@ -90,19 +91,19 @@ func (sim *Simulation) IsEnabled() bool {
 	return sim.enabled
 }
 func (sim *Simulation) IsInitialized() bool {
-	enemyFishPresent := false
-	for _, fish := range sim.enemyFish.GetAllFish() {
-		if fish != nil {
-			enemyFishPresent = true
-		}
-	}
-	playerFishPresent := false
-	for _, fish := range sim.player.Fish.GetAllFish() {
-		if fish != nil {
-			playerFishPresent = true
-		}
-	}
-	return playerFishPresent && enemyFishPresent
+	// enemyFishPresent := false
+	// for _, fish := range sim.enemyFish.GetAllFish() {
+	// 	if fish != nil {
+	// 		enemyFishPresent = true
+	// 	}
+	// }
+	// playerFishPresent := false
+	// for _, fish := range sim.player.Fish.GetAllFish() {
+	// 	if fish != nil {
+	// 		playerFishPresent = true
+	// 	}
+	// }
+	return true
 }
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {
@@ -150,8 +151,10 @@ func (sim *Simulation) Encounter_SetFish(encounterFish *collection.Collection) {
 }
 
 func (sim *Simulation) IsGameOver() bool {
-	gameOver := sim.Player_GetFish().AllFishDead()
-	if gameOver {
+	playerFishDead := sim.Player_GetFish().AllFishDead()
+	playerInventoryFish := sim.Player_GetInventory().GetCount()
+	isGameOver := playerFishDead && playerInventoryFish <= 0
+	if isGameOver {
 		sim.Disable()
 		ENV.EventBus.Publish(environment.Event{
 			Type:      "GameOverEvent",
@@ -159,7 +162,7 @@ func (sim *Simulation) IsGameOver() bool {
 			// do we need data in there? who killed you maybe?
 		})
 	}
-	return gameOver
+	return isGameOver
 }
 func (sim *Simulation) IsDone() bool {
 	encounterDone := sim.Encounter_GetFish().AllFishDead()
@@ -199,12 +202,13 @@ func (sim *Simulation) GetFishRegistry() *fish.FishStatsRegistry {
 // Event Handlers
 func (sim *Simulation) startSimulationEventHandler(event environment.Event) {
 	encounterFish := sim.Encounter_GetFish()
-	if encounterFish != nil && !encounterFish.AllFishDead() { // prevent simulation from starting when all the enemies are dead!
+	anyPlayerFishPresent := sim.Player_GetFish().AnyFishPresent() // todo: check this for encounters as well?
+	if encounterFish != nil && !encounterFish.AllFishDead() && anyPlayerFishPresent {
 		sim.enabled = true
 		sim.Player_GetFish().DisableChanges()
 		sim.Encounter_GetFish().DisableChanges()
 	} else {
-		ENV.Logger.Warn("simulation failed to start, all encounter fish are dead")
+		ENV.Logger.Warn("simulation failed to start, all encounter fish are dead or no player fish present in collection")
 	}
 }
 

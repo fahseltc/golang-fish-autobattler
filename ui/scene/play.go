@@ -34,30 +34,7 @@ func NewPlayScene(sm *Manager) *Play {
 
 	player := player.NewPlayer(ENV, "player1")
 	player.Fish = collection.NewCollection(ENV)
-
-	// TODO check for errors on return
-	fish, _ := statsReg.GetFish("Goldfish")
-	player.Fish.AddFish(fish, 0)
-	fish, _ = statsReg.GetFish("Shark")
-	player.Fish.AddFish(fish, 1)
-	fish, _ = statsReg.GetFish("Eel")
-	player.Fish.AddFish(fish, 3)
-	fish, _ = statsReg.GetFish("Minnow")
-	player.Fish.AddFish(fish, 4)
-
-	// encounterFish := collection.NewCollection(ENV)
-
-	// fish, _ = statsReg.GetFish("Lionfish")
-	// encounterFish.AddFish(fish, 1)
-	// fish, _ = statsReg.GetFish("Puffer")
-	// encounterFish.AddFish(fish, 2)
-	// fish, _ = statsReg.GetFish("Goldfish")
-	// encounterFish.AddFish(fish, 4)
-
 	sim := simulation.NewSimulation(ENV, player)
-	// Dont need to set fish for initial encounter, but we will later
-	//enc, _ := encMgr.GetCurrent()
-	//sim.Encounter_SetFish(enc.GetCollection())
 
 	ui := ui.NewUI(ENV, sim, encMgr)
 

@@ -1,5 +1,5 @@
 NAME,TYPE,LIFE,SIZE,DURATION,DAMAGE,DESCRIPTION
-Minnow,weapon,5,tiny,0.5,1, lil guy
+Minnow,weapon,5,tiny,1,1, lil guy
 Puffer,reactive,20,tiny,1,1, he spiky
 Whale,weapon,30,huge,4,5, he big
 Eel,weapon,25,small,3,2,long boy

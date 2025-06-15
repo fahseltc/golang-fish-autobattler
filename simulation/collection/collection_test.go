@@ -203,7 +203,8 @@ func Test_EnableChanges_Default_EnablesChanges(t *testing.T) {
 func Test_AllFishDead_WithAllDeadFish_ReturnsTrue(t *testing.T) {
 	coll := setupCollection()
 	for i := 0; i < 5; i++ {
-		fish := fish.NewFish(ENV, "test", "test-fish", fish.NewWeaponStats(1, 1, 1))
+		stats := fish.NewWeaponStats(1, 1, 1)
+		fish := fish.NewFish(ENV, "test", "test-fish", &stats)
 		fish.TakeDamage(1)
 		coll.AddFish(fish, i)
 	}
@@ -214,7 +215,8 @@ func Test_AllFishDead_WithAllDeadFish_ReturnsTrue(t *testing.T) {
 func Test_AllFishDead_WithAllAliveFish_ReturnsFalse(t *testing.T) {
 	coll := setupCollection()
 	for i := 0; i < 5; i++ {
-		fish := fish.NewFish(ENV, "test", "test-fish", fish.NewWeaponStats(1, 1, 1))
+		stats := fish.NewWeaponStats(1, 1, 1)
+		fish := fish.NewFish(ENV, "test", "test-fish", &stats)
 		coll.AddFish(fish, i)
 	}
 	if coll.AllFishDead() {
@@ -224,7 +226,8 @@ func Test_AllFishDead_WithAllAliveFish_ReturnsFalse(t *testing.T) {
 
 func Test_ById_WithValidString_ReturnsFishAndIndex(t *testing.T) {
 	coll := setupCollection()
-	fish := fish.NewFish(ENV, "asdfgh", "test-fish", fish.NewWeaponStats(1, 1, 1))
+	stats := fish.NewWeaponStats(1, 1, 1)
+	fish := fish.NewFish(ENV, "asdfgh", "test-fish", &stats)
 	coll.AddFish(fish, 2)
 
 	foundIndex, foundFish := coll.ById(fish.Id.String())
@@ -237,7 +240,8 @@ func Test_ById_WithValidString_ReturnsFishAndIndex(t *testing.T) {
 }
 func Test_ById_WithInvalidString_ReturnsNilAnd99(t *testing.T) {
 	coll := setupCollection()
-	fish := fish.NewFish(ENV, "zxcvbn", "test-fish", fish.NewWeaponStats(1, 1, 1))
+	stats := fish.NewWeaponStats(1, 1, 1)
+	fish := fish.NewFish(ENV, "zxcvbn", "test-fish", &stats)
 	coll.AddFish(fish, 2)
 
 	foundIndex, foundFish := coll.ById("test-fish")

@@ -1,6 +1,8 @@
 package inventory
 
-import "fishgame/simulation/fish"
+import (
+	"fishgame/simulation/fish"
+)
 
 type Inventory struct {
 	fish map[string]*fish.Fish
@@ -19,7 +21,7 @@ func (inv *Inventory) Add(fish *fish.Fish) {
 func (inv *Inventory) Get(id string) *fish.Fish {
 	fish := inv.fish[id]
 	if fish != nil {
-		inv.fish[id] = nil
+		delete(inv.fish, id)
 		return fish
 	}
 	return nil

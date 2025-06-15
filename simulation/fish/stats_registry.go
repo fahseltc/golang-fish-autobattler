@@ -44,10 +44,10 @@ func (reg *FishStatsRegistry) parseCsv(Env *environment.Env, filepath string) {
 		description := fish[6]
 
 		stats := NewStats(fishType, size, life, duration, damage)
-		fish := NewFish(Env, name, description, stats)
+		fish := NewFish(Env, name, description, &stats)
 
 		reg.addFish(name, *fish)
-		reg.addStat(name, *stats)
+		reg.addStat(name, stats)
 	}
 }
 
@@ -88,6 +88,8 @@ func (r *FishStatsRegistry) GetFish(name string) (*Fish, error) {
 	} else {
 		newFishInstance := fish
 		newFishInstance.Id, _ = uuid.NewUUID()
+		statsCopy := *fish.Stats // copy the stats instance so each fish has its own
+		newFishInstance.Stats = &statsCopy
 		return &newFishInstance, nil
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fishgame/simulation/collection"
 	"fishgame/simulation/fish"
 	"fmt"
+	"log"
 	"math/rand/v2"
 )
 
@@ -68,6 +69,10 @@ func (mgr *Manager) GetRandomEncounterForTier() (EncounterInterface, error) {
 	encCount := len(mgr.encounters[mgr.currentTierIndex])
 	if encCount == 1 {
 		return mgr.encounters[mgr.currentTierIndex][0], nil
+	}
+	if encCount == 0 {
+		ENV.Logger.Error(fmt.Sprintf("there are no encounters for tier: %v", mgr.currentTierIndex))
+		log.Fatal()
 	}
 	rnd := rand.IntN(encCount - 1)
 	return mgr.encounters[mgr.currentTierIndex][rnd], nil

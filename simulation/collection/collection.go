@@ -172,6 +172,15 @@ func (coll *Collection) AllFishDead() bool {
 	return true
 }
 
+func (coll *Collection) AnyFishPresent() bool {
+	for _, fish := range coll.fishSlotMap {
+		if fish != nil {
+			return true
+		}
+	}
+	return false
+}
+
 // func (coll *Collection) UpdateFishStats() {
 // 	for _, fish := range coll.fishSlotMap {
 // 		if fish.Stats.Type.String() == "AdjacencyBasedWeapon" { // todo why cant this type be found?

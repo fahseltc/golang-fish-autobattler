@@ -16,7 +16,8 @@ func setupEnv() {
 
 func Test_TakeDamage_WithUndamagedFish_TakesDamage(t *testing.T) {
 	setupEnv()
-	fish := NewFish(ENV, "Goldfish", "he little", NewWeaponStats(20, 1, 5))
+	stats := NewWeaponStats(20, 1, 5)
+	fish := NewFish(ENV, "Goldfish", "he little", &stats)
 
 	fish.TakeDamage(10)
 	if fish.Stats.CurrentLife != 10 {
@@ -29,7 +30,8 @@ func Test_TakeDamage_WithUndamagedFish_TakesDamage(t *testing.T) {
 
 func Test_TakeDamage_AllItsLife_IsNotAlive(t *testing.T) {
 	setupEnv()
-	fish := NewFish(ENV, "Shrimp", "he shramp", NewWeaponStats(100, 1, 5))
+	stats := NewWeaponStats(100, 1, 5)
+	fish := NewFish(ENV, "Shrimp", "he shramp", &stats)
 
 	fish.TakeDamage(100)
 
@@ -43,7 +45,8 @@ func Test_TakeDamage_AllItsLife_IsNotAlive(t *testing.T) {
 
 func TestEvent_TakeDamage_AllItsLife_SendsFishDiedEvent(t *testing.T) {
 	setupEnv()
-	fish := NewFish(ENV, "Shrimp", "he shramp", NewWeaponStats(100, 1, 5))
+	stats := NewWeaponStats(100, 1, 5)
+	fish := NewFish(ENV, "Shrimp", "he shramp", &stats)
 	eventReceived := false
 	ENV.EventBus.Subscribe("FishDiedEvent", func(event environment.Event) {
 		eventReceived = true
@@ -57,8 +60,10 @@ func TestEvent_TakeDamage_AllItsLife_SendsFishDiedEvent(t *testing.T) {
 
 func TestEvent_Activate_WithTarget_SendsFishAttackedEvent(t *testing.T) {
 	setupEnv()
-	fish := NewFish(ENV, "Shrimp", "he shramp", NewWeaponStats(100, 1, 5))
-	target := NewFish(ENV, "Kelp", "he get hit", NewWeaponStats(5, 999, 0))
+	stats := NewWeaponStats(100, 1, 5)
+	fish := NewFish(ENV, "Shrimp", "he shramp", &stats)
+	stats2 := NewWeaponStats(5, 999, 0)
+	target := NewFish(ENV, "Kelp", "he get hit", &stats2)
 
 	var event *environment.Event
 	ENV.EventBus.Subscribe("FishAttackedEvent", func(eventIncoming environment.Event) {

@@ -87,6 +87,12 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface, encounterMg
 
 	ui.inventory = NewInventorySprite()
 
+	initialEncounter, _ := ui.encounterMgr.GetCurrent()
+
+	dlg := NewInitialDialog(initialEncounter, sim)
+	ui.dialogs = append(ui.dialogs, dlg)
+	ui.sim.Encounter_SetFish(initialEncounter.GetCollection())
+
 	// StartSimulationEvent - no data associated
 	// StopSimulationEvent - no data associated
 	// FishAttackedEvent
@@ -96,10 +102,11 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface, encounterMg
 	ENV.EventBus.Subscribe("FishAttackedEvent", ui.handleFishAttackedEvent)
 	//ENV.EventBus.Subscribe("FishDiedEvent", func(event environment.Event) {})
 	//ENV.EventBus.Subscribe("GameOverEvent", func(event environment.Event) {})
-	//ENV.EventBus.Subscribe("EncounterDoneEvent", func(event environment.Event) {})
+
 	ENV.EventBus.Subscribe("DisableUiEvent", ui.handleDisableUiEvent)
 	ENV.EventBus.Subscribe("EnableUiEvent", ui.handleEnableUiEvent)
 	ENV.EventBus.Subscribe("NextEncounterEvent", ui.handleNextEncounterEvent)
+	ENV.EventBus.Subscribe("EncounterDoneEvent", ui.handleEncounterDoneEvent)
 
 	return ui
 }
@@ -119,14 +126,6 @@ func (ui *UI) Update(dt float64) {
 		for i, dialog := range ui.dialogs {
 			if dialog.IsCompleted() {
 				ui.dialogs = append(ui.dialogs[:i], ui.dialogs[i+1:]...)
-				if len(ui.dialogs) == 0 {
-					ENV.EventBus.Publish(environment.Event{
-						Type: "NextEncounterEvent",
-						Data: environment.NextEncounterEvent{
-							EncounterType: "battle",
-						},
-					})
-				}
 			} else {
 				dialog.Update()
 			}
@@ -343,25 +342,32 @@ func (ui *UI) handleFishAttackedEvent(event environment.Event) {
 
 // Just do one-off things that need to happen when the encounter starts
 func (ui *UI) handleNextEncounterEvent(event environment.Event) {
-	previousEncType := encounter.TypeFromString(event.Data.(environment.NextEncounterEvent).EncounterType)
-	switch previousEncType {
-	case encounter.EncounterTypeInitial:
-		enc, err := ui.encounterMgr.GetCurrent()
-		if err != nil {
-			log.Fatalf("unable to get current encounter")
-		}
-		rewards := enc.GetRewards()
-		if len(rewards) > 0 {
-			dlg := NewInitialDialog(enc, ui.sim)
-			ui.dialogs = append(ui.dialogs, dlg)
-		}
-	case encounter.EncounterTypeBattle: // set up next battle
-		enc, err := ui.encounterMgr.GetNext()
-		if err != nil {
-			log.Fatalf("unable to get next encounter")
-		}
-		ui.sim.Encounter_SetFish(enc.GetCollection())
-
+	enc, err := ui.encounterMgr.GetNext()
+	if err != nil {
+		ENV.Logger.Error("unable to get next encounter")
+		log.Fatal()
 	}
+	ui.sim.Encounter_SetFish(enc.GetCollection())
+	// previousEncType := encounter.TypeFromString(event.Data.(environment.NextEncounterEvent).EncounterType)
+	// switch previousEncType { // switch based on previous encounter type
+	// case encounter.EncounterTypeInitial:
+	// case encounter.EncounterTypeBattle: // set up next battle
+	// 	enc, err := ui.encounterMgr.GetNext()
+	// 	if err != nil {
+	// 		log.Fatalf("unable to get next encounter")
+	// 	}
+	// 	ui.sim.Encounter_SetFish(enc.GetCollection())
 
+	// }
+}
+
+func (ui *UI) handleEncounterDoneEvent(event environment.Event) {
+	// show rewards dialog which should then publish NextEncounterEvent
+	enc, _ := ui.encounterMgr.GetCurrent()
+	enc.GetRewards()
+	rewards := enc.GetRewards()
+	if len(rewards) > 0 {
+		dlg := NewRewardDialog(enc, ui.sim)
+		ui.dialogs = append(ui.dialogs, dlg)
+	}
 }

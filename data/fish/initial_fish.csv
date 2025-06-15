@@ -1,4 +1,4 @@
 NAME,TYPE,LIFE,SIZE,DURATION,DAMAGE,DESCRIPTION
-Salmon,adjacencyBasedWeapon,10,tiny,1,1,Extra damage for adjacent salmon
-Shark,sizeBasedWeapon,15,medium,1.5,2,Extra damage to smaller fish
-Lionfish,venomousBasedWeapon,25,small,3,2,Inflicts venom DOT
+Salmon,adjacencyBasedWeapon,10,tiny,1,1,Lives in both salt and fresh water. Gains extra damage for other adjacent salmon
+Shark,sizeBasedWeapon,15,medium,1.5,2,Apex predators! Gains extra damage when attacking smaller fish
+Lionfish,venomousBasedWeapon,25,small,3,2,Not scared of anything. Inflicts a stacking damage over time venom

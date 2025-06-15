@@ -17,7 +17,6 @@ type DebuffInterface interface {
 }
 
 type Debuff struct {
-	MaxDuration       float64
 	RemainingDuration float64
 	CurrentTime       float64
 	TickRate          float64
@@ -35,13 +34,9 @@ func NewItemDebuff(fish *Fish, dbt DebuffType, dur float64, tickRate float64, da
 		target:            fish,
 		damage:            dam,
 	}
-	fish.env.Logger.Info("debuff", "created", debuff.Type, "maxDuration", debuff.MaxDuration, "damage", debuff.damage)
+	fish.env.Logger.Info("debuff", "created", debuff.Type, "remainingDuration", debuff.RemainingDuration, "damage", debuff.damage)
 	return debuff
 }
-
-// example 20 remdur with tick rate 2
-// many frames occur where we just need to subtract dt from remainingduration
-// at some point we have removed '2' worth of dt time from remainingdur, and need to trigger
 
 func (dbf *Debuff) Update(dt float64) {
 	trigger := false
@@ -52,6 +47,7 @@ func (dbf *Debuff) Update(dt float64) {
 			dbf.RemainingDuration -= dbf.TickRate
 			trigger = true
 		}
+		// if DT is very high, the poison perhaps should have triggered twice? do we want to handle that?
 	}
 
 	if trigger {

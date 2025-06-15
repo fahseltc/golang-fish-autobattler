@@ -10,18 +10,17 @@ import (
 
 func setupPlayer() *player.Player {
 	ENV = environment.NewEnv(nil, nil)
-	return &player.Player{
-		Name: "player1",
-		Fish: collection.NewCollection(ENV),
-	}
+	return player.NewPlayer(ENV, "testplayer")
 }
 
 func Test_Update_WithBasicWeapon_HitEachOther(t *testing.T) {
 	player := setupPlayer()
-	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", fish.NewWeaponStats(20, 1, 5)), 0)
+	stats := fish.NewWeaponStats(20, 1, 5)
+	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", &stats), 0)
 
 	enemyItems := collection.NewCollection(ENV)
-	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", fish.NewWeaponStats(20, 1, 5)), 0)
+	stats2 := fish.NewWeaponStats(20, 1, 5)
+	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", &stats2), 0)
 	sim := NewSimulation(ENV, player)
 	sim.Encounter_SetFish(enemyItems)
 	sim.Enable()
@@ -37,10 +36,12 @@ func Test_Update_WithBasicWeapon_HitEachOther(t *testing.T) {
 
 func Test_Update_WithSizeBasedWeapon_DoesDoubleDamageToTarget(t *testing.T) {
 	player := setupPlayer()
-	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", fish.NewStats(fish.SizeBasedWeapon, fish.SizeHuge, 20, 2, 5)), 0)
+	stats := fish.NewStats(fish.SizeBasedWeapon, fish.SizeHuge, 20, 2, 5)
+	player.Fish.AddFish(fish.NewFish(ENV, "Whale", "he big", &stats), 0)
 
 	enemyItems := collection.NewCollection(ENV)
-	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", fish.NewWeaponStats(10, 1, 5)), 0)
+	stats2 := fish.NewWeaponStats(10, 1, 1)
+	enemyItems.AddFish(fish.NewFish(ENV, "Goldfish", "he little", &stats2), 0)
 	sim := NewSimulation(ENV, player)
 	sim.Encounter_SetFish(enemyItems)
 	sim.Enable()
@@ -55,17 +56,15 @@ func Test_Update_WithSizeBasedWeapon_DoesDoubleDamageToTarget(t *testing.T) {
 }
 
 func Test_Update_WithVenomBasedWeapon_DoesDamageOverTimeToTarget_AndStacks(t *testing.T) {
-	env := environment.NewEnv(nil, nil)
-	player := &player.Player{
-		Name: "player1",
-		Fish: collection.NewCollection(env),
-	}
-	venomFish := fish.NewFish(env, "Poisonous", "he ouch", fish.NewStats(fish.VenomousBasedWeapon, fish.SizeLarge, 20, 1, 5))
+	player := setupPlayer()
+	stats := fish.NewStats(fish.VenomousBasedWeapon, fish.SizeLarge, 20, 1, 5)
+	venomFish := fish.NewFish(ENV, "Poisonous", "he ouch", &stats)
 	player.Fish.AddFish(venomFish, 0)
 
-	encounterFish := collection.NewCollection(env)
-	encounterFish.AddFish(fish.NewFish(env, "Goldfish", "he little", fish.NewWeaponStats(100, 999, 999)), 0)
-	sim := NewSimulation(env, player)
+	encounterFish := collection.NewCollection(ENV)
+	stats2 := fish.NewWeaponStats(100, 999, 999)
+	encounterFish.AddFish(fish.NewFish(ENV, "Goldfish", "he little", &stats2), 0)
+	sim := NewSimulation(ENV, player)
 	sim.Encounter_SetFish(encounterFish)
 	sim.Enable()
 	sim.Update(1.0)

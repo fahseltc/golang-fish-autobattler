@@ -43,12 +43,16 @@ func Test_StartSimulationEventHandler_WithEventAndEmptyEnemies_DoesntDisableColl
 
 func Test_StartSimulationEventHandler_WithEventAndEnemies_DisablesCollectionChanges(t *testing.T) { // todo test inverse
 	env := environment.NewEnv(nil, nil)
+	playerColl := collection.NewCollection(env)
+	stats := fish.NewStats(fish.Weapon, fish.SizeSmall, 99, 1, 1)
+	playerColl.AddFish(fish.NewFish(env, "playerfish1", "", &stats), 1)
 	sim := NewSimulation(env, &player.Player{
 		Name: "player1",
-		Fish: collection.NewCollection(env),
+		Fish: playerColl,
 	})
 	enemyFish := collection.NewCollection(env)
-	enemyFish.AddFish(fish.NewFish(env, "testfish", "", fish.NewStats(fish.Weapon, fish.SizeSmall, 99, 1, 1)), 1)
+	stats2 := fish.NewStats(fish.Weapon, fish.SizeSmall, 99, 1, 1)
+	enemyFish.AddFish(fish.NewFish(env, "testfish", "", &stats2), 1)
 	sim.Encounter_SetFish(enemyFish)
 
 	env.EventBus.Publish(environment.Event{
@@ -57,5 +61,38 @@ func Test_StartSimulationEventHandler_WithEventAndEnemies_DisablesCollectionChan
 
 	if sim.Player_GetFish().IsChangeable() {
 		t.Error("Player collection should not be changeable")
+	}
+}
+
+func Test_IsGameOver_WithAliveFish_ReturnsFalse(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	stats := fish.NewStats(fish.Weapon, fish.SizeSmall, 99, 1, 1)
+	player := player.NewPlayer(env, "testplayer")
+	player.Fish.AddFish(fish.NewFish(env, "playerfish1", "", &stats), 1)
+	sim := NewSimulation(env, player)
+
+	if sim.IsGameOver() {
+		t.Error("game should not be over with one fish in slots")
+	}
+}
+
+func Test_IsGameOver_WithNoFishAndAliveInventoryFish_ReturnsFalse(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	stats := fish.NewStats(fish.Weapon, fish.SizeSmall, 99, 1, 1)
+	player := player.NewPlayer(env, "testplayer")
+	player.Inventory.Add(fish.NewFish(env, "playerfish1", "", &stats))
+	sim := NewSimulation(env, player)
+
+	if sim.IsGameOver() {
+		t.Error("game should not be over with one fish in inventory")
+	}
+}
+func Test_IsGameOver_WithNoFishAndNoInventoryFish_ReturnsTrue(t *testing.T) {
+	env := environment.NewEnv(nil, nil)
+	player := player.NewPlayer(env, "testplayer")
+	sim := NewSimulation(env, player)
+
+	if !sim.IsGameOver() {
+		t.Error("game should be over with no fish")
 	}
 }
