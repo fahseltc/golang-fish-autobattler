@@ -24,6 +24,7 @@ type SimulationInterface interface {
 	Disable()
 	IsEnabled() bool
 	IsInitialized() bool
+	Player_Get() *player.Player
 	Player_GetFish() *collection.Collection
 	Player_GetInventory() *inventory.Inventory
 	Player_GetAllStoredFish() []*fish.Fish
@@ -104,6 +105,10 @@ func (sim *Simulation) IsInitialized() bool {
 	// 	}
 	// }
 	return true
+}
+
+func (sim *Simulation) Player_Get() *player.Player {
+	return sim.player
 }
 
 func (sim *Simulation) Player_GetFish() *collection.Collection {

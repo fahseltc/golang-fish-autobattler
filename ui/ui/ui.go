@@ -29,12 +29,13 @@ type UI struct {
 	sim          simulation.SimulationInterface
 	encounterMgr *encounter.Manager
 
-	sprites        map[string]*Sprite
-	playerSlots    map[int]*Slot
-	encounterSlots map[int]*Slot
-	inventory      *Sprite
-	attackLines    []*AttackLine
-	dialogs        []DialogInterface
+	sprites         map[string]*Sprite
+	playerSlots     map[int]*Slot
+	encounterSlots  map[int]*Slot
+	inventory       *Sprite
+	currencyDisplay *Currency
+	attackLines     []*AttackLine
+	dialogs         []DialogInterface
 
 	startSimBtn *Button
 	stopSimBtn  *Button
@@ -59,6 +60,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface, encounterMg
 		sprites:              make(map[string]*Sprite),
 		playerSlots:          make(map[int]*Slot),
 		encounterSlots:       make(map[int]*Slot),
+		inventory:            NewInventorySprite(),
 		enabled:              true,
 		draggedFromInventory: false,
 	}
@@ -84,8 +86,7 @@ func NewUI(env *environment.Env, sim simulation.SimulationInterface, encounterMg
 		ui.playerSlots[i] = NewPlayerSlot(i)
 		ui.encounterSlots[i] = NewEncounterSlot(i)
 	}
-
-	ui.inventory = NewInventorySprite()
+	ui.currencyDisplay = NewCurrency(sim.Player_Get())
 
 	initialEncounter, _ := ui.encounterMgr.GetCurrent()
 
@@ -281,6 +282,7 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 	ui.startSimBtn.Draw(screen)
 	ui.stopSimBtn.Draw(screen)
 	ui.inventory.Draw(screen)
+	ui.currencyDisplay.Draw(screen)
 
 	if ui.enabled {
 		for _, sprite := range ui.sprites {

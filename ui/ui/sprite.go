@@ -31,6 +31,26 @@ type Sprite struct {
 	progressBar *ProgressBar
 }
 
+func NewCurrencySprite() *Sprite {
+	rect := shapes.Rectangle{
+		X: float32(ENV.Config.Get("currency.x").(int)),
+		Y: float32(ENV.Config.Get("currency.y").(int)),
+		W: float32(ENV.Config.Get("currency.w").(int)),
+		H: float32(ENV.Config.Get("currency.h").(int)),
+	}
+
+	img := util.LoadImage("ui/icons/fishfood.png")
+	if img == nil {
+		img = util.LoadImage("TEXTURE_MISSING.png")
+	}
+	scaled := util.ScaleImage(img, rect.W, rect.H)
+
+	return &Sprite{
+		Img:  scaled,
+		Rect: rect,
+	}
+}
+
 func NewInventorySprite() *Sprite {
 	rect := shapes.Rectangle{
 		X: float32(ENV.Config.Get("inventory.x").(int)),
